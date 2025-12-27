@@ -37,6 +37,15 @@ cp .env.example .env
 
 ### 3. 啟動 Redis
 
+**選項 1: 使用 Redis Cloud (推薦)**
+```bash
+# 在 .env 文件中設置 REDIS_URL
+REDIS_URL=redis://default:your_password@your-redis-cloud.com:6379/0
+```
+
+詳細設定請參考 [REDIS_CLOUD_SETUP.md](REDIS_CLOUD_SETUP.md)
+
+**選項 2: 本地 Redis**
 ```bash
 docker run -d -p 6379:6379 redis:7-alpine
 ```

@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.2.0] - 2024-12-27
+
+### Added
+- 🔧 **Redis Cloud Support**: 
+  - New `REDIS_URL` environment variable for Redis Cloud connectivity
+  - Automatic fallback to individual Redis parameters if URL not provided
+  - Support for `redis://` and `rediss://` (SSL/TLS) connection strings
+  - Comprehensive [REDIS_CLOUD_SETUP.md](REDIS_CLOUD_SETUP.md) guide
+
+### Changed
+- **Configuration Priority**: 
+  - `REDIS_URL` takes precedence over individual Redis parameters
+  - Updated `.env.example` to show `REDIS_URL` as primary option
+  - Enhanced logging to indicate connection method (URL vs parameters)
+
+### Documentation
+- Added Redis Cloud setup guide with examples for Redis Cloud and Upstash
+- Updated README.md with Redis Cloud deployment instructions
+- Added troubleshooting section for common Redis connection issues
+
 ## [1.1.0] - 2024-12-27
 
 ### Added

@@ -16,6 +16,10 @@ class Config:
     HOST: str = os.getenv("HOST", "0.0.0.0")
     
     # Redis Configuration
+    # Support REDIS_URL for Redis Cloud (e.g., redis://user:pass@host:port/db)
+    REDIS_URL: Optional[str] = os.getenv("REDIS_URL")
+    
+    # Fallback to individual parameters if REDIS_URL is not set
     REDIS_HOST: str = os.getenv("REDIS_HOST", "localhost")
     REDIS_PORT: int = int(os.getenv("REDIS_PORT", "6379"))
     REDIS_PASSWORD: Optional[str] = os.getenv("REDIS_PASSWORD")

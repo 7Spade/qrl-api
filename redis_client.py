@@ -30,20 +30,31 @@ class RedisClient:
             True if connection successful
         """
         try:
-            self.client = redis.Redis(
-                host=config.REDIS_HOST,
-                port=config.REDIS_PORT,
-                password=config.REDIS_PASSWORD,
-                db=config.REDIS_DB,
-                decode_responses=config.REDIS_DECODE_RESPONSES,
-                socket_connect_timeout=config.REDIS_SOCKET_CONNECT_TIMEOUT,
-                socket_timeout=config.REDIS_SOCKET_TIMEOUT
-            )
+            # Use REDIS_URL if provided (for Redis Cloud)
+            if config.REDIS_URL:
+                self.client = redis.from_url(
+                    config.REDIS_URL,
+                    decode_responses=config.REDIS_DECODE_RESPONSES,
+                    socket_connect_timeout=config.REDIS_SOCKET_CONNECT_TIMEOUT,
+                    socket_timeout=config.REDIS_SOCKET_TIMEOUT
+                )
+                logger.info(f"Connected to Redis using REDIS_URL")
+            else:
+                # Fallback to individual parameters
+                self.client = redis.Redis(
+                    host=config.REDIS_HOST,
+                    port=config.REDIS_PORT,
+                    password=config.REDIS_PASSWORD,
+                    db=config.REDIS_DB,
+                    decode_responses=config.REDIS_DECODE_RESPONSES,
+                    socket_connect_timeout=config.REDIS_SOCKET_CONNECT_TIMEOUT,
+                    socket_timeout=config.REDIS_SOCKET_TIMEOUT
+                )
+                logger.info(f"Connected to Redis at {config.REDIS_HOST}:{config.REDIS_PORT}")
             
             # Test connection
             await self.client.ping()
             self.connected = True
-            logger.info(f"Connected to Redis at {config.REDIS_HOST}:{config.REDIS_PORT}")
             return True
         
         except redis.ConnectionError as e:
