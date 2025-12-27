@@ -105,6 +105,14 @@ async def startup_event():
     if redis_client.connected:
         await redis_client.set_bot_status("initialized", {"startup_time": datetime.now().isoformat()})
     
+    # Start scheduler
+    from scheduler import trading_scheduler
+    try:
+        await trading_scheduler.start()
+        logger.info("Trading scheduler started successfully")
+    except Exception as e:
+        logger.error(f"Failed to start scheduler: {e}")
+    
     logger.info("QRL Trading API started successfully")
 
 
@@ -112,6 +120,14 @@ async def startup_event():
 async def shutdown_event():
     """Cleanup on shutdown"""
     logger.info("Shutting down QRL Trading API...")
+    
+    # Stop scheduler
+    from scheduler import trading_scheduler
+    try:
+        await trading_scheduler.stop()
+        logger.info("Trading scheduler stopped")
+    except Exception as e:
+        logger.error(f"Failed to stop scheduler: {e}")
     
     if redis_client.connected:
         await redis_client.set_bot_status("stopped", {"shutdown_time": datetime.now().isoformat()})
