@@ -9,7 +9,7 @@ kind: CloudSchedulerJob
 metadata:
   name: qrl-sync-balance-job
   annotations:
-    cnrm.cloud.google.com/project-id: "YOUR_PROJECT_ID"  # 替換為您的專案 ID
+    cnrm.cloud.google.com/project-id: "qrl-api"  # 替換為您的專案 ID
 spec:
   location: asia-southeast1
   description: "Sync MEXC account balance to Redis every minute"
@@ -37,7 +37,7 @@ kind: CloudSchedulerJob
 metadata:
   name: qrl-update-price-job
   annotations:
-    cnrm.cloud.google.com/project-id: "YOUR_PROJECT_ID"  # 替換為您的專案 ID
+    cnrm.cloud.google.com/project-id: "qrl-api"  # 替換為您的專案 ID
 spec:
   location: asia-southeast1
   description: "Update QRL/USDT price from MEXC every minute"
@@ -65,7 +65,7 @@ kind: CloudSchedulerJob
 metadata:
   name: qrl-update-cost-job
   annotations:
-    cnrm.cloud.google.com/project-id: "YOUR_PROJECT_ID"  # 替換為您的專案 ID
+    cnrm.cloud.google.com/project-id: "qrl-api"  # 替換為您的專案 ID
 spec:
   location: asia-southeast1
   description: "Update cost and PnL calculations every 5 minutes"
