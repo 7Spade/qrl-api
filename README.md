@@ -332,3 +332,5 @@ try {
 gcloud builds submit --tag asia-southeast1-docker.pkg.dev/qrl-api/qrl-trading-api/qrl-trading-api:latest
 
 gcloud run deploy qrl-api --image asia-southeast1-docker.pkg.dev/qrl-api/qrl-trading-api/qrl-trading-api:latest --region asia-southeast1 --platform managed --allow-unauthenticated --set-env-vars REDIS_HOST=redis://default:iBefSqwUpkvrEDxix5EcerQUoiq8ke8p@redis-18847.c334.asia-southeast2-1.gce.cloud.redislabs.com:18847
+新指令
+gcloud run deploy qrl-trading-api --image asia-southeast1-docker.pkg.dev/qrl-api/qrl-trading-api/qrl-trading-api:latest --region asia-southeast1 --platform managed --allow-unauthenticated --set-env-vars REDIS_HOST=redis://default:iBefSqwUpkvrEDxix5EcerQUoiq8ke8p@redis-18847.c334.asia-southeast2-1.gce.cloud.red
