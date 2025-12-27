@@ -369,6 +369,36 @@ class MEXCClient:
         
         return await self._request("GET", "/api/v3/myTrades", params=params, signed=True)
     
+    # ===== Sub-Account Endpoints (Authenticated) =====
+    
+    async def get_sub_accounts(self) -> List[Dict[str, Any]]:
+        """
+        Get sub-accounts list
+        
+        Returns:
+            List of sub-accounts
+        """
+        try:
+            # MEXC sub-account API endpoint
+            # Note: This endpoint may require special permissions
+            return await self._request("GET", "/api/v3/sub-account/list", signed=True)
+        except Exception as e:
+            logger.warning(f"Failed to get sub-accounts (may not be supported): {e}")
+            return []
+    
+    async def get_sub_account_balance(self, email: str) -> Dict[str, Any]:
+        """
+        Get sub-account balance
+        
+        Args:
+            email: Sub-account email
+            
+        Returns:
+            Sub-account balance information
+        """
+        params = {"email": email}
+        return await self._request("GET", "/api/v3/sub-account/assets", params=params, signed=True)
+    
     async def close(self):
         """Close the HTTP client"""
         if self._client:

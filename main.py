@@ -6,9 +6,12 @@ import logging
 import sys
 from datetime import datetime
 from typing import Dict, Any, Optional
+from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, BackgroundTasks
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Request
+from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 
 from config import config
@@ -28,6 +31,15 @@ logger = logging.getLogger(__name__)
 # Initialize FastAPI app
 app = FastAPI(
     title="QRL Trading API",
+    description="MEXC API Integration for QRL/USDT Automated Trading",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
+)
+
+# Setup templates and static files
+templates = Jinja2Templates(directory="templates")
+# app.mount("/static", StaticFiles(directory="static"), name="static")
     description="MEXC API Integration for QRL/USDT Automated Trading",
     version="1.0.0",
     docs_url="/docs",
@@ -117,6 +129,11 @@ async def shutdown_event():
 
 # ===== API Endpoints =====
 
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard(request: Request):
+    """Dashboard page - visualize balances and QRL/USDT"""
+    return templates.TemplateResponse("dashboard.html", {"request": request})
+
 @app.get("/", response_model=Dict[str, Any])
 async def root():
     """Root endpoint - service information"""
@@ -126,6 +143,7 @@ async def root():
         "description": "MEXC API Integration for QRL/USDT Trading (Async)",
         "framework": "FastAPI + Uvicorn + httpx + redis.asyncio",
         "endpoints": {
+            "dashboard": "/dashboard",
             "health": "/health",
             "status": "/status",
             "execute": "/execute (POST)",
@@ -339,6 +357,34 @@ async def get_account_balance():
     except Exception as e:
         logger.error(f"Failed to get account balance: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to get account balance: {str(e)}")
+
+
+@app.get("/account/sub-accounts")
+async def get_sub_accounts():
+    """Get sub-accounts list (requires API keys)"""
+    if not config.MEXC_API_KEY or not config.MEXC_SECRET_KEY:
+        raise HTTPException(
+            status_code=401,
+            detail="API keys not configured. Set MEXC_API_KEY and MEXC_SECRET_KEY environment variables."
+        )
+    
+    try:
+        # Get sub-accounts from MEXC API
+        sub_accounts = await mexc_client.get_sub_accounts()
+        
+        return {
+            "sub_accounts": sub_accounts,
+            "count": len(sub_accounts) if sub_accounts else 0,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Failed to get sub-accounts: {e}")
+        # Return empty list if not supported or error
+        return {
+            "sub_accounts": [],
+            "count": 0,
+            "timestamp": datetime.now().isoformat()
+        }
 
 
 @app.exception_handler(Exception)
