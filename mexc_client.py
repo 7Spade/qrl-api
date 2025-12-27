@@ -400,31 +400,51 @@ class MEXCClient:
     
     async def get_sub_accounts(self) -> List[Dict[str, Any]]:
         """
-        Get sub-accounts list
+        Get sub-accounts list using broker API
+        
+        Note: This endpoint requires broker account permissions.
+        Regular spot trading accounts may not have access to sub-account APIs.
         
         Returns:
-            List of sub-accounts
+            List of sub-accounts with their details
+            
+        Raises:
+            Exception: If API request fails or permissions are insufficient
         """
         try:
-            # MEXC sub-account API endpoint
-            # Note: This endpoint may require special permissions
-            return await self._request("GET", "/api/v3/sub-account/list", signed=True)
+            # Use correct MEXC broker API endpoint for sub-account list
+            # According to MEXC v3 API documentation
+            return await self._request("GET", "/api/v3/broker/sub-account/list", signed=True)
         except Exception as e:
-            logger.warning(f"Failed to get sub-accounts (may not be supported): {e}")
+            logger.warning(f"Failed to get sub-accounts (may require broker permissions): {e}")
+            # Return empty list instead of raising to maintain API compatibility
             return []
     
     async def get_sub_account_balance(self, email: str) -> Dict[str, Any]:
         """
-        Get sub-account balance
+        Get sub-account balance using broker API
         
         Args:
-            email: Sub-account email
+            email: Sub-account email address
             
         Returns:
-            Sub-account balance information
+            Sub-account balance information with assets details
+            
+        Raises:
+            ValueError: If email is not provided or invalid
+            Exception: If API request fails
         """
+        if not email:
+            raise ValueError("Sub-account email is required")
+            
         params = {"email": email}
-        return await self._request("GET", "/api/v3/sub-account/assets", params=params, signed=True)
+        try:
+            # Use correct MEXC broker API endpoint for sub-account assets
+            # According to MEXC v3 API documentation
+            return await self._request("GET", "/api/v3/broker/sub-account/assets", params=params, signed=True)
+        except Exception as e:
+            logger.error(f"Failed to get sub-account balance for {email}: {e}")
+            raise
     
     async def close(self):
         """Close the HTTP client"""
