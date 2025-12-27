@@ -56,7 +56,7 @@ python main.py
 
 1. **構建映像**
 ```bash
-docker build -t qrl-bot .
+docker build -t qrl-trading-api .
 ```
 
 2. **運行容器**
@@ -64,7 +64,7 @@ docker build -t qrl-bot .
 docker run -p 8080:8080 \
   -e REDIS_HOST=host.docker.internal \
   -e REDIS_PORT=6379 \
-  qrl-bot
+  qrl-trading-api
 ```
 
 ## 📡 API 端點
@@ -144,18 +144,18 @@ gcloud redis instances describe qrl-redis --region=asia-east1
 1. **構建並推送映像到 Artifact Registry**
 ```bash
 # 創建 Artifact Registry 倉庫
-gcloud artifacts repositories create qrl-bot \
+gcloud artifacts repositories create qrl-trading-api \
   --repository-format=docker \
   --location=asia-east1
 
 # 構建並推送
-gcloud builds submit --tag asia-east1-docker.pkg.dev/PROJECT_ID/qrl-bot/qrl-bot:latest
+gcloud builds submit --tag asia-east1-docker.pkg.dev/PROJECT_ID/qrl-trading-api/qrl-trading-api:latest
 ```
 
 2. **部署 Cloud Run 服務**
 ```bash
-gcloud run deploy qrl-bot \
-  --image asia-east1-docker.pkg.dev/PROJECT_ID/qrl-bot/qrl-bot:latest \
+gcloud run deploy qrl-trading-api \
+  --image asia-east1-docker.pkg.dev/PROJECT_ID/qrl-trading-api/qrl-trading-api:latest \
   --platform managed \
   --region asia-east1 \
   --allow-unauthenticated \
@@ -169,7 +169,7 @@ gcloud run deploy qrl-bot \
 
 ```bash
 # 每分鐘執行一次
-gcloud scheduler jobs create http qrl-bot-trigger \
+gcloud scheduler jobs create http qrl-trading-api-trigger \
   --schedule="*/1 * * * *" \
   --uri="https://YOUR_CLOUD_RUN_URL/execute" \
   --http-method=POST \
@@ -234,7 +234,7 @@ bot:qrl-usdt:last-trade      → 最後交易時間戳
 
 ### 查看日誌
 ```bash
-gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=qrl-bot" --limit 50
+gcloud logging read "resource.type=cloud_run_revision AND resource.labels.service_name=qrl-trading-api" --limit 50
 ```
 
 ### 監控指標
