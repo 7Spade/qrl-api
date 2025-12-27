@@ -275,16 +275,16 @@
                 <div class="card-title">📊 價格信息</div>
                 <div class="balance-item">
                     <span class="balance-label">當前價格</span>
-                    <span class="balance-value">{{ "%.6f"|format(price.current) if price.current else 'N/A' }}</span>
+                    <span class="balance-value">{{ "%.6f"|format(price.current) if price.current is not none else '0.000000' }}</span>
                 </div>
                 <div class="balance-item">
                     <span class="balance-label">平均成本</span>
-                    <span class="balance-value">{{ "%.6f"|format(price.avg_cost) if price.avg_cost else 'N/A' }}</span>
+                    <span class="balance-value">{{ "%.6f"|format(price.avg_cost) if price.avg_cost is not none else '0.000000' }}</span>
                 </div>
                 <div class="balance-item">
                     <span class="balance-label">盈虧</span>
-                    <span class="balance-value {% if price.pnl_percent %}{{ 'positive' if price.pnl_percent > 0 else 'negative' }}{% endif %}">
-                        {% if price.pnl_percent %}{{ "%+.2f"|format(price.pnl_percent) }}%{% else %}N/A{% endif %}
+                    <span class="balance-value {% if price.pnl_percent is not none %}{{ 'positive' if price.pnl_percent > 0 else 'negative' }}{% endif %}">
+                        {% if price.pnl_percent is not none %}{{ "%+.2f"|format(price.pnl_percent) }}%{% else %}--{% endif %}
                     </span>
                 </div>
             </div>

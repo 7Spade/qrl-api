@@ -130,7 +130,7 @@ async def dashboard(request: Request):
         # Get position data
         try:
             position = redis_client.get_position() or {}
-            qrl_balance = position.get('size', 0)
+            qrl_balance = float(position.get('size', 0)) if position.get('size') else 0
         except Exception as e:
             logger.warning(f"Dashboard: Cannot get position from Redis: {e}")
             position = {}
@@ -146,10 +146,13 @@ async def dashboard(request: Request):
         # Calculate position distribution
         total_qrl = qrl_balance
         if layers_data:
-            core_qrl = layers_data.get('core', 0)
-            swing_qrl = layers_data.get('swing', 0)
-            active_qrl = layers_data.get('active', 0)
-            total_qrl = core_qrl + swing_qrl + active_qrl
+            # Support both old ('core', 'swing', 'active') and new ('core_qrl', 'swing_qrl', 'active_qrl') field names for backward compatibility
+            core_qrl = float(layers_data.get('core_qrl', layers_data.get('core', 0)))
+            swing_qrl = float(layers_data.get('swing_qrl', layers_data.get('swing', 0)))
+            active_qrl = float(layers_data.get('active_qrl', layers_data.get('active', 0)))
+            # Only use layers total if all values are present and valid
+            if core_qrl > 0 or swing_qrl > 0 or active_qrl > 0:
+                total_qrl = core_qrl + swing_qrl + active_qrl
         else:
             core_qrl = total_qrl * 0.7
             swing_qrl = total_qrl * 0.2
@@ -184,27 +187,30 @@ async def dashboard(request: Request):
         usdt_balance = 0
         try:
             mexc_balance = mexc_client.get_account_balance()
-            if mexc_balance and mexc_balance.get('QRL', 0) > 0:
-                qrl_balance_from_api = mexc_balance.get('QRL', 0)
-                usdt_balance = mexc_balance.get('USDT', 0)
+            if mexc_balance:
+                qrl_balance_from_api = float(mexc_balance.get('QRL', 0))
+                usdt_balance = float(mexc_balance.get('USDT', 0))
                 
-                # Update total_qrl with real data from API
-                total_qrl = qrl_balance_from_api
-                # Recalculate position layers based on actual balance
-                if not layers_data:
-                    core_qrl = total_qrl * 0.7
-                    swing_qrl = total_qrl * 0.2
-                    active_qrl = total_qrl * 0.1
-                    core_percent = 70
-                    swing_percent = 20
-                    active_percent = 10
+                # Update total_qrl with real data from API if available
+                if qrl_balance_from_api > 0:
+                    total_qrl = qrl_balance_from_api
+                    # Recalculate position layers based on actual balance if not set
+                    if not layers_data:
+                        core_qrl = total_qrl * 0.7
+                        swing_qrl = total_qrl * 0.2
+                        active_qrl = total_qrl * 0.1
+                        core_percent = 70
+                        swing_percent = 20
+                        active_percent = 10
                 logger.info(f"Dashboard: Using real MEXC balance - QRL: {qrl_balance_from_api}, USDT: {usdt_balance}")
             else:
-                usdt_balance = 500
-                logger.warning("Dashboard: Using fallback mock data for balance")
+                # Fallback values when API fails
+                if usdt_balance == 0:
+                    usdt_balance = 0  # Changed from 500 to 0 for more accurate display
+                logger.warning("Dashboard: MEXC API returned no balance data")
         except Exception as e:
             logger.error(f"Dashboard: Error fetching MEXC balance: {e}")
-            usdt_balance = 500
+            # Keep usdt_balance as 0 when API fails
         
         # Get real price from MEXC API
         try:
@@ -234,6 +240,22 @@ async def dashboard(request: Request):
         
         total_value = (total_qrl * latest_price) + usdt_balance if latest_price > 0 else usdt_balance
         usdt_reserve_percent = (usdt_balance / total_value * 100) if total_value > 0 else 0
+        
+        # Ensure all numeric values are properly typed for template rendering
+        total_qrl = float(total_qrl) if total_qrl else 0.0
+        usdt_balance = float(usdt_balance) if usdt_balance else 0.0
+        total_value = float(total_value) if total_value else 0.0
+        latest_price = float(latest_price) if latest_price else 0.0
+        avg_cost = float(avg_cost) if avg_cost else 0.0
+        core_qrl = float(core_qrl) if core_qrl else 0.0
+        swing_qrl = float(swing_qrl) if swing_qrl else 0.0
+        active_qrl = float(active_qrl) if active_qrl else 0.0
+        core_percent = float(core_percent) if core_percent else 0.0
+        swing_percent = float(swing_percent) if swing_percent else 0.0
+        active_percent = float(active_percent) if active_percent else 0.0
+        realized_pnl = float(realized_pnl) if realized_pnl else 0.0
+        unrealized_pnl = float(unrealized_pnl) if unrealized_pnl else 0.0
+        usdt_reserve_percent = float(usdt_reserve_percent) if usdt_reserve_percent else 0.0
         
         # Prepare template data
         template_data = {
