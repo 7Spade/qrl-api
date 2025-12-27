@@ -132,10 +132,5 @@ timeout: '900s'
 # 日誌選項
 options:
   logging: CLOUD_LOGGING_ONLY
-  machineType: 'N1_HIGHCPU_8'
 
 # 替代變數（可在觸發時覆蓋）
-substitutions:
-  _CLOUD_RUN_URL: 'https://qrl-trading-api-545492969490.asia-southeast1.run.app'
-  _REGION: 'asia-southeast1'
-  _TIMEZONE: 'Asia/Taipei'
