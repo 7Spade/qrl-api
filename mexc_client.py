@@ -420,30 +420,43 @@ class MEXCClient:
             # Return empty list instead of raising to maintain API compatibility
             return []
     
-    async def get_sub_account_balance(self, email: str) -> Dict[str, Any]:
+    async def get_sub_account_balance(self, email: Optional[str] = None, sub_account_id: Optional[str] = None) -> Dict[str, Any]:
         """
         Get sub-account balance using broker API
         
         Args:
-            email: Sub-account email address
+            email: Sub-account email address (optional)
+            sub_account_id: Sub-account ID (optional)
+            
+        Note:
+            At least one of email or sub_account_id must be provided.
+            Different MEXC sub-accounts may use email or ID as identifier.
             
         Returns:
             Sub-account balance information with assets details
             
         Raises:
-            ValueError: If email is not provided or invalid
+            ValueError: If neither email nor sub_account_id is provided
             Exception: If API request fails
         """
-        if not email:
-            raise ValueError("Sub-account email is required")
+        # Validate that at least one identifier is provided
+        if not email and not sub_account_id:
+            raise ValueError("Either sub-account email or sub-account ID must be provided")
+        
+        # Build params based on available identifier
+        params = {}
+        if email:
+            params["email"] = email
+        if sub_account_id:
+            params["subAccountId"] = sub_account_id
             
-        params = {"email": email}
         try:
             # Use correct MEXC broker API endpoint for sub-account assets
             # According to MEXC v3 API documentation
             return await self._request("GET", "/api/v3/broker/sub-account/assets", params=params, signed=True)
         except Exception as e:
-            logger.error(f"Failed to get sub-account balance for {email}: {e}")
+            identifier = email or sub_account_id
+            logger.error(f"Failed to get sub-account balance for {identifier}: {e}")
             raise
     
     async def close(self):

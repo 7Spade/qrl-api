@@ -505,6 +505,106 @@ async def get_sub_accounts():
         }
 
 
+@app.get("/account/sub-account/balance")
+async def get_sub_account_balance(
+    email: Optional[str] = None,
+    sub_account_id: Optional[str] = None
+):
+    """
+    Get specific sub-account balance (requires API keys with broker permissions)
+    
+    Query parameters:
+        email: Sub-account email address (optional)
+        sub_account_id: Sub-account ID (optional)
+        
+    Note: At least one of email or sub_account_id must be provided.
+    Different sub-accounts may use email or ID as identifier.
+    
+    Returns:
+        dict: Sub-account balance details
+        
+    Raises:
+        HTTPException: 400 if no identifier provided, 401 if API keys missing
+    """
+    # Validate API keys are configured
+    if not config.MEXC_API_KEY or not config.MEXC_SECRET_KEY:
+        logger.error("API keys not configured - cannot fetch sub-account balance")
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "error": "API keys not configured",
+                "message": "Set MEXC_API_KEY and MEXC_SECRET_KEY environment variables",
+                "help": "Check Cloud Run environment variables or .env file"
+            }
+        )
+    
+    # Validate at least one identifier is provided
+    if not email and not sub_account_id:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": "Missing identifier",
+                "message": "Either email or sub_account_id must be provided",
+                "help": "Add ?email=xxx@example.com or ?sub_account_id=123456 to the request"
+            }
+        )
+    
+    try:
+        identifier = email or sub_account_id
+        logger.info(f"Fetching balance for sub-account: {identifier}")
+        
+        # Get sub-account balance from MEXC API
+        balance_data = await mexc_client.get_sub_account_balance(
+            email=email,
+            sub_account_id=sub_account_id
+        )
+        
+        logger.info(f"Successfully retrieved balance for sub-account: {identifier}")
+        
+        return {
+            "success": True,
+            "sub_account": {
+                "email": email,
+                "id": sub_account_id
+            },
+            "balance": balance_data,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except ValueError as e:
+        # Validation error
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": "Validation error",
+                "message": str(e)
+            }
+        )
+    except Exception as e:
+        logger.error(f"Failed to get sub-account balance: {e}")
+        
+        # Check if it's a permission error
+        error_msg = str(e).lower()
+        if "403" in error_msg or "permission" in error_msg or "forbidden" in error_msg:
+            raise HTTPException(
+                status_code=403,
+                detail={
+                    "error": "Insufficient permissions",
+                    "message": "Sub-account access requires broker permissions",
+                    "help": "This feature is only available for MEXC broker accounts"
+                }
+            )
+        
+        # Generic error
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "Failed to fetch sub-account balance",
+                "message": str(e)
+            }
+        )
+
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request, exc):
     """Global exception handler"""
