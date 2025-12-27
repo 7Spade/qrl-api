@@ -315,6 +315,19 @@ MIT License
 - [Redis 文檔](https://redis.io/docs/)
 
 gcloud artifacts repositories create qrl-trading-api --repository-format=docker --location=asia-southeast1 --description="Docker repository for QRL trading API"
+上面的強化
+try {
+    # 檢查 repository 是否存在
+    gcloud artifacts repositories describe qrl-trading-api --location=asia-southeast1 | Out-Null
+
+    # 如果存在，更新描述
+    gcloud artifacts repositories update qrl-trading-api --location=asia-southeast1 --description="Docker repository for QRL trading API (updated)"
+    Write-Host "Repository exists. Description updated."
+} catch {
+    # 如果不存在，創建 repository
+    gcloud artifacts repositories create qrl-trading-api --repository-format=docker --location=asia-southeast1 --description="Docker repository for QRL trading API"
+    Write-Host "Repository did not exist. Created new repository."
+}
 
 gcloud builds submit --tag asia-southeast1-docker.pkg.dev/qrl-api/qrl-trading-api/qrl-trading-api:latest
 
