@@ -1,0 +1,15 @@
+# Web Framework
+flask==3.0.0
+gunicorn==21.2.0
+
+# Redis
+redis==5.0.1
+
+# HTTP Client for MEXC API
+requests==2.31.0
+
+# Environment variables
+python-dotenv==1.0.0
+
+# Logging
+python-json-logger==2.0.7
