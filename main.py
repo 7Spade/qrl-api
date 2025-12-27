@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 # Initialize FastAPI app
 app = FastAPI(
     title="QRL Trading API",
-    description="MEXC API Integration for QRL/USDT Automated Trading",
+    description="MEXC API Integration for QRL/USDT Automated Trading (Cloud Run)",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc"
@@ -40,6 +40,10 @@ app = FastAPI(
 # Setup templates and static files
 templates = Jinja2Templates(directory="templates")
 # app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Include Cloud Tasks router
+from cloud_tasks import router as cloud_tasks_router
+app.include_router(cloud_tasks_router)
 
 
 # ===== Pydantic Models =====
@@ -88,7 +92,7 @@ class ExecuteResponse(BaseModel):
 @app.on_event("startup")
 async def startup_event():
     """Initialize connections on startup"""
-    logger.info("Starting QRL Trading API...")
+    logger.info("Starting QRL Trading API (Cloud Run mode)...")
     
     # Connect to Redis
     if not await redis_client.connect():
@@ -105,29 +109,13 @@ async def startup_event():
     if redis_client.connected:
         await redis_client.set_bot_status("initialized", {"startup_time": datetime.now().isoformat()})
     
-    # Start scheduler
-    from scheduler import trading_scheduler
-    try:
-        await trading_scheduler.start()
-        logger.info("Trading scheduler started successfully")
-    except Exception as e:
-        logger.error(f"Failed to start scheduler: {e}")
-    
-    logger.info("QRL Trading API started successfully")
+    logger.info("QRL Trading API started successfully (Cloud Run - serverless mode)")
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
     """Cleanup on shutdown"""
     logger.info("Shutting down QRL Trading API...")
-    
-    # Stop scheduler
-    from scheduler import trading_scheduler
-    try:
-        await trading_scheduler.stop()
-        logger.info("Trading scheduler stopped")
-    except Exception as e:
-        logger.error(f"Failed to stop scheduler: {e}")
     
     if redis_client.connected:
         await redis_client.set_bot_status("stopped", {"shutdown_time": datetime.now().isoformat()})
