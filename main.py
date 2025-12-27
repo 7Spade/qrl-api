@@ -7,7 +7,6 @@ import sys
 import time
 import asyncio
 from datetime import datetime
-from typing import Dict, Any
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse, Response, FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -19,6 +18,7 @@ from redis_client import redis_client
 from bot import trading_bot
 from mexc_client import mexc_client
 
+
 # Configure logging
 def setup_logging():
     """Configure JSON logging for Cloud Run"""
@@ -27,12 +27,13 @@ def setup_logging():
         '%(asctime)s %(name)s %(levelname)s %(message)s'
     )
     log_handler.setFormatter(formatter)
-    
+
     root_logger = logging.getLogger()
     root_logger.addHandler(log_handler)
     root_logger.setLevel(logging.INFO if not config.DEBUG else logging.DEBUG)
-    
+
     return root_logger
+
 
 logger = setup_logging()
 
@@ -47,7 +48,7 @@ app = FastAPI(
 import os
 if not os.path.exists("static"):
     os.makedirs("static", exist_ok=True)
-    
+
 try:
     app.mount("/static", StaticFiles(directory="static"), name="static")
 except Exception as e:
@@ -55,6 +56,7 @@ except Exception as e:
 
 # Setup templates
 templates = Jinja2Templates(directory="templates")
+
 
 # WebSocket connection manager
 class ConnectionManager:
@@ -78,7 +80,9 @@ class ConnectionManager:
             except Exception as e:
                 logger.error(f"Error broadcasting to client: {e}")
 
+
 manager = ConnectionManager()
+
 
 # Initialize services with error handling
 @app.on_event("startup")
@@ -95,8 +99,8 @@ async def startup_event():
         logger.info("MEXC client initialized successfully")
     except Exception as e:
         logger.warning(f"MEXC client initialization failed (will use fallback data): {e}")
-    
-    logger.info(f"QRL Trading Bot started")
+
+    logger.info("QRL Trading Bot started")
     logger.info(f"Trading pair: {config.TRADING_PAIR}")
     logger.info(f"Redis: {config.REDIS_URL}")
 
@@ -126,7 +130,7 @@ async def dashboard(request: Request):
             bot_status = 'unknown'
             latest_price = 0
             daily_trades = 0
-        
+
         # Get position data
         try:
             position = redis_client.get_position() or {}
@@ -135,14 +139,14 @@ async def dashboard(request: Request):
             logger.warning(f"Dashboard: Cannot get position from Redis: {e}")
             position = {}
             qrl_balance = 0
-        
+
         # Get position layers
         try:
             layers_data = redis_client.get_position_layers()
         except Exception as e:
             logger.warning(f"Dashboard: Cannot get position layers from Redis: {e}")
             layers_data = None
-        
+
         # Calculate position distribution
         total_qrl = qrl_balance
         if layers_data:
@@ -154,18 +158,18 @@ async def dashboard(request: Request):
             core_qrl = total_qrl * 0.7
             swing_qrl = total_qrl * 0.2
             active_qrl = total_qrl * 0.1
-        
+
         core_percent = (core_qrl / total_qrl * 100) if total_qrl > 0 else 70
         swing_percent = (swing_qrl / total_qrl * 100) if total_qrl > 0 else 20
         active_percent = (active_qrl / total_qrl * 100) if total_qrl > 0 else 10
-        
+
         # Get cost tracking
         try:
             cost_data = redis_client.get_cost_tracking()
         except Exception as e:
             logger.warning(f"Dashboard: Cannot get cost tracking from Redis: {e}")
             cost_data = None
-            
+
         if cost_data:
             avg_cost = float(cost_data.get('avg_cost', 0))
             realized_pnl = float(cost_data.get('realized_pnl', 0))
@@ -174,12 +178,12 @@ async def dashboard(request: Request):
             avg_cost = 0
             realized_pnl = 0
             unrealized_pnl = 0
-        
+
         # Calculate P&L percentage
         pnl_percent = None
         if avg_cost > 0 and latest_price > 0:
             pnl_percent = ((latest_price / avg_cost) - 1) * 100
-        
+
         # Get real balance from MEXC API
         usdt_balance = 0
         try:
@@ -187,7 +191,7 @@ async def dashboard(request: Request):
             if mexc_balance and mexc_balance.get('QRL', 0) > 0:
                 qrl_balance_from_api = mexc_balance.get('QRL', 0)
                 usdt_balance = mexc_balance.get('USDT', 0)
-                
+
                 # Update total_qrl with real data from API
                 total_qrl = qrl_balance_from_api
                 # Recalculate position layers based on actual balance
@@ -205,7 +209,7 @@ async def dashboard(request: Request):
         except Exception as e:
             logger.error(f"Dashboard: Error fetching MEXC balance: {e}")
             usdt_balance = 500
-        
+
         # Get real price from MEXC API
         try:
             mexc_price = mexc_client.get_ticker_price('QRL/USDT')
@@ -221,20 +225,20 @@ async def dashboard(request: Request):
         except Exception as e:
             logger.error(f"Dashboard: Error fetching MEXC price: {e}")
             logger.warning(f"Dashboard: Using Redis price: {latest_price}")
-        
+
         # If still no price data, use a demo price for display purposes
         if latest_price == 0:
             latest_price = 0.000850  # Demo price for QRL/USDT
             logger.info("Dashboard: Using demo price for display")
-        
+
         # If no cost data, use demo cost slightly below current price
         if avg_cost == 0 and latest_price > 0:
             avg_cost = latest_price * 0.95  # Demo cost 5% below current price
             logger.info("Dashboard: Using demo average cost for display")
-        
+
         total_value = (total_qrl * latest_price) + usdt_balance if latest_price > 0 else usdt_balance
         usdt_reserve_percent = (usdt_balance / total_value * 100) if total_value > 0 else 0
-        
+
         # Prepare template data
         template_data = {
             'request': request,
@@ -264,9 +268,9 @@ async def dashboard(request: Request):
             'usdt_reserve_percent': usdt_reserve_percent,
             'update_time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }
-        
+
         return templates.TemplateResponse('index.html', template_data)
-        
+
     except Exception as e:
         logger.error(f"Dashboard error: {e}", exc_info=True)
         error_html = f"""
@@ -312,14 +316,14 @@ async def websocket_endpoint(websocket: WebSocket):
         while True:
             # Send periodic updates every 5 seconds
             await asyncio.sleep(5)
-            
+
             try:
                 # Gather current data
                 bot_status = redis_client.get_bot_status() or 'unknown'
                 latest_price = redis_client.get_latest_price() or 0
                 daily_trades = redis_client.get_daily_trades()
                 position = redis_client.get_position() or {}
-                
+
                 # Prepare update message
                 update = {
                     'type': 'update',
@@ -329,12 +333,12 @@ async def websocket_endpoint(websocket: WebSocket):
                     'daily_trades': daily_trades,
                     'position': position
                 }
-                
+
                 await websocket.send_json(update)
-                
+
             except Exception as e:
                 logger.error(f"Error sending WebSocket update: {e}")
-                
+
     except WebSocketDisconnect:
         manager.disconnect(websocket)
 
@@ -360,17 +364,17 @@ async def health():
     try:
         redis_healthy = redis_client.health_check()
         bot_status = redis_client.get_bot_status()
-        
+
         health_status = {
             'status': 'healthy' if redis_healthy else 'unhealthy',
             'redis': 'connected' if redis_healthy else 'disconnected',
             'bot_status': bot_status or 'unknown',
             'timestamp': int(time.time())
         }
-        
+
         status_code = 200 if redis_healthy else 503
         return JSONResponse(content=health_status, status_code=status_code)
-        
+
     except Exception as e:
         logger.error(f"Health check failed: {e}")
         return JSONResponse(
@@ -387,29 +391,29 @@ async def execute_trading():
     """
     try:
         logger.info("Trading execution triggered")
-        
+
         # Execute trading bot
         result = trading_bot.run()
-        
+
         response = {
             'success': result['success'],
             'message': result['message'],
             'phase': result['phase'],
             'execution_time': result['execution_time']
         }
-        
+
         status_code = 200 if result['success'] else 500
         logger.info(f"Trading execution completed: {response}")
-        
+
         # Broadcast update to connected WebSocket clients
         await manager.broadcast({
             'type': 'trade_executed',
             'timestamp': datetime.now().isoformat(),
             'result': response
         })
-        
+
         return JSONResponse(content=response, status_code=status_code)
-        
+
     except Exception as e:
         logger.error(f"Trading execution failed: {e}", exc_info=True)
         return JSONResponse(
@@ -429,7 +433,7 @@ async def get_status():
         latest_price = redis_client.get_latest_price()
         daily_trades = redis_client.get_daily_trades()
         last_trade_time = redis_client.get_last_trade_time()
-        
+
         return {
             'bot_status': status or 'unknown',
             'position': position,
@@ -438,7 +442,7 @@ async def get_status():
             'last_trade_time': last_trade_time,
             'max_daily_trades': config.MAX_DAILY_TRADES
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to get status: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -452,38 +456,38 @@ async def control_bot(request: Request):
     try:
         data = await request.json()
         action = data.get('action', '').lower()
-        
+
         if action not in ['start', 'pause', 'stop']:
             raise HTTPException(
                 status_code=400,
                 detail='Invalid action. Use: start, pause, or stop'
             )
-        
+
         # Map actions to status
         status_map = {
             'start': 'running',
             'pause': 'paused',
             'stop': 'stopped'
         }
-        
+
         new_status = status_map[action]
         redis_client.set_bot_status(new_status)
-        
+
         logger.info(f"Bot status changed to: {new_status}")
-        
+
         # Broadcast status change to WebSocket clients
         await manager.broadcast({
             'type': 'status_change',
             'timestamp': datetime.now().isoformat(),
             'new_status': new_status
         })
-        
+
         return {
             'success': True,
             'status': new_status,
             'message': f'Bot {action}ed successfully'
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:

@@ -12,16 +12,16 @@ logger = logging.getLogger(__name__)
 
 class RedisClient:
     """Redis client for trading bot data management"""
-    
+
     def __init__(self):
         """Initialize Redis connection"""
         self.client = None
         self.connect()
-    
+
     def connect(self) -> bool:
         """
         Establish connection to Redis using REDIS_URL
-        
+
         Returns:
             bool: True if connection successful, False otherwise
         """
@@ -39,14 +39,14 @@ class RedisClient:
         except Exception as e:
             logger.error(f"Failed to connect to Redis: {e}")
             return False
-    
+
     def set_bot_status(self, status: str) -> bool:
         """
         Set bot running status
-        
+
         Args:
             status: Bot status ('running', 'paused', 'stopped')
-            
+
         Returns:
             bool: True if successful
         """
@@ -58,11 +58,11 @@ class RedisClient:
         except Exception as e:
             logger.error(f"Failed to set bot status: {e}")
             return False
-    
+
     def get_bot_status(self) -> Optional[str]:
         """
         Get current bot status
-        
+
         Returns:
             str: Current status or None if not found
         """
@@ -72,14 +72,14 @@ class RedisClient:
         except Exception as e:
             logger.error(f"Failed to get bot status: {e}")
             return None
-    
+
     def set_position(self, position_data: Dict[str, Any]) -> bool:
         """
         Store current position data
-        
+
         Args:
             position_data: Dictionary containing position information
-            
+
         Returns:
             bool: True if successful
         """
@@ -91,11 +91,11 @@ class RedisClient:
         except Exception as e:
             logger.error(f"Failed to set position: {e}")
             return False
-    
+
     def get_position(self) -> Optional[Dict[str, Any]]:
         """
         Get current position data
-        
+
         Returns:
             dict: Position data or None if not found
         """
@@ -106,15 +106,15 @@ class RedisClient:
         except Exception as e:
             logger.error(f"Failed to get position: {e}")
             return None
-    
+
     def set_latest_price(self, price: float, ttl: int = 300) -> bool:
         """
         Store latest price with TTL
-        
+
         Args:
             price: Current price
             ttl: Time to live in seconds (default 5 minutes)
-            
+
         Returns:
             bool: True if successful
         """
@@ -125,11 +125,11 @@ class RedisClient:
         except Exception as e:
             logger.error(f"Failed to set latest price: {e}")
             return False
-    
+
     def get_latest_price(self) -> Optional[float]:
         """
         Get latest price
-        
+
         Returns:
             float: Latest price or None if not found
         """
@@ -140,15 +140,15 @@ class RedisClient:
         except Exception as e:
             logger.error(f"Failed to get latest price: {e}")
             return None
-    
+
     def add_price_to_history(self, price: float, max_length: int = 100) -> bool:
         """
         Add price to historical data (FIFO list)
-        
+
         Args:
             price: Price to add
             max_length: Maximum number of prices to keep
-            
+
         Returns:
             bool: True if successful
         """
@@ -162,14 +162,14 @@ class RedisClient:
         except Exception as e:
             logger.error(f"Failed to add price to history: {e}")
             return False
-    
+
     def get_price_history(self, count: int = 100) -> List[float]:
         """
         Get price history
-        
+
         Args:
             count: Number of prices to retrieve
-            
+
         Returns:
             list: List of historical prices (most recent first)
         """
@@ -180,11 +180,11 @@ class RedisClient:
         except Exception as e:
             logger.error(f"Failed to get price history: {e}")
             return []
-    
+
     def increment_daily_trades(self) -> int:
         """
         Increment today's trade count
-        
+
         Returns:
             int: Current trade count
         """
@@ -198,11 +198,11 @@ class RedisClient:
         except Exception as e:
             logger.error(f"Failed to increment daily trades: {e}")
             return 0
-    
+
     def get_daily_trades(self) -> int:
         """
         Get today's trade count
-        
+
         Returns:
             int: Number of trades today
         """
@@ -213,14 +213,14 @@ class RedisClient:
         except Exception as e:
             logger.error(f"Failed to get daily trades: {e}")
             return 0
-    
+
     def set_last_trade_time(self, timestamp: int) -> bool:
         """
         Store timestamp of last trade
-        
+
         Args:
             timestamp: Unix timestamp
-            
+
         Returns:
             bool: True if successful
         """
@@ -231,11 +231,11 @@ class RedisClient:
         except Exception as e:
             logger.error(f"Failed to set last trade time: {e}")
             return False
-    
+
     def get_last_trade_time(self) -> Optional[int]:
         """
         Get timestamp of last trade
-        
+
         Returns:
             int: Unix timestamp or None if not found
         """
@@ -246,11 +246,11 @@ class RedisClient:
         except Exception as e:
             logger.error(f"Failed to get last trade time: {e}")
             return None
-    
+
     def health_check(self) -> bool:
         """
         Check if Redis connection is healthy
-        
+
         Returns:
             bool: True if healthy
         """
@@ -259,13 +259,13 @@ class RedisClient:
         except Exception as e:
             logger.error(f"Redis health check failed: {e}")
             return False
-    
+
     # ===== Position Layer Management (Accumulation Strategy) =====
-    
+
     def set_position_layers(self, layers: Dict[str, Any]) -> bool:
         """
         Store position layer data (core, swing, active)
-        
+
         Args:
             layers: Dictionary with layer information
                 {
@@ -276,7 +276,7 @@ class RedisClient:
                     'core_percent': float,
                     'last_adjust': int (timestamp)
                 }
-            
+
         Returns:
             bool: True if successful
         """
@@ -288,11 +288,11 @@ class RedisClient:
         except Exception as e:
             logger.error(f"Failed to set position layers: {e}")
             return False
-    
+
     def get_position_layers(self) -> Optional[Dict[str, str]]:
         """
         Get position layer data
-        
+
         Returns:
             dict: Position layer data or None if not found
         """
@@ -303,11 +303,11 @@ class RedisClient:
         except Exception as e:
             logger.error(f"Failed to get position layers: {e}")
             return None
-    
+
     def set_cost_tracking(self, cost_data: Dict[str, Any]) -> bool:
         """
         Store cost tracking data
-        
+
         Args:
             cost_data: Dictionary with cost information
                 {
@@ -317,7 +317,7 @@ class RedisClient:
                     'unrealized_pnl': float,
                     'realized_pnl': float
                 }
-            
+
         Returns:
             bool: True if successful
         """
@@ -328,11 +328,11 @@ class RedisClient:
         except Exception as e:
             logger.error(f"Failed to set cost tracking: {e}")
             return False
-    
+
     def get_cost_tracking(self) -> Optional[Dict[str, str]]:
         """
         Get cost tracking data
-        
+
         Returns:
             dict: Cost tracking data or None if not found
         """
@@ -343,14 +343,14 @@ class RedisClient:
         except Exception as e:
             logger.error(f"Failed to get cost tracking: {e}")
             return None
-    
+
     def get_tradeable_qrl(self, layer: str = 'all') -> float:
         """
         Get tradeable QRL amount (excluding core position)
-        
+
         Args:
             layer: 'all', 'swing', or 'active'
-            
+
         Returns:
             float: Tradeable QRL amount
         """
@@ -358,7 +358,7 @@ class RedisClient:
             layers = self.get_position_layers()
             if not layers:
                 return 0.0
-            
+
             if layer == 'active':
                 return float(layers.get('active_qrl', 0))
             elif layer == 'swing':
