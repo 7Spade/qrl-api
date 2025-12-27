@@ -20,6 +20,6 @@ ENV PYTHONUNBUFFERED=1
 # Expose port (Cloud Run will use the PORT env var it provides)
 EXPOSE 8080
 
-# Run the application with gunicorn for production
+# Run the application with uvicorn for production
 # Cloud Run will provide the PORT environment variable automatically
-CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 60 main:app
+CMD exec uvicorn main:app --host 0.0.0.0 --port $PORT --workers 1
