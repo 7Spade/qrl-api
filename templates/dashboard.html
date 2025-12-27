@@ -312,6 +312,7 @@
         
         async function loadAccountBalance() {
             const data = await fetchData('/account/balance');
+            console.log('Account balance response:', data);
             if (data && data.balances) {
                 // QRL Balance
                 const qrl = data.balances.QRL || { free: '0', locked: '0' };
@@ -327,8 +328,10 @@
                 document.getElementById('usdt-free').textContent = parseFloat(usdt.free).toFixed(2);
                 document.getElementById('usdt-locked').textContent = parseFloat(usdt.locked).toFixed(2);
                 
+                console.log('Balances loaded:', { qrlTotal, usdtTotal });
                 return { qrlTotal, usdtTotal };
             }
+            console.error('Failed to load account balance - no data or no balances property');
             return null;
         }
         
@@ -352,17 +355,40 @@
         
         async function loadStatus() {
             const data = await fetchData('/status');
+            console.log('Status response:', data);
             if (data) {
                 document.getElementById('daily-trades').textContent = data.daily_trades || 0;
                 document.getElementById('bot-status').textContent = data.bot_status || 'unknown';
                 
                 if (data.position) {
+                    console.log('Position data:', data.position);
+                    // Update average cost
                     const avgCost = data.position.avg_cost;
-                    if (avgCost) {
+                    if (avgCost && avgCost !== '0') {
                         document.getElementById('avg-cost').textContent = parseFloat(avgCost).toFixed(6);
+                    } else {
+                        document.getElementById('avg-cost').textContent = 'N/A';
                     }
+                    
+                    // Update unrealized PnL
+                    const unrealizedPnl = data.position.unrealized_pnl;
+                    if (unrealizedPnl !== undefined && unrealizedPnl !== null) {
+                        const pnlValue = parseFloat(unrealizedPnl);
+                        const pnlElement = document.getElementById('unrealized-pnl');
+                        pnlElement.textContent = pnlValue.toFixed(2) + ' USDT';
+                        // Color code: green for profit, red for loss
+                        pnlElement.style.color = pnlValue >= 0 ? '#26de81' : '#fc5c65';
+                    } else {
+                        document.getElementById('unrealized-pnl').textContent = 'N/A';
+                    }
+                } else {
+                    console.error('No position data in status response');
                 }
+                
+                return data.position || {};
             }
+            console.error('Failed to load status - no data');
+            return {};
         }
         
         async function loadSubAccounts() {
@@ -386,12 +412,20 @@
         }
         
         async function refreshData() {
+            // ALWAYS try to get real-time data from API first
             const balances = await loadAccountBalance();
             const price = await loadPrice();
-            await loadStatus();
+            const position = await loadStatus();
             
+            // Use real-time API balance if available (most accurate)
             if (balances && price) {
                 calculateTotalValue(balances.qrlTotal, balances.usdtTotal, price);
+            }
+            // Only fall back to position data if API call failed
+            else if (position && price && (position.qrl_balance || position.usdt_balance)) {
+                const qrlBal = parseFloat(position.qrl_balance || 0);
+                const usdtBal = parseFloat(position.usdt_balance || 0);
+                calculateTotalValue(qrlBal, usdtBal, price);
             }
         }
         

@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 # Initialize FastAPI app
 app = FastAPI(
     title="QRL Trading API",
-    description="MEXC API Integration for QRL/USDT Automated Trading",
+    description="MEXC API Integration for QRL/USDT Automated Trading (Cloud Run)",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc"
@@ -40,11 +40,10 @@ app = FastAPI(
 # Setup templates and static files
 templates = Jinja2Templates(directory="templates")
 # app.mount("/static", StaticFiles(directory="static"), name="static")
-    description="MEXC API Integration for QRL/USDT Automated Trading",
-    version="1.0.0",
-    docs_url="/docs",
-    redoc_url="/redoc"
-)
+
+# Include Cloud Tasks router
+from cloud_tasks import router as cloud_tasks_router
+app.include_router(cloud_tasks_router)
 
 
 # ===== Pydantic Models =====
@@ -93,7 +92,7 @@ class ExecuteResponse(BaseModel):
 @app.on_event("startup")
 async def startup_event():
     """Initialize connections on startup"""
-    logger.info("Starting QRL Trading API...")
+    logger.info("Starting QRL Trading API (Cloud Run mode)...")
     
     # Connect to Redis
     if not await redis_client.connect():
@@ -110,7 +109,7 @@ async def startup_event():
     if redis_client.connected:
         await redis_client.set_bot_status("initialized", {"startup_time": datetime.now().isoformat()})
     
-    logger.info("QRL Trading API started successfully")
+    logger.info("QRL Trading API started successfully (Cloud Run - serverless mode)")
 
 
 @app.on_event("shutdown")
@@ -186,12 +185,18 @@ async def get_status():
     
     bot_status = await redis_client.get_bot_status()
     position = await redis_client.get_position()
+    cost_data = await redis_client.get_cost_data()
     latest_price = await redis_client.get_latest_price()
     daily_trades = await redis_client.get_daily_trades()
     
+    # Merge position and cost data
+    merged_position = dict(position)
+    if cost_data:
+        merged_position.update(cost_data)
+    
     return StatusResponse(
         bot_status=bot_status.get("status", "unknown"),
-        position=position,
+        position=merged_position,
         latest_price=latest_price,
         daily_trades=daily_trades,
         timestamp=datetime.now().isoformat()
