@@ -12,6 +12,7 @@ from pythonjsonlogger import jsonlogger
 from config import config
 from redis_client import redis_client
 from bot import trading_bot
+from mexc_client import mexc_client
 
 # Configure logging
 def setup_logging():
@@ -101,8 +102,34 @@ def dashboard():
         if avg_cost > 0 and latest_price > 0:
             pnl_percent = ((latest_price / avg_cost) - 1) * 100
         
-        # Mock USDT balance (in production, get from MEXC API)
-        usdt_balance = 500  # TODO: Get from MEXC API
+        # Get real balance from MEXC API
+        mexc_balance = mexc_client.get_account_balance()
+        if mexc_balance:
+            qrl_balance_from_api = mexc_balance.get('QRL', 0)
+            usdt_balance = mexc_balance.get('USDT', 0)
+            
+            # Update total_qrl if we got real data from API and it's different
+            if qrl_balance_from_api > 0:
+                total_qrl = qrl_balance_from_api
+                # Recalculate position layers based on actual balance
+                if not layers_data:
+                    core_qrl = total_qrl * 0.7
+                    swing_qrl = total_qrl * 0.2
+                    active_qrl = total_qrl * 0.1
+                    core_percent = 70
+                    swing_percent = 20
+                    active_percent = 10
+        else:
+            # Fallback to mock data if API fails
+            usdt_balance = 500
+        
+        # Get real price from MEXC API
+        mexc_price = mexc_client.get_ticker_price('QRLUSDT')
+        if mexc_price:
+            latest_price = mexc_price
+            # Update price in Redis for other components
+            redis_client.set_latest_price(latest_price)
+        
         total_value = (total_qrl * latest_price) + usdt_balance if latest_price > 0 else usdt_balance
         usdt_reserve_percent = (usdt_balance / total_value * 100) if total_value > 0 else 0
         

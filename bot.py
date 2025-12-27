@@ -9,6 +9,7 @@ from enum import Enum
 
 from config import config
 from redis_client import redis_client
+from mexc_client import mexc_client
 
 logger = logging.getLogger(__name__)
 
@@ -127,32 +128,36 @@ class TradingBot:
     
     def _data_collection_phase(self) -> Optional[Dict[str, Any]]:
         """
-        Data collection phase: Fetch market data and account info
+        Data collection phase: Fetch market data and account info from MEXC API
         
         Returns:
             dict: Market data or None if failed
         """
         try:
-            # TODO: Implement MEXC API calls
-            # For now, return mock data structure
-            
-            # Simulate fetching current price
-            current_price = 0.5  # Mock price
+            # Fetch current price from MEXC
+            current_price = mexc_client.get_ticker_price('QRLUSDT')
+            if not current_price:
+                logger.warning("Failed to fetch price from MEXC, using last known price")
+                current_price = redis_client.get_latest_price() or 0.5
             
             # Store in Redis
             redis_client.set_latest_price(current_price)
             redis_client.add_price_to_history(current_price)
             
+            # Fetch account balance from MEXC
+            balance = mexc_client.get_account_balance()
+            if not balance:
+                logger.warning("Failed to fetch balance from MEXC, using mock data")
+                balance = {'USDT': 1000.0, 'QRL': 0.0}
+            
             market_data = {
                 'price': current_price,
-                'balance': {
-                    'USDT': 1000.0,
-                    'QRL': 0.0
-                },
+                'balance': balance,
                 'position': redis_client.get_position() or {'size': 0, 'entry_price': 0}
             }
             
-            logger.info(f"Market data collected: price={current_price}")
+            logger.info(f"Market data collected: price={current_price}, "
+                       f"USDT={balance.get('USDT', 0)}, QRL={balance.get('QRL', 0)}")
             return market_data
             
         except Exception as e:
