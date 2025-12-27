@@ -15,7 +15,7 @@ spec:
   description: "Sync MEXC account balance to Redis every minute"
   schedule: "* * * * *"  # 每分鐘執行
   timeZone: "Asia/Taipei"
-  attemptDeadline: "320s"
+  attemptDeadline: "60s"
   retryConfig:
     retryCount: 3
     maxRetryDuration: "0s"
@@ -43,7 +43,7 @@ spec:
   description: "Update QRL/USDT price from MEXC every minute"
   schedule: "* * * * *"  # 每分鐘執行
   timeZone: "Asia/Taipei"
-  attemptDeadline: "320s"
+  attemptDeadline: "60s"
   retryConfig:
     retryCount: 3
     maxRetryDuration: "0s"
@@ -71,7 +71,7 @@ spec:
   description: "Update cost and PnL calculations every 5 minutes"
   schedule: "*/5 * * * *"  # 每 5 分鐘執行
   timeZone: "Asia/Taipei"
-  attemptDeadline: "320s"
+  attemptDeadline: "60s"
   retryConfig:
     retryCount: 3
     maxRetryDuration: "0s"
