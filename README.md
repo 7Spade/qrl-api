@@ -167,13 +167,52 @@ gcloud run deploy qrl-trading-api \
 
 ### 設置 Cloud Scheduler
 
+#### 方式一：使用自動部署腳本（推薦）
+
 ```bash
-# 每分鐘執行一次
+# 賦予執行權限
+chmod +x deploy_scheduler.sh
+
+# 執行部署腳本
+./deploy_scheduler.sh https://YOUR_CLOUD_RUN_URL YOUR_PROJECT_ID asia-east1
+
+# 範例
+./deploy_scheduler.sh https://qrl-trading-api-xxxxx-uc.a.run.app my-project-123 asia-east1
+```
+
+#### 方式二：手動建立
+
+```bash
+# 每 3 分鐘執行一次（QRL/USDT 專用，無需頻繁執行）
 gcloud scheduler jobs create http qrl-trading-api-trigger \
-  --schedule="*/1 * * * *" \
+  --schedule="*/3 * * * *" \
   --uri="https://YOUR_CLOUD_RUN_URL/execute" \
   --http-method=POST \
-  --location=asia-southeast1
+  --location=asia-east1 \
+  --description="QRL/USDT 囤幣機器人 - 每 3 分鐘執行一次" \
+  --time-zone="Asia/Taipei" \
+  --attempt-deadline=180s \
+  --max-retry-attempts=3 \
+  --headers="Content-Type=application/json"
+```
+
+#### 管理排程作業
+
+```bash
+# 手動觸發執行（測試用）
+gcloud scheduler jobs run qrl-trading-api-trigger --location=asia-east1
+
+# 暫停排程
+gcloud scheduler jobs pause qrl-trading-api-trigger --location=asia-east1
+
+# 恢復排程
+gcloud scheduler jobs resume qrl-trading-api-trigger --location=asia-east1
+
+# 查看狀態
+gcloud scheduler jobs describe qrl-trading-api-trigger --location=asia-east1
+
+# 查看執行記錄
+gcloud scheduler jobs logs read qrl-trading-api-trigger --location=asia-east1 --limit=10
 ```
 
 ## 🔧 配置說明
