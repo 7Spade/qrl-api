@@ -187,8 +187,13 @@ class TradingBot:
                 logger.info("Insufficient price history for strategy")
                 return TradeSignal.HOLD
             
-            # Calculate moving average for reference
-            long_ma = sum(price_history[:config.LONG_MA_PERIOD]) / config.LONG_MA_PERIOD
+            # Calculate moving average using MEXC client (more reliable with CCXT)
+            long_ma = mexc_client.calculate_moving_average(period=config.LONG_MA_PERIOD)
+            if not long_ma:
+                # Fallback to manual calculation from Redis history
+                long_ma = sum(price_history[:config.LONG_MA_PERIOD]) / config.LONG_MA_PERIOD
+                logger.info(f"Using fallback MA calculation: {long_ma:.6f}")
+            
             current_price = market_data['price']
             
             # Get cost tracking data
