@@ -1,5 +1,35 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- 📦 **MEXC API Data Persistence**: 
+  - All MEXC API responses are now permanently stored in Redis
+  - New Redis storage methods in `redis_client.py`:
+    - `set_mexc_raw_response()` / `get_mexc_raw_response()` - Complete API response storage
+    - `set_mexc_account_balance()` / `get_mexc_account_balance()` - Processed balance data
+    - `set_mexc_qrl_price()` / `get_mexc_qrl_price()` - QRL price data
+    - `set_mexc_total_value()` / `get_mexc_total_value()` - Total value calculation
+  - New API endpoint: `GET /account/balance/redis` - View all stored MEXC data
+  - Test script: `test_mexc_redis_storage.py` for verification
+  - Comprehensive documentation: `docs/MEXC_REDIS_STORAGE.md`
+
+### Changed
+- **Enhanced `/account/balance` endpoint**:
+  - Now stores complete MEXC API response in Redis permanently
+  - Fetches and stores QRL price automatically
+  - Calculates and stores total account value in USDT
+  - Returns comprehensive response with Redis storage information
+  - Detailed step-by-step logging for all operations
+
+### Documentation
+- Added MEXC Redis Storage guide with detailed data structure documentation
+- Updated README.md with MEXC Data Persistence section
+- Included Redis CLI debugging commands and examples
+
+### Fixed
+- Addressed issues #24 and #25 regarding MEXC data persistence and debugging
+
 ## [1.2.0] - 2024-12-27
 
 ### Added
