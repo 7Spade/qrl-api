@@ -274,3 +274,9 @@ MIT License
 - [MEXC API 文檔](https://mexcdevelop.github.io/apidocs/)
 - [Google Cloud Run 文檔](https://cloud.google.com/run/docs)
 - [Redis 文檔](https://redis.io/docs/)
+
+gcloud artifacts repositories create qrl-trading-api --repository-format=docker --location=asia-southeast1 --description="Docker repository for QRL trading API"
+
+gcloud builds submit --tag asia-southeast1-docker.pkg.dev/qrl-api/qrl-trading-api/qrl-trading-api:latest
+
+gcloud run deploy qrl-api --image asia-southeast1-docker.pkg.dev/qrl-api/qrl-trading-api/qrl-trading-api:latest --region asia-southeast1 --platform managed --allow-unauthenticated --set-env-vars REDIS_HOST=redis://default:iBefSqwUpkvrEDxix5EcerQUoiq8ke8p@redis-18847.c334.asia-southeast2-1.gce.cloud.redislabs.com:18847
