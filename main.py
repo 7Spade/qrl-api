@@ -34,6 +34,21 @@ logger = setup_logging()
 # Create Flask app
 app = Flask(__name__)
 
+# Initialize services with error handling
+try:
+    # Test Redis connection
+    redis_client.get_bot_status()
+    logger.info("Redis connection successful")
+except Exception as e:
+    logger.warning(f"Redis connection failed (will continue with limited functionality): {e}")
+
+try:
+    # Test MEXC client
+    mexc_client.health_check()
+    logger.info("MEXC client initialized successfully")
+except Exception as e:
+    logger.warning(f"MEXC client initialization failed (will use fallback data): {e}")
+
 
 @app.route('/', methods=['GET'])
 def index():
@@ -56,19 +71,36 @@ def index():
 def dashboard():
     """
     Web dashboard - shows balance, positions, and trading stats
+    View-only interface (no control buttons)
     """
     try:
-        # Get all data
-        bot_status = redis_client.get_bot_status() or 'unknown'
-        latest_price = redis_client.get_latest_price() or 0
-        daily_trades = redis_client.get_daily_trades()
+        # Get all data with fallbacks
+        try:
+            bot_status = redis_client.get_bot_status() or 'unknown'
+            latest_price = redis_client.get_latest_price() or 0
+            daily_trades = redis_client.get_daily_trades()
+        except Exception as e:
+            logger.warning(f"Dashboard: Redis connection failed, using defaults: {e}")
+            bot_status = 'unknown'
+            latest_price = 0
+            daily_trades = 0
         
         # Get position data
-        position = redis_client.get_position() or {}
-        qrl_balance = position.get('size', 0)
+        try:
+            position = redis_client.get_position() or {}
+            qrl_balance = position.get('size', 0)
+        except Exception as e:
+            logger.warning(f"Dashboard: Cannot get position from Redis: {e}")
+            position = {}
+            qrl_balance = 0
         
         # Get position layers
-        layers_data = redis_client.get_position_layers()
+        try:
+            layers_data = redis_client.get_position_layers()
+        except Exception as e:
+            logger.warning(f"Dashboard: Cannot get position layers from Redis: {e}")
+            layers_data = None
+            
         if layers_data:
             core_qrl = float(layers_data.get('core_qrl', qrl_balance * 0.7))
             swing_qrl = float(layers_data.get('swing_qrl', qrl_balance * 0.2))
@@ -87,7 +119,12 @@ def dashboard():
         active_percent = (active_qrl / total_qrl * 100) if total_qrl > 0 else 10
         
         # Get cost tracking
-        cost_data = redis_client.get_cost_tracking()
+        try:
+            cost_data = redis_client.get_cost_tracking()
+        except Exception as e:
+            logger.warning(f"Dashboard: Cannot get cost tracking from Redis: {e}")
+            cost_data = None
+            
         if cost_data:
             avg_cost = float(cost_data.get('avg_cost', 0))
             realized_pnl = float(cost_data.get('realized_pnl', 0))
@@ -135,7 +172,10 @@ def dashboard():
             if mexc_price and mexc_price > 0:
                 latest_price = mexc_price
                 # Update price in Redis for other components
-                redis_client.set_latest_price(latest_price)
+                try:
+                    redis_client.set_latest_price(latest_price)
+                except Exception as e:
+                    logger.warning(f"Dashboard: Cannot update price in Redis: {e}")
                 logger.info(f"Dashboard: Using real MEXC price: {latest_price}")
             else:
                 logger.warning(f"Dashboard: MEXC price not available, using Redis price: {latest_price}")
@@ -179,7 +219,45 @@ def dashboard():
         
     except Exception as e:
         logger.error(f"Dashboard error: {e}", exc_info=True)
-        return f"<h1>Error loading dashboard</h1><p>{str(e)}</p>", 500
+        # Return a simple error page instead of 500
+        error_html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>QRL Trading Bot - Error</title>
+            <meta charset="UTF-8">
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }}
+                .error {{ background: white; padding: 30px; border-radius: 10px; max-width: 600px; }}
+                h1 {{ color: #d32f2f; }}
+                pre {{ background: #f5f5f5; padding: 15px; border-radius: 5px; overflow-x: auto; }}
+            </style>
+        </head>
+        <body>
+            <div class="error">
+                <h1>⚠️ 服務暫時無法使用</h1>
+                <p>儀表板載入失敗，可能原因：</p>
+                <ul>
+                    <li>Redis 連接失敗</li>
+                    <li>MEXC API 連接失敗</li>
+                    <li>環境變數未正確配置</li>
+                </ul>
+                <h3>錯誤詳情：</h3>
+                <pre>{str(e)}</pre>
+                <p><a href="/">← 返回首頁</a></p>
+            </div>
+        </body>
+        </html>
+        """
+        return error_html, 503
+
+
+@app.route('/favicon.ico')
+def favicon():
+    """
+    Favicon endpoint - return empty response to prevent 404/503 errors
+    """
+    return '', 204
 
 
 @app.route('/health', methods=['GET'])
