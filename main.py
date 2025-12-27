@@ -9,7 +9,7 @@ import asyncio
 from datetime import datetime
 from typing import Dict, Any
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, Response, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pythonjsonlogger import jsonlogger
@@ -43,8 +43,15 @@ app = FastAPI(
     version="2.0.0"
 )
 
-# Mount static files
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# Mount static files (create directory if it doesn't exist)
+import os
+if not os.path.exists("static"):
+    os.makedirs("static", exist_ok=True)
+    
+try:
+    app.mount("/static", StaticFiles(directory="static"), name="static")
+except Exception as e:
+    logger.warning(f"Could not mount static files: {e}")
 
 # Setup templates
 templates = Jinja2Templates(directory="templates")
@@ -322,11 +329,15 @@ async def websocket_endpoint(websocket: WebSocket):
         manager.disconnect(websocket)
 
 
-@app.get("/favicon.ico")
+@app.get("/favicon.ico", response_class=FileResponse)
 async def favicon():
     """
-    Favicon endpoint - return empty response to prevent 404 errors
+    Favicon endpoint - serves the favicon file
     """
+    import os
+    favicon_path = os.path.join("static", "favicon.ico")
+    if os.path.exists(favicon_path):
+        return FileResponse(favicon_path, media_type="image/x-icon")
     return Response(status_code=204)
 
 
