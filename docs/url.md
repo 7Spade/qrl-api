@@ -1,0 +1,13 @@
+https://www.mexc.com/zh-MY/api-docs/spot-v3/introduction
+https://github.com/mexcdevelop/mexc-api-sdk
+https://github.com/mexcdevelop/mexc-api-demo
+https://github.com/mexcdevelop/websocket-proto
+https://github.com/protocolbuffers/protobuf
+https://www.mexc.com/zh-MY/api-docs/spot-v3/public-api-definitions
+https://www.mexc.com/zh-MY/api-docs/spot-v3/websocket-user-data-streams
+https://www.mexc.com/zh-MY/api-docs/spot-v3/websocket-market-streams
+https://www.mexc.com/zh-MY/api-docs/spot-v3/spot-account-trade
+https://www.mexc.com/zh-MY/api-docs/spot-v3/market-data-endpoints
+https://www.mexc.com/zh-MY/api-docs/spot-v3/general-info
+https://www.mexc.com/zh-MY/api-docs/spot-v3/faqs
+https://www.mexc.com/zh-MY/api-docs/spot-v3/introduction
