@@ -512,26 +512,37 @@
             return {};
         }
         
-        async function loadSubAccounts() {
+async function loadSubAccounts() {
             console.log('=== LOADING SUB-ACCOUNTS ===');
             const data = await fetchData('/account/sub-accounts');
             
             if (!data) {
                 console.log('⚠️ No response from sub-accounts endpoint');
-                console.log('This is normal if API keys are not configured or lack broker permissions');
+                console.log('This is normal if API keys are not configured or lack permissions');
                 return;
             }
             
             console.log('📋 Sub-accounts response:', data);
+            console.log(`Mode: ${data.mode || 'UNKNOWN'}`);
             
             if (data.sub_accounts && data.sub_accounts.length > 0) {
-                console.log(`✅ Found ${data.sub_accounts.length} sub-accounts`);
+                console.log(`✅ Found ${data.sub_accounts.length} sub-accounts (${data.mode} mode)`);
                 const select = document.getElementById('account-select');
                 
                 data.sub_accounts.forEach(account => {
                     const option = document.createElement('option');
-                    option.value = account.id || account.email;
-                    option.textContent = `子帳戶: ${account.email || account.id}`;
+                    
+                    // Handle different formats based on mode
+                    if (data.mode === 'BROKER') {
+                        // Broker API format: subAccount (string name)
+                        option.value = account.subAccount;
+                        option.textContent = `子帳戶: ${account.subAccount} - ${account.note || 'N/A'}`;
+                    } else {
+                        // Spot API format: subAccountId (numeric ID)
+                        option.value = account.subAccountId;
+                        option.textContent = `子帳戶: ${account.subAccountId} - ${account.note || 'N/A'} (${account.status || ''})`;
+                    }
+                    
                     select.appendChild(option);
                 });
             } else {
@@ -543,8 +554,6 @@
                     console.log('Help:', data.help);
                 }
             }
-            
-            console.log('=== END SUB-ACCOUNTS ===');
         }
         
         function calculateTotalValue(qrlBalance, usdtBalance, qrlPrice) {

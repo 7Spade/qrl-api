@@ -440,19 +440,28 @@ async def get_account_balance():
 
 
 @app.get("/account/sub-accounts")
-async def get_sub_accounts():
+async def get_sub_accounts_endpoint():
     """
-    Get sub-accounts list (requires API keys with broker permissions)
+    Get sub-accounts list (auto-detects API mode)
     
-    This endpoint fetches sub-account list from MEXC broker API.
-    Note: Regular spot trading accounts may not have access to this endpoint.
-    Broker account permissions are required.
+    Automatically uses:
+    - Spot API for regular users (returns subAccountId)
+    - Broker API for broker accounts (returns subAccount name)
+    
+    Mode is determined by SUB_ACCOUNT_MODE and IS_BROKER_ACCOUNT config.
     
     Returns:
-        dict: List of sub-accounts with their details
+        dict: List of sub-accounts with mode information
+        {
+            "success": true,
+            "mode": "SPOT" or "BROKER",
+            "sub_accounts": [...],
+            "count": 0,
+            "timestamp": "..."
+        }
         
     Raises:
-        HTTPException: 401 if API keys not configured, 403 if insufficient permissions
+        HTTPException: 401 if API keys not configured
     """
     # Validate API keys are configured
     if not config.MEXC_API_KEY or not config.MEXC_SECRET_KEY:
@@ -467,14 +476,17 @@ async def get_sub_accounts():
         )
     
     try:
-        logger.info("Fetching sub-accounts from MEXC broker API")
-        # Get sub-accounts from MEXC API
+        mode = "BROKER" if (config.IS_BROKER_ACCOUNT or config.SUB_ACCOUNT_MODE == "BROKER") else "SPOT"
+        logger.info(f"Fetching sub-accounts using {mode} API")
+        
+        # Get sub-accounts from MEXC API (auto-selects API based on config)
         sub_accounts = await mexc_client.get_sub_accounts()
         
-        logger.info(f"Successfully retrieved {len(sub_accounts)} sub-accounts")
+        logger.info(f"Successfully retrieved {len(sub_accounts)} sub-accounts using {mode} API")
         
         return {
             "success": True,
+            "mode": mode,
             "sub_accounts": sub_accounts,
             "count": len(sub_accounts) if sub_accounts else 0,
             "timestamp": datetime.now().isoformat()
@@ -483,21 +495,26 @@ async def get_sub_accounts():
     except Exception as e:
         logger.warning(f"Failed to get sub-accounts: {e}")
         
+        # Determine mode for error response
+        mode = "BROKER" if (config.IS_BROKER_ACCOUNT or config.SUB_ACCOUNT_MODE == "BROKER") else "SPOT"
+        
         # Check if it's a permission error
         error_msg = str(e).lower()
         if "403" in error_msg or "permission" in error_msg or "forbidden" in error_msg:
             return {
                 "success": False,
+                "mode": mode,
                 "sub_accounts": [],
                 "count": 0,
-                "message": "Sub-account access requires broker permissions",
-                "help": "This feature is only available for MEXC broker accounts",
+                "message": f"Sub-account access requires {mode} API permissions",
+                "help": f"Ensure your MEXC account has {mode} API access enabled",
                 "timestamp": datetime.now().isoformat()
             }
         
         # Return empty list for other errors (maintain API compatibility)
         return {
             "success": False,
+            "mode": mode,
             "sub_accounts": [],
             "count": 0,
             "message": str(e),
@@ -506,25 +523,30 @@ async def get_sub_accounts():
 
 
 @app.get("/account/sub-account/balance")
-async def get_sub_account_balance(
+async def get_sub_account_balance_endpoint(
+    identifier: Optional[str] = None,
+    # Legacy parameters for backward compatibility
     email: Optional[str] = None,
     sub_account_id: Optional[str] = None
 ):
     """
-    Get specific sub-account balance (requires API keys with broker permissions)
+    Get specific sub-account balance
     
     Query parameters:
-        email: Sub-account email address (optional)
-        sub_account_id: Sub-account ID (optional)
+        identifier: Sub-account identifier (subAccountId for SPOT, subAccount name for BROKER)
+        email: (DEPRECATED) Legacy parameter, use identifier instead
+        sub_account_id: (DEPRECATED) Legacy parameter, use identifier instead
         
-    Note: At least one of email or sub_account_id must be provided.
-    Different sub-accounts may use email or ID as identifier.
+    Note:
+        - SPOT API: Does NOT support querying sub-account balance from main account.
+                    You must use the sub-account's own API key.
+        - BROKER API: Can query sub-account balance using sub-account name.
     
     Returns:
-        dict: Sub-account balance details
+        dict: Sub-account balance details (BROKER API only)
         
     Raises:
-        HTTPException: 400 if no identifier provided, 401 if API keys missing
+        HTTPException: 400 if no identifier, 401 if API keys missing, 501 for SPOT API
     """
     # Validate API keys are configured
     if not config.MEXC_API_KEY or not config.MEXC_SECRET_KEY:
@@ -538,39 +560,48 @@ async def get_sub_account_balance(
             }
         )
     
-    # Validate at least one identifier is provided
-    if not email and not sub_account_id:
+    # Get identifier from new or legacy parameters
+    sub_account_identifier = identifier or email or sub_account_id
+    
+    # Validate identifier is provided
+    if not sub_account_identifier:
         raise HTTPException(
             status_code=400,
             detail={
                 "error": "Missing identifier",
-                "message": "Either email or sub_account_id must be provided",
-                "help": "Add ?email=xxx@example.com or ?sub_account_id=123456 to the request"
+                "message": "Sub-account identifier must be provided",
+                "help": "Add ?identifier=xxx to the request (subAccountId for SPOT, subAccount name for BROKER)"
             }
         )
     
     try:
-        identifier = email or sub_account_id
-        logger.info(f"Fetching balance for sub-account: {identifier}")
+        mode = "BROKER" if (config.IS_BROKER_ACCOUNT or config.SUB_ACCOUNT_MODE == "BROKER") else "SPOT"
+        logger.info(f"Fetching balance for sub-account: {sub_account_identifier} using {mode} API")
         
         # Get sub-account balance from MEXC API
-        balance_data = await mexc_client.get_sub_account_balance(
-            email=email,
-            sub_account_id=sub_account_id
-        )
+        balance_data = await mexc_client.get_sub_account_balance(sub_account_identifier)
         
-        logger.info(f"Successfully retrieved balance for sub-account: {identifier}")
+        logger.info(f"Successfully retrieved balance for sub-account: {sub_account_identifier}")
         
         return {
             "success": True,
-            "sub_account": {
-                "email": email,
-                "id": sub_account_id
-            },
+            "mode": mode,
+            "sub_account_identifier": sub_account_identifier,
             "balance": balance_data,
             "timestamp": datetime.now().isoformat()
         }
         
+    except NotImplementedError as e:
+        # Spot API limitation
+        logger.warning(f"Spot API limitation: {e}")
+        raise HTTPException(
+            status_code=501,
+            detail={
+                "error": "Not supported in SPOT mode",
+                "message": str(e),
+                "help": "Use sub-account's own API key to query balance, or switch to BROKER mode if available"
+            }
+        )
     except ValueError as e:
         # Validation error
         raise HTTPException(
@@ -590,8 +621,8 @@ async def get_sub_account_balance(
                 status_code=403,
                 detail={
                     "error": "Insufficient permissions",
-                    "message": "Sub-account access requires broker permissions",
-                    "help": "This feature is only available for MEXC broker accounts"
+                    "message": "Sub-account access requires proper API permissions",
+                    "help": "Ensure your MEXC account has the required API access enabled"
                 }
             )
         
@@ -600,6 +631,215 @@ async def get_sub_account_balance(
             status_code=500,
             detail={
                 "error": "Failed to fetch sub-account balance",
+                "message": str(e)
+            }
+        )
+
+
+@app.post("/account/sub-account/transfer")
+async def transfer_between_sub_accounts_endpoint(
+    from_account: str,
+    to_account: str,
+    asset: str,
+    amount: str,
+    from_type: str = "SPOT",
+    to_type: str = "SPOT"
+):
+    """
+    Transfer between sub-accounts or main account ↔ sub-account
+    
+    Request body:
+        from_account: Source account identifier (empty string for main account in SPOT mode)
+        to_account: Destination account identifier (empty string for main account in SPOT mode)
+        asset: Asset symbol (e.g., "USDT", "BTC")
+        amount: Transfer amount (string)
+        from_type: Source account type for SPOT API (SPOT, MARGIN, ETF, CONTRACT)
+        to_type: Destination account type for SPOT API (SPOT, MARGIN, ETF, CONTRACT)
+    
+    Returns:
+        dict: Transfer result with transaction ID
+        
+    Raises:
+        HTTPException: 400/401/500 on errors
+    """
+    # Validate API keys
+    if not config.MEXC_API_KEY or not config.MEXC_SECRET_KEY:
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "error": "API keys not configured",
+                "message": "Set MEXC_API_KEY and MEXC_SECRET_KEY environment variables"
+            }
+        )
+    
+    try:
+        mode = "BROKER" if (config.IS_BROKER_ACCOUNT or config.SUB_ACCOUNT_MODE == "BROKER") else "SPOT"
+        
+        if mode == "BROKER":
+            # Broker API transfer
+            result = await mexc_client.broker_transfer_between_sub_accounts(
+                from_account, to_account, asset, amount
+            )
+        else:
+            # Spot API universal transfer
+            # Empty string means main account
+            from_acc = from_account if from_account else None
+            to_acc = to_account if to_account else None
+            
+            result = await mexc_client.transfer_between_sub_accounts(
+                from_type, to_type, asset, amount, from_acc, to_acc
+            )
+        
+        logger.info(f"Transfer successful: {from_account} -> {to_account}, {amount} {asset}")
+        
+        return {
+            "success": True,
+            "mode": mode,
+            "transfer": result,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Transfer failed: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "Transfer failed",
+                "message": str(e)
+            }
+        )
+
+
+@app.post("/account/sub-account/api-key")
+async def create_sub_account_api_key_endpoint(
+    sub_account_identifier: str,
+    note: str,
+    permissions: str
+):
+    """
+    Create API key for sub-account
+    
+    Request body:
+        sub_account_identifier: Sub-account ID (SPOT) or name (BROKER)
+        note: API key description
+        permissions: Permissions string
+            - SPOT API: JSON array string (e.g., '["SPOT"]')
+            - BROKER API: Comma-separated string (e.g., "SPOT_ACCOUNT_READ,SPOT_ACCOUNT_WRITE")
+    
+    Returns:
+        dict: API key details including secretKey (STORE SECURELY!)
+        
+    Raises:
+        HTTPException: 400/401/500 on errors
+    """
+    # Validate API keys
+    if not config.MEXC_API_KEY or not config.MEXC_SECRET_KEY:
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "error": "API keys not configured",
+                "message": "Set MEXC_API_KEY and MEXC_SECRET_KEY environment variables"
+            }
+        )
+    
+    try:
+        mode = "BROKER" if (config.IS_BROKER_ACCOUNT or config.SUB_ACCOUNT_MODE == "BROKER") else "SPOT"
+        
+        if mode == "BROKER":
+            # Broker API
+            result = await mexc_client.create_broker_sub_account_api_key(
+                sub_account_identifier, permissions, note
+            )
+        else:
+            # Spot API - permissions should be a list
+            import json
+            try:
+                perms_list = json.loads(permissions) if isinstance(permissions, str) else permissions
+            except json.JSONDecodeError:
+                perms_list = [permissions]  # Single permission
+            
+            result = await mexc_client.create_sub_account_api_key(
+                sub_account_identifier, note, perms_list
+            )
+        
+        logger.info(f"API key created for sub-account: {sub_account_identifier}")
+        
+        return {
+            "success": True,
+            "mode": mode,
+            "api_key_data": result,
+            "warning": "Store the secretKey securely - it will not be shown again!",
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to create API key: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "Failed to create API key",
+                "message": str(e)
+            }
+        )
+
+
+@app.delete("/account/sub-account/api-key")
+async def delete_sub_account_api_key_endpoint(
+    sub_account_id: str,
+    api_key: str
+):
+    """
+    Delete sub-account API key (SPOT API only)
+    
+    Query parameters:
+        sub_account_id: Sub-account ID
+        api_key: API key to delete
+    
+    Returns:
+        dict: Deletion confirmation
+        
+    Raises:
+        HTTPException: 400/401/501/500 on errors
+    """
+    # Validate API keys
+    if not config.MEXC_API_KEY or not config.MEXC_SECRET_KEY:
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "error": "API keys not configured",
+                "message": "Set MEXC_API_KEY and MEXC_SECRET_KEY environment variables"
+            }
+        )
+    
+    # Check mode
+    mode = "BROKER" if (config.IS_BROKER_ACCOUNT or config.SUB_ACCOUNT_MODE == "BROKER") else "SPOT"
+    if mode == "BROKER":
+        raise HTTPException(
+            status_code=501,
+            detail={
+                "error": "Not supported in BROKER mode",
+                "message": "BROKER API does not support API key deletion via this endpoint"
+            }
+        )
+    
+    try:
+        result = await mexc_client.delete_sub_account_api_key(sub_account_id, api_key)
+        
+        logger.info(f"API key deleted for sub-account: {sub_account_id}")
+        
+        return {
+            "success": True,
+            "mode": mode,
+            "result": result,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to delete API key: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "Failed to delete API key",
                 "message": str(e)
             }
         )
