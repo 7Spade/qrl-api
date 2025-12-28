@@ -23,14 +23,14 @@ MEXC API 整合的 QRL/USDT 自動化交易機器人
 - ✅ Docker 容器化支援
 
 
-## 📢 最新更新
+## 📢 最新更新 (Latest Updates)
 
-**端點重構與價格顯示修復** (2024-12)
-- ✅ Cloud Scheduler 任務端點重新命名為時間基準系統 (01-min-job, 05-min-job, 15-min-job)
-- ✅ 修復 QRL/USDT 價格顯示問題
-- ✅ 增強 K 線數據端點，支持所有 MEXC 時間間隔
-- ✅ 新增市場數據快取機制
-- 📖 詳細說明請參閱 [端點重構文檔](docs/ENDPOINT_REFACTORING.md)
+**市場數據快取修復** (Market Data Caching Fix) - 2024-12
+- ✅ 新增市場數據 Redis 快取方法 (Added Redis caching for market data)
+- ✅ 修復價格與趨勢顯示問題 (Fixed price and trend display issues)
+- ✅ 支援所有 MEXC K 線時間間隔 (Support all MEXC kline intervals)
+- ✅ 自適應快取 TTL 優化性能 (Adaptive caching TTL for performance)
+- 📖 詳見 [市場數據修復文檔](docs/MARKET_DATA_FIXES.md)
 
 ## 快速開始
 
