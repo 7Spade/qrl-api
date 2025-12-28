@@ -1,3 +1,1 @@
-User Request Details:
-- Repository: ac484/qrl-api
-- Task: Organize and streamline documentation without removing docs\00-Cloud Run Deploy.md; collect, classify, analyze structure, remove redundancy, simplify and unify style, apply Occam’s razor, focus on clarity; reorganize documents into ordered 01, 02, 03 naming while keeping the specified file untouched.
+User request: Analyze and simplify modules per problem statement focusing on templates/dashboard.html, bot.py, cloud_tasks.py, config.py, main.py, mexc_client.py, redis_client.py, validate_cloud_task_fixes.py, validate_fixes.py. Follow SRP, simplify, ensure equivalence.
