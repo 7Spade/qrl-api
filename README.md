@@ -242,56 +242,26 @@ qrl-api/
 - [MEXC API SDK](https://github.com/mexcdevelop/mexc-api-sdk)
 - [WebSocket 協議](https://github.com/mexcdevelop/websocket-proto)
 
-## Redis 快取系統
+## MEXC 數據持久化
 
-### 快取功能
+所有從 MEXC API 獲取的數據都會**永久儲存在 Redis** 中，方便除錯和分析。查看 **[MEXC Redis 儲存指南](./docs/MEXC_REDIS_STORAGE.md)** 了解詳情：
 
-本專案實現了全面的 Redis 快取系統，用於存儲所有 MEXC v3 API 數據：
+- 📦 完整 API 響應儲存
+- 💰 帳戶餘額數據
+- 📈 QRL 價格數據
+- 💵 總價值計算（USDT）
+- 🔍 詳細日誌記錄
+- 🛠️ 除錯工具和方法
 
-**市場數據快取：**
-- ✅ 24 小時行情統計（ticker）
-- ✅ 當前價格（price）
-- ✅ 訂單簿深度（order book）
-- ✅ 最近交易記錄（recent trades）
-- ✅ K 線/蠟燭圖數據（klines）
+**Redis 儲存的數據:**
+- `mexc:raw_response:account_info` - 完整 MEXC API 響應
+- `mexc:account_balance` - 處理後的餘額數據
+- `mexc:qrl_price` - QRL 價格數據
+- `mexc:total_value` - 總價值計算
 
-**帳戶數據快取：**
-- ✅ 帳戶餘額（balance）
-- ✅ 未成交訂單（open orders）
-- ✅ 歷史訂單（order history）
-
-### 快取配置
-
-在 `.env` 文件中配置快取 TTL（存活時間）：
-
-```bash
-# Redis 快取 TTL 配置（單位：秒）
-CACHE_TTL_PRICE=30           # 價格數據（預設：30秒）
-CACHE_TTL_TICKER=60          # 24小時行情（預設：60秒）
-CACHE_TTL_ORDER_BOOK=10      # 訂單簿（預設：10秒）
-CACHE_TTL_TRADES=60          # 最近交易（預設：60秒）
-CACHE_TTL_KLINES=300         # K線數據（預設：300秒）
-CACHE_TTL_ACCOUNT=120        # 帳戶數據（預設：120秒）
-CACHE_TTL_ORDERS=30          # 訂單數據（預設：30秒）
-```
-
-### 快取優勢
-
-1. **性能提升**：快取請求的響應速度提升 50-90%
-2. **減少 API 調用**：降低 70-95% 的 MEXC API 調用次數
-3. **避免限速**：顯著降低觸發 API 速率限制的風險
-4. **成本效益**：減少帶寬和 API 配額使用
-5. **高可靠性**：即使 MEXC API 暫時不可用，快取數據仍可使用
-
-### 快取測試
-
-運行快取測試套件：
-
-```bash
-python test_redis_caching.py
-```
-
-詳細文檔請參考：[REDIS_CACHING.md](./REDIS_CACHING.md)
+**API 端點:**
+- `GET /account/balance` - 獲取餘額並儲存到 Redis
+- `GET /account/balance/redis` - 查看 Redis 中儲存的數據
 
 ## 疑難排解
 

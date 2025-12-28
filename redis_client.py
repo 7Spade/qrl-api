@@ -457,388 +457,200 @@ class RedisClient:
             logger.error(f"Failed to get cost data: {e}")
             return {}
     
-    # ===== Raw MEXC API Response Storage (Permanent) =====
+    # ===== MEXC API Data Storage =====
     
-    async def set_raw_mexc_response(self, endpoint: str, response_data: Dict[str, Any], 
-                                     metadata: Optional[Dict[str, Any]] = None) -> bool:
+    async def set_mexc_raw_response(self, endpoint: str, response_data: Dict[str, Any]) -> bool:
         """
-        Store raw MEXC API response permanently for historical tracking and debugging
+        Store complete MEXC API raw response (permanent storage)
         
         Args:
-            endpoint: API endpoint name (e.g., "account_info", "ticker_24hr")
-            response_data: Raw response from MEXC API
-            metadata: Optional metadata (e.g., request parameters)
-        
+            endpoint: API endpoint name (e.g., "account_info", "ticker_price")
+            response_data: Complete API response data
+            
         Returns:
-            True if successful, False otherwise
+            bool: True if successful, False otherwise
         """
         try:
-            timestamp = int(datetime.now().timestamp() * 1000)
-            key = f"mexc:raw:{endpoint}:latest"
-            history_key = f"mexc:raw:{endpoint}:history"
+            key = f"mexc:raw_response:{endpoint}"
             
-            # Prepare data with timestamp
-            data = {
-                "response": response_data,
-                "timestamp": timestamp,
-                "datetime": datetime.now().isoformat(),
-                "metadata": metadata or {}
+            # Add metadata
+            data_with_meta = {
+                "endpoint": endpoint,
+                "data": response_data,
+                "timestamp": datetime.now().isoformat(),
+                "stored_at": int(datetime.now().timestamp() * 1000)
             }
             
-            # Store latest response (permanent, no TTL)
-            await self.client.set(key, json.dumps(data))
-            
-            # Add to historical sorted set (keep last 1000 entries)
-            await self.client.zadd(history_key, {json.dumps(data): timestamp})
-            
-            # Trim history to last 1000 entries
-            count = await self.client.zcard(history_key)
-            if count > 1000:
-                await self.client.zremrangebyrank(history_key, 0, count - 1001)
-            
-            logger.debug(f"Stored raw MEXC response for {endpoint}")
+            # Store permanently (no expiration)
+            await self.client.set(key, json.dumps(data_with_meta))
+            logger.info(f"Stored MEXC raw response for endpoint: {endpoint}")
             return True
         except Exception as e:
-            logger.error(f"Failed to store raw MEXC response for {endpoint}: {e}")
+            logger.error(f"Failed to store MEXC raw response for {endpoint}: {e}")
             return False
     
-    async def get_raw_mexc_response(self, endpoint: str) -> Optional[Dict[str, Any]]:
+    async def get_mexc_raw_response(self, endpoint: str) -> Optional[Dict[str, Any]]:
         """
-        Get latest raw MEXC API response
+        Retrieve MEXC API raw response
         
         Args:
             endpoint: API endpoint name
             
         Returns:
-            Raw response data with timestamp, or None if not found
+            Optional[Dict]: Raw response data with metadata, or None if not found
         """
         try:
-            key = f"mexc:raw:{endpoint}:latest"
+            key = f"mexc:raw_response:{endpoint}"
             data = await self.client.get(key)
             if data:
                 return json.loads(data)
             return None
         except Exception as e:
-            logger.error(f"Failed to get raw MEXC response for {endpoint}: {e}")
+            logger.error(f"Failed to get MEXC raw response for {endpoint}: {e}")
             return None
     
-    async def get_raw_mexc_response_history(self, endpoint: str, 
-                                           start_time: Optional[int] = None,
-                                           end_time: Optional[int] = None,
-                                           limit: int = 100) -> List[Dict[str, Any]]:
+    async def set_mexc_account_balance(self, balance_data: Dict[str, Any]) -> bool:
         """
-        Get historical raw MEXC API responses within time range
+        Store processed MEXC account balance data (permanent storage)
         
         Args:
-            endpoint: API endpoint name
-            start_time: Start timestamp (milliseconds), None for earliest
-            end_time: End timestamp (milliseconds), None for latest
-            limit: Maximum number of entries to return
+            balance_data: Processed balance information with QRL and USDT
             
         Returns:
-            List of raw responses with timestamps, sorted by timestamp (newest first)
+            bool: True if successful, False otherwise
         """
         try:
-            history_key = f"mexc:raw:{endpoint}:history"
+            key = "mexc:account_balance"
             
-            # Get from sorted set
-            min_score = start_time if start_time else "-inf"
-            max_score = end_time if end_time else "+inf"
-            
-            # Get entries in reverse order (newest first)
-            entries = await self.client.zrevrangebyscore(
-                history_key, max_score, min_score, start=0, num=limit
-            )
-            
-            return [json.loads(entry) for entry in entries]
-        except Exception as e:
-            logger.error(f"Failed to get raw MEXC response history for {endpoint}: {e}")
-            return []
-    
-    # ===== Market Data Caching (MEXC v3 API) =====
-    
-    async def set_ticker_24hr(self, symbol: str, ticker_data: Dict[str, Any]) -> bool:
-        """
-        Cache 24hr ticker statistics
-        
-        Args:
-            symbol: Trading symbol (e.g., "QRLUSDT")
-            ticker_data: Ticker data from MEXC API
-        """
-        try:
-            key = f"market:{symbol}:ticker:24hr"
-            data = {
-                **ticker_data,
-                "cached_at": datetime.now().isoformat()
+            # Add metadata
+            data_with_meta = {
+                "balances": balance_data,
+                "timestamp": datetime.now().isoformat(),
+                "stored_at": int(datetime.now().timestamp() * 1000)
             }
-            await self.client.set(key, json.dumps(data), ex=config.CACHE_TTL_TICKER)
-            logger.debug(f"Cached 24hr ticker for {symbol}")
+            
+            # Store permanently (no expiration)
+            await self.client.set(key, json.dumps(data_with_meta))
+            logger.info("Stored MEXC account balance data")
             return True
         except Exception as e:
-            logger.error(f"Failed to cache 24hr ticker: {e}")
+            logger.error(f"Failed to store MEXC account balance: {e}")
             return False
     
-    async def get_ticker_24hr(self, symbol: str) -> Optional[Dict[str, Any]]:
+    async def get_mexc_account_balance(self) -> Optional[Dict[str, Any]]:
         """
-        Get cached 24hr ticker statistics
+        Retrieve MEXC account balance data
         
-        Args:
-            symbol: Trading symbol (e.g., "QRLUSDT")
+        Returns:
+            Optional[Dict]: Balance data with metadata, or None if not found
         """
         try:
-            key = f"market:{symbol}:ticker:24hr"
+            key = "mexc:account_balance"
             data = await self.client.get(key)
             if data:
                 return json.loads(data)
             return None
         except Exception as e:
-            logger.error(f"Failed to get cached ticker: {e}")
+            logger.error(f"Failed to get MEXC account balance: {e}")
             return None
     
-    async def set_order_book(self, symbol: str, order_book_data: Dict[str, Any]) -> bool:
+    async def set_mexc_qrl_price(self, price: float, price_data: Optional[Dict[str, Any]] = None) -> bool:
         """
-        Cache order book depth data
+        Store QRL price data (permanent storage)
         
         Args:
-            symbol: Trading symbol
-            order_book_data: Order book data from MEXC API
+            price: Current QRL price in USDT
+            price_data: Optional additional price data from API
+            
+        Returns:
+            bool: True if successful, False otherwise
         """
         try:
-            key = f"market:{symbol}:orderbook"
+            key = "mexc:qrl_price"
+            
+            # Prepare data
             data = {
-                **order_book_data,
-                "cached_at": datetime.now().isoformat()
+                "price": str(price),
+                "price_float": price,
+                "timestamp": datetime.now().isoformat(),
+                "stored_at": int(datetime.now().timestamp() * 1000)
             }
-            await self.client.set(key, json.dumps(data), ex=config.CACHE_TTL_ORDER_BOOK)
-            logger.debug(f"Cached order book for {symbol}")
-            return True
-        except Exception as e:
-            logger.error(f"Failed to cache order book: {e}")
-            return False
-    
-    async def get_order_book(self, symbol: str) -> Optional[Dict[str, Any]]:
-        """
-        Get cached order book depth data
-        
-        Args:
-            symbol: Trading symbol
-        """
-        try:
-            key = f"market:{symbol}:orderbook"
-            data = await self.client.get(key)
-            if data:
-                return json.loads(data)
-            return None
-        except Exception as e:
-            logger.error(f"Failed to get cached order book: {e}")
-            return None
-    
-    async def set_recent_trades(self, symbol: str, trades_data: List[Dict[str, Any]]) -> bool:
-        """
-        Cache recent trades list
-        
-        Args:
-            symbol: Trading symbol
-            trades_data: Recent trades from MEXC API
-        """
-        try:
-            key = f"market:{symbol}:trades:recent"
-            data = {
-                "trades": trades_data,
-                "cached_at": datetime.now().isoformat()
-            }
-            await self.client.set(key, json.dumps(data), ex=config.CACHE_TTL_TRADES)
-            logger.debug(f"Cached recent trades for {symbol}")
-            return True
-        except Exception as e:
-            logger.error(f"Failed to cache recent trades: {e}")
-            return False
-    
-    async def get_recent_trades(self, symbol: str) -> Optional[List[Dict[str, Any]]]:
-        """
-        Get cached recent trades list
-        
-        Args:
-            symbol: Trading symbol
-        """
-        try:
-            key = f"market:{symbol}:trades:recent"
-            data = await self.client.get(key)
-            if data:
-                parsed = json.loads(data)
-                return parsed.get("trades", [])
-            return None
-        except Exception as e:
-            logger.error(f"Failed to get cached recent trades: {e}")
-            return None
-    
-    async def set_klines(self, symbol: str, interval: str, klines_data: List[List]) -> bool:
-        """
-        Cache klines/candlestick data
-        
-        Args:
-            symbol: Trading symbol
-            interval: Kline interval (e.g., "1m", "5m", "1h")
-            klines_data: Klines data from MEXC API
-        """
-        try:
-            key = f"market:{symbol}:klines:{interval}"
-            data = {
-                "klines": klines_data,
-                "cached_at": datetime.now().isoformat()
-            }
-            await self.client.set(key, json.dumps(data), ex=config.CACHE_TTL_KLINES)
-            logger.debug(f"Cached klines for {symbol} ({interval})")
-            return True
-        except Exception as e:
-            logger.error(f"Failed to cache klines: {e}")
-            return False
-    
-    async def get_klines(self, symbol: str, interval: str) -> Optional[List[List]]:
-        """
-        Get cached klines/candlestick data
-        
-        Args:
-            symbol: Trading symbol
-            interval: Kline interval (e.g., "1m", "5m", "1h")
-        """
-        try:
-            key = f"market:{symbol}:klines:{interval}"
-            data = await self.client.get(key)
-            if data:
-                parsed = json.loads(data)
-                return parsed.get("klines", [])
-            return None
-        except Exception as e:
-            logger.error(f"Failed to get cached klines: {e}")
-            return None
-    
-    # ===== Account Data Caching (MEXC v3 API) =====
-    
-    async def set_account_balance(self, balance_data: Dict[str, Any]) -> bool:
-        """
-        Store account balance information permanently (no TTL)
-        
-        Args:
-            balance_data: Account balance data from MEXC API
-        """
-        try:
-            key = f"account:balance"
-            data = {
-                **balance_data,
-                "cached_at": datetime.now().isoformat()
-            }
-            # Store permanently without TTL to prevent data loss between Cloud Scheduler runs
+            
+            # Add additional price data if provided
+            if price_data:
+                data["raw_data"] = price_data
+            
+            # Store permanently (no expiration)
             await self.client.set(key, json.dumps(data))
-            logger.debug("Stored account balance (permanent)")
+            logger.info(f"Stored QRL price: {price} USDT")
             return True
         except Exception as e:
-            logger.error(f"Failed to store account balance: {e}")
+            logger.error(f"Failed to store QRL price: {e}")
             return False
     
-    async def get_account_balance(self) -> Optional[Dict[str, Any]]:
-        """Get cached account balance information"""
+    async def get_mexc_qrl_price(self) -> Optional[Dict[str, Any]]:
+        """
+        Retrieve QRL price data
+        
+        Returns:
+            Optional[Dict]: Price data with metadata, or None if not found
+        """
         try:
-            key = f"account:balance"
+            key = "mexc:qrl_price"
             data = await self.client.get(key)
             if data:
                 return json.loads(data)
             return None
         except Exception as e:
-            logger.error(f"Failed to get cached account balance: {e}")
+            logger.error(f"Failed to get QRL price: {e}")
             return None
     
-    async def set_open_orders(self, symbol: Optional[str], orders_data: List[Dict[str, Any]]) -> bool:
+    async def set_mexc_total_value(self, total_value_usdt: float, breakdown: Dict[str, Any]) -> bool:
         """
-        Cache open orders list
+        Store total account value in USDT (permanent storage)
         
         Args:
-            symbol: Trading symbol (None for all symbols)
-            orders_data: Open orders from MEXC API
+            total_value_usdt: Total value in USDT
+            breakdown: Breakdown of value calculation (QRL value, USDT balance, etc.)
+            
+        Returns:
+            bool: True if successful, False otherwise
         """
         try:
-            key = f"account:orders:open:{symbol if symbol else 'all'}"
+            key = "mexc:total_value"
+            
+            # Prepare data
             data = {
-                "orders": orders_data,
-                "cached_at": datetime.now().isoformat()
+                "total_value_usdt": str(total_value_usdt),
+                "total_value_float": total_value_usdt,
+                "breakdown": breakdown,
+                "timestamp": datetime.now().isoformat(),
+                "stored_at": int(datetime.now().timestamp() * 1000)
             }
-            await self.client.set(key, json.dumps(data), ex=config.CACHE_TTL_ORDERS)
-            logger.debug(f"Cached open orders for {symbol if symbol else 'all symbols'}")
+            
+            # Store permanently (no expiration)
+            await self.client.set(key, json.dumps(data))
+            logger.info(f"Stored total account value: {total_value_usdt} USDT")
             return True
         except Exception as e:
-            logger.error(f"Failed to cache open orders: {e}")
+            logger.error(f"Failed to store total value: {e}")
             return False
     
-    async def get_open_orders(self, symbol: Optional[str]) -> Optional[List[Dict[str, Any]]]:
+    async def get_mexc_total_value(self) -> Optional[Dict[str, Any]]:
         """
-        Get cached open orders list
+        Retrieve total account value data
         
-        Args:
-            symbol: Trading symbol (None for all symbols)
+        Returns:
+            Optional[Dict]: Total value data with breakdown, or None if not found
         """
         try:
-            key = f"account:orders:open:{symbol if symbol else 'all'}"
+            key = "mexc:total_value"
             data = await self.client.get(key)
             if data:
-                parsed = json.loads(data)
-                return parsed.get("orders", [])
+                return json.loads(data)
             return None
         except Exception as e:
-            logger.error(f"Failed to get cached open orders: {e}")
-            return None
-    
-    async def set_order_history(self, symbol: str, orders_data: List[Dict[str, Any]], 
-                                start_time: Optional[int] = None, end_time: Optional[int] = None) -> bool:
-        """
-        Cache order history
-        
-        Args:
-            symbol: Trading symbol
-            orders_data: Order history from MEXC API
-            start_time: Optional start timestamp
-            end_time: Optional end timestamp
-        """
-        try:
-            # Create a unique key based on parameters
-            time_suffix = ""
-            if start_time or end_time:
-                time_suffix = f":{start_time or 0}-{end_time or 0}"
-            key = f"account:orders:history:{symbol}{time_suffix}"
-            
-            data = {
-                "orders": orders_data,
-                "cached_at": datetime.now().isoformat()
-            }
-            await self.client.set(key, json.dumps(data), ex=config.CACHE_TTL_ORDERS)
-            logger.debug(f"Cached order history for {symbol}")
-            return True
-        except Exception as e:
-            logger.error(f"Failed to cache order history: {e}")
-            return False
-    
-    async def get_order_history(self, symbol: str, start_time: Optional[int] = None, 
-                                end_time: Optional[int] = None) -> Optional[List[Dict[str, Any]]]:
-        """
-        Get cached order history
-        
-        Args:
-            symbol: Trading symbol
-            start_time: Optional start timestamp
-            end_time: Optional end timestamp
-        """
-        try:
-            time_suffix = ""
-            if start_time or end_time:
-                time_suffix = f":{start_time or 0}-{end_time or 0}"
-            key = f"account:orders:history:{symbol}{time_suffix}"
-            
-            data = await self.client.get(key)
-            if data:
-                parsed = json.loads(data)
-                return parsed.get("orders", [])
-            return None
-        except Exception as e:
-            logger.error(f"Failed to get cached order history: {e}")
+            logger.error(f"Failed to get total value: {e}")
             return None
     
     async def close(self):
