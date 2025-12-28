@@ -16,14 +16,14 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/tasks", tags=["Cloud Tasks"])
 
 
-@router.post("/01-min-job")
-async def task_01_min_job(
+@router.post("/sync-balance")
+async def task_sync_balance(
     x_cloudscheduler: str = Header(None, alias="X-CloudScheduler"),
     authorization: str = Header(None)
 ):
     """
-    Cloud Scheduler Task: Sync MEXC account balance to Redis (01-min-job)
-    Triggered by: Cloud Scheduler (every 1 minute)
+    Cloud Scheduler Task: Sync MEXC account balance to Redis
+    Triggered by: Cloud Scheduler (every 1-5 minutes)
     
     Stores:
     1. Raw MEXC API response (permanent)
@@ -40,7 +40,7 @@ async def task_01_min_job(
         raise HTTPException(status_code=401, detail="Unauthorized - Cloud Scheduler only")
     
     auth_method = "OIDC" if authorization else "X-CloudScheduler"
-    logger.info(f"[Cloud Task] 01-min-job (sync-balance) authenticated via {auth_method}")
+    logger.info(f"[Cloud Task] sync-balance authenticated via {auth_method}")
     
     try:
         if not config.MEXC_API_KEY or not config.MEXC_SECRET_KEY:
@@ -116,7 +116,7 @@ async def task_01_min_job(
             
             return {
                 "status": "success",
-                "task": "01-min-job",
+                "task": "sync-balance",
                 "data": {
                     "qrl_balance": qrl_balance,
                     "usdt_balance": usdt_balance,
@@ -133,14 +133,14 @@ async def task_01_min_job(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/05-min-job")
-async def task_05_min_job(
+@router.post("/update-price")
+async def task_update_price(
     x_cloudscheduler: str = Header(None, alias="X-CloudScheduler"),
     authorization: str = Header(None)
 ):
     """
-    Cloud Scheduler Task: Update QRL/USDT price (05-min-job)
-    Triggered by: Cloud Scheduler (every 5 minutes)
+    Cloud Scheduler Task: Update QRL/USDT price
+    Triggered by: Cloud Scheduler (every 1 minute)
     
     Stores:
     1. Raw MEXC ticker response (permanent)
@@ -157,7 +157,7 @@ async def task_05_min_job(
         raise HTTPException(status_code=401, detail="Unauthorized - Cloud Scheduler only")
     
     auth_method = "OIDC" if authorization else "X-CloudScheduler"
-    logger.info(f"[Cloud Task] 05-min-job (update-price) authenticated via {auth_method}")
+    logger.info(f"[Cloud Task] update-price authenticated via {auth_method}")
     
     try:
         async with mexc_client:
@@ -209,7 +209,7 @@ async def task_05_min_job(
             
             return {
                 "status": "success",
-                "task": "05-min-job",
+                "task": "update-price",
                 "data": {
                     "price": price,
                     "volume_24h": volume_24h,
@@ -233,14 +233,14 @@ async def task_05_min_job(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/15-min-job")
-async def task_15_min_job(
+@router.post("/update-cost")
+async def task_update_cost(
     x_cloudscheduler: str = Header(None, alias="X-CloudScheduler"),
     authorization: str = Header(None)
 ):
     """
-    Cloud Scheduler Task: Update cost and PnL data (15-min-job)
-    Triggered by: Cloud Scheduler (every 15 minutes)
+    Cloud Scheduler Task: Update cost and PnL data
+    Triggered by: Cloud Scheduler (every 5 minutes)
     
     Calculates and stores:
     1. Current position value
@@ -257,7 +257,7 @@ async def task_15_min_job(
         raise HTTPException(status_code=401, detail="Unauthorized - Cloud Scheduler only")
     
     auth_method = "OIDC" if authorization else "X-CloudScheduler"
-    logger.info(f"[Cloud Task] 15-min-job (update-cost) authenticated via {auth_method}")
+    logger.info(f"[Cloud Task] update-cost authenticated via {auth_method}")
     
     try:
         # Get current position and cost data
@@ -307,7 +307,7 @@ async def task_15_min_job(
             
             return {
                 "status": "success",
-                "task": "15-min-job",
+                "task": "update-cost",
                 "data": {
                     "qrl_balance": qrl_balance,
                     "avg_cost": avg_cost,
