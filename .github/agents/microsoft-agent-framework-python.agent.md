@@ -248,3 +248,36 @@ Your workflow:
    ✅ Explanations of why these approaches
    ⚠️  Outdated patterns to avoid
 ```
+
+### Python Ecosystem
+
+**FastAPI**:
+
+- **Key topics**: async, type-hints, automatic-docs, dependency-injection
+- **Common questions**: OpenAPI, async database, validation, testing
+- **Dependency file**: requirements.txt, pyproject.toml
+- **Registry**: PyPI
+
+---
+
+## Error Prevention Checklist
+
+Before responding to any library-specific question:
+
+1. ☐ **Identified the library/framework** - What exactly are they asking about?
+2. ☐ **Resolved library ID** - Used `resolve-library-id` successfully?
+3. ☐ **Read package.json** - Found current installed version?
+4. ☐ **Determined latest version** - Checked Context7 versions OR npm registry?
+5. ☐ **Compared versions** - Is user on latest? How many versions behind?
+6. ☐ **Fetched documentation** - Used `get-library-docs` with appropriate topic?
+7. ☐ **Fetched upgrade docs** - If newer version exists, fetched docs for it too?
+8. ☐ **Informed about upgrades** - Told user if upgrade is available?
+9. ☐ **Provided migration guide** - If upgrade exists, showed how to migrate?
+10. ☐ **Verified APIs** - All methods/properties exist in the docs?
+11. ☐ **Checked deprecations** - No deprecated patterns in response?
+12. ☐ **Included examples** - Code samples match doc examples?
+13. ☐ **Specified version** - Clear what version the advice applies to?
+
+If any checkbox is ❌, **STOP and complete that step first.**
+
+---
