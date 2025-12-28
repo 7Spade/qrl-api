@@ -104,7 +104,7 @@ async def task_sync_balance(
             
             logger.info(
                 f"[Cloud Task] Balance synced - "
-                f"QRL: {qrl_balance:.4f} (locked: {all_balances.get('QRL', {}).get('locked', 0)}), "
+                f"QRL: {qrl_balance:.2f} (locked: {all_balances.get('QRL', {}).get('locked', 0)}), "
                 f"USDT: {usdt_balance:.2f} (locked: {all_balances.get('USDT', {}).get('locked', 0)}), "
                 f"Total assets: {len(all_balances)}, "
                 f"Account type: {account_info.get('accountType')}, "
@@ -200,11 +200,11 @@ async def task_update_price(
             
             logger.info(
                 f"[Cloud Task] Price updated - "
-                f"Price: {price:.6f}, "
+                f"Price: {price:.5f}, "
                 f"Change: {price_change_pct:.2f}%, "
                 f"Volume: {volume_24h:.2f}, "
-                f"24h High/Low: {high_24h:.6f}/{low_24h:.6f}, "
-                f"Bid/Ask: {bid_price:.6f}/{ask_price:.6f} (spread: {spread:.8f})"
+                f"24h High/Low: {high_24h:.5f}/{low_24h:.5f}, "
+                f"Bid/Ask: {bid_price:.5f}/{ask_price:.5f} (spread: {spread:.8f})"
             )
             
             return {
@@ -297,8 +297,8 @@ async def task_update_cost(
             
             logger.info(
                 f"[Cloud Task] Cost updated - "
-                f"Position: {qrl_balance:.4f} QRL @ ${avg_cost:.6f}, "
-                f"Current: ${current_price:.6f}, "
+                f"Position: {qrl_balance:.2f} QRL @ ${avg_cost:.5f}, "
+                f"Current: ${current_price:.5f}, "
                 f"Value: ${current_value:.2f}, "
                 f"Unrealized P&L: ${unrealized_pnl:.2f} ({roi_pct:.2f}%), "
                 f"Realized P&L: ${realized_pnl:.2f}, "

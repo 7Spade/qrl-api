@@ -42,7 +42,7 @@ async def get_account_balance():
             usdt_total = float(usdt_balance.get("free", 0)) + float(usdt_balance.get("locked", 0))
             
             logger.info(
-                f"Account balance fetched - QRL: {qrl_total:.4f}, USDT: {usdt_total:.2f}"
+                f"Account balance fetched - QRL: {qrl_total:.2f}, USDT: {usdt_total:.2f}"
             )
             
             return {
