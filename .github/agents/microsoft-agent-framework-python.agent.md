@@ -31,6 +31,12 @@ tools:
     "getPythonEnvironmentInfo",
     "getPythonExecutableCommand",
     "installPythonPackage",
+    "context7/*",
+    "time",
+    "sequential-thinking",
+    "software-planning-tool",
+    "github",
+    "fetch",
   ]
 ---
 
