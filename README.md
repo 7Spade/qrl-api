@@ -21,23 +21,26 @@ MEXC API 整合的 QRL/USDT 自動化交易機器人
 - ✅ 多層倉位管理
 - ✅ 風險控制機制
 - ✅ Docker 容器化支援
+- ✅ Google Cloud Run 部署支援
 
 ## 快速開始
 
-### 1. 安裝依賴
+### 本地開發
+
+#### 1. 安裝依賴
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 2. 配置環境變數
+#### 2. 配置環境變數
 
 ```bash
 cp .env.example .env
 # 編輯 .env 文件，設置你的 MEXC API 密鑰
 ```
 
-### 3. 啟動 Redis
+#### 3. 啟動 Redis
 
 **選項 1: 使用 Redis Cloud (推薦)**
 ```bash
@@ -52,7 +55,7 @@ REDIS_URL=redis://default:your_password@your-redis-cloud.com:6379/0
 docker run -d -p 6379:6379 redis:7-alpine
 ```
 
-### 4. 運行應用
+#### 4. 運行應用
 
 ```bash
 # 開發模式
@@ -62,10 +65,43 @@ uvicorn main:app --reload
 uvicorn main:app --host 0.0.0.0 --port 8080
 ```
 
-### 5. 訪問 API 文檔
+#### 5. 訪問 API 文檔
 
 - Swagger UI: http://localhost:8080/docs
 - ReDoc: http://localhost:8080/redoc
+
+### Google Cloud 部署 🚀
+
+**快速部署 (3 個命令):**
+
+```bash
+# 1. 設置 Secret Manager 密鑰
+./setup-secrets.sh
+
+# 2. 部署到 Cloud Run
+./deploy.sh
+
+# 3. 驗證部署
+SERVICE_URL=$(gcloud run services describe qrl-trading-api --region=asia-southeast1 --format='value(status.url)')
+curl "$SERVICE_URL/health"
+```
+
+**詳細說明:**
+- 📖 [快速部署指南](QUICK_DEPLOY.md) - 3 步驟快速部署
+- 📚 [完整部署文檔](DEPLOYMENT.md) - 詳細的部署說明和故障排除
+- 🔧 部署腳本:
+  - `setup-secrets.sh` - 設置 Secret Manager 密鑰
+  - `deploy.sh` - 自動化部署流程
+- ⚙️ Cloud Build 配置:
+  - `cloudbuild.yaml` - 主要部署管道
+  - `cloudbuild-scheduler.yaml` - Cloud Scheduler 任務部署
+
+**部署流程:**
+```
+Dockerfile → Cloud Build → Artifact Registry → Cloud Run
+    ↓           ↓                ↓                ↓
+ 驗證代碼    建立映像        儲存映像         自動部署
+```
 
 ## API 端點
 

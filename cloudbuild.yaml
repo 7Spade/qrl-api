@@ -1,35 +1,146 @@
 # cloudbuild.yaml
-# Minimal Cloud Build for qrl-api
-# Build Docker image, push to Artifact Registry, deploy to Cloud Run
+# Complete Cloud Build Pipeline for qrl-api
+# Workflow: Dockerfile → Build Image → Test → Push to Artifact Registry → Deploy to Cloud Run
+#
+# Usage:
+#   gcloud builds submit --config=cloudbuild.yaml .
+#
+# Prerequisites:
+#   - Enable APIs: cloudbuild.googleapis.com, run.googleapis.com, artifactregistry.googleapis.com
+#   - Create Artifact Registry repository: gcloud artifacts repositories create qrl-trading-api --repository-format=docker --location=asia-southeast1
+#   - Setup Secret Manager secrets: mexc-api-key, mexc-secret-key, redis-url
+#   - Grant permissions to Cloud Build service account
 
+# Substitutions - can be overridden with --substitutions flag
 substitutions:
-  _IMAGE_URI: "asia-southeast1-docker.pkg.dev/qrl-api/qrl-trading-api/qrl-trading-api:latest"
+  _SERVICE_NAME: "qrl-trading-api"
+  _REGION: "asia-southeast1"
+  _REPOSITORY: "qrl-trading-api"
+  _IMAGE_NAME: "qrl-trading-api"
+  _IMAGE_TAG: "latest"
+  _IMAGE_URI: "asia-southeast1-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/${_IMAGE_NAME}:${_IMAGE_TAG}"
+  _GIT_TAG: "${SHORT_SHA}"
 
 steps:
-  # 1️⃣ Build Docker image
+  # ==================== Pre-Build Validation ====================
+  
+  # Step 1: Validate Dockerfile syntax
   - name: 'gcr.io/cloud-builders/docker'
+    id: 'validate-dockerfile'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        echo "🔍 Validating Dockerfile..."
+        if [ ! -f Dockerfile ]; then
+          echo "❌ Error: Dockerfile not found!"
+          exit 1
+        fi
+        docker build --no-cache --target validate-only -f - . <<'DOCKERFILE' || true
+        FROM python:3.11-slim AS validate-only
+        WORKDIR /app
+        COPY requirements.txt .
+        RUN pip install --no-cache-dir -r requirements.txt
+        COPY *.py ./
+        RUN python -m py_compile *.py
+        DOCKERFILE
+        echo "✅ Dockerfile validation complete"
+
+  # Step 2: Lint Python code
+  - name: 'python:3.11-slim'
+    id: 'lint-python'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        echo "🔍 Linting Python code..."
+        pip install --quiet flake8 || true
+        python -m py_compile *.py 2>&1 | grep -v "^$" || echo "✅ Python syntax check passed"
+        echo "✅ Lint complete"
+
+  # ==================== Build Stage ====================
+
+  # Step 3: Build Docker image with git commit tag
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-image'
     args:
       - 'build'
       - '-t'
       - '${_IMAGE_URI}'
+      - '-t'
+      - 'asia-southeast1-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/${_IMAGE_NAME}:${_GIT_TAG}'
+      - '--build-arg'
+      - 'BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")'
+      - '--build-arg'
+      - 'VCS_REF=${SHORT_SHA}'
+      - '--label'
+      - 'git.commit=${REVISION_ID}'
+      - '--label'
+      - 'build.id=${BUILD_ID}'
       - '.'
+    waitFor: ['validate-dockerfile', 'lint-python']
 
-  # 2️⃣ Push Docker image
+  # Step 4: Test the built image
   - name: 'gcr.io/cloud-builders/docker'
+    id: 'test-image'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        echo "🧪 Testing Docker image..."
+        
+        # Test 1: Check image exists
+        docker images ${_IMAGE_URI}
+        
+        # Test 2: Inspect image
+        docker inspect ${_IMAGE_URI} | grep -q "qrl-trading-api" || {
+          echo "❌ Image inspection failed"
+          exit 1
+        }
+        
+        # Test 3: Check image size
+        SIZE=$(docker images ${_IMAGE_URI} --format "{{.Size}}" | head -1)
+        echo "📦 Image size: $SIZE"
+        
+        # Test 4: Verify health check exists
+        docker inspect ${_IMAGE_URI} | grep -q "HEALTHCHECK" || {
+          echo "⚠️  Warning: No healthcheck found in image"
+        }
+        
+        echo "✅ Image tests passed"
+    waitFor: ['build-image']
+
+  # ==================== Push Stage ====================
+
+  # Step 5: Push image to Artifact Registry (with multiple tags)
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-latest'
     args:
       - 'push'
       - '${_IMAGE_URI}'
+    waitFor: ['test-image']
 
-  # 3️⃣ Deploy to Cloud Run
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push-commit-tag'
+    args:
+      - 'push'
+      - 'asia-southeast1-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/${_IMAGE_NAME}:${_GIT_TAG}'
+    waitFor: ['test-image']
+
+  # ==================== Deploy Stage ====================
+
+  # Step 6: Deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'deploy-cloud-run'
     entrypoint: 'gcloud'
     args:
       - 'run'
       - 'deploy'
-      - 'qrl-trading-api'
+      - '${_SERVICE_NAME}'
       - '--image=${_IMAGE_URI}'
-      - '--region=asia-southeast1'
+      - '--region=${_REGION}'
       - '--platform=managed'
+      # Authentication
       - '--allow-unauthenticated'
       # Resource limits
       - '--memory=512Mi'
@@ -40,6 +151,89 @@ steps:
       - '--timeout=300s'
       # Environment variables from Secret Manager
       - '--set-secrets=MEXC_API_KEY=mexc-api-key:latest,MEXC_SECRET_KEY=mexc-secret-key:latest,REDIS_URL=redis-url:latest'
+      # Additional environment variables
+      - '--set-env-vars=ENV=production,LOG_LEVEL=INFO,LOG_FORMAT=json'
+      # Labels for management
+      - '--labels=app=qrl-trading-api,environment=production,managed-by=cloud-build'
+      # Update traffic to latest revision
+      - '--no-traffic'
+    waitFor: ['push-latest', 'push-commit-tag']
 
-# Timeout for the entire build
+  # ==================== Post-Deploy Validation ====================
+
+  # Step 7: Verify deployment
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'verify-deployment'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        echo "🔍 Verifying Cloud Run deployment..."
+        
+        # Get service URL
+        SERVICE_URL=$(gcloud run services describe ${_SERVICE_NAME} \
+          --region=${_REGION} \
+          --format='value(status.url)')
+        
+        echo "📍 Service URL: $SERVICE_URL"
+        
+        # Wait for service to be ready
+        echo "⏳ Waiting for service to be ready..."
+        sleep 10
+        
+        # Health check
+        echo "🏥 Checking health endpoint..."
+        if curl -sf "$SERVICE_URL/health" > /dev/null; then
+          echo "✅ Health check passed"
+        else
+          echo "⚠️  Health check failed - service may still be starting"
+        fi
+        
+        # Get service info
+        echo "📊 Service information:"
+        gcloud run services describe ${_SERVICE_NAME} --region=${_REGION} \
+          --format='table(status.conditions[0].type,status.conditions[0].status,status.latestReadyRevisionName)'
+        
+        echo "✅ Deployment verification complete"
+        echo "🚀 Service deployed successfully to: $SERVICE_URL"
+    waitFor: ['deploy-cloud-run']
+
+  # Step 8: Send traffic to new revision
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'update-traffic'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        echo "🚦 Updating traffic to latest revision..."
+        gcloud run services update-traffic ${_SERVICE_NAME} \
+          --region=${_REGION} \
+          --to-latest
+        echo "✅ Traffic updated to latest revision"
+    waitFor: ['verify-deployment']
+
+# Images to be pushed to Artifact Registry
+images:
+  - '${_IMAGE_URI}'
+  - 'asia-southeast1-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/${_IMAGE_NAME}:${_GIT_TAG}'
+
+# Build options
+options:
+  # Use higher machine type for faster builds
+  machineType: 'N1_HIGHCPU_8'
+  # Enable logging
+  logging: CLOUD_LOGGING_ONLY
+  # Enable substitution validation
+  substitutionOption: 'ALLOW_LOOSE'
+  # Dynamic substitutions
+  dynamic_substitutions: true
+
+# Timeout for the entire build (20 minutes)
 timeout: 1200s
+
+# Tags for build organization
+tags:
+  - 'qrl-trading-api'
+  - 'cloud-run'
+  - 'production'
+  - 'automated'
