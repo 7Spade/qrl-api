@@ -40,6 +40,7 @@ class Config:
     # 1. SPOT API: For regular users (uses numeric subAccountId)
     # 2. BROKER API: For broker/institutional accounts (uses string subAccount name)
     SUB_ACCOUNT_MODE: str = os.getenv("SUB_ACCOUNT_MODE", "SPOT")  # SPOT or BROKER
+    IS_BROKER_ACCOUNT: bool = os.getenv("IS_BROKER_ACCOUNT", "false").lower() == "true"
     
     # Spot API sub-account (regular users) - uses numeric ID
     SUB_ACCOUNT_ID: Optional[str] = os.getenv("SUB_ACCOUNT_ID")
@@ -55,6 +56,8 @@ class Config:
         Returns:
             True if in BROKER mode, False if in SPOT mode
         """
+        if hasattr(self, "IS_BROKER_ACCOUNT"):
+            return bool(self.IS_BROKER_ACCOUNT) or self.SUB_ACCOUNT_MODE.upper() == "BROKER"
         return self.SUB_ACCOUNT_MODE.upper() == "BROKER"
     
     @property
@@ -137,6 +140,7 @@ class Config:
             "usdt_reserve_pct": cls.USDT_RESERVE_PCT,
             "sub_account_configured": bool(cls.SUB_ACCOUNT_ID or cls.SUB_ACCOUNT_NAME),
             "sub_account_mode": cls.SUB_ACCOUNT_MODE,
+            "is_broker_account": bool(getattr(cls, "IS_BROKER_ACCOUNT", False) or cls.SUB_ACCOUNT_MODE.upper() == "BROKER"),
         }
 
 

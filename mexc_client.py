@@ -58,7 +58,29 @@ class MEXCClient:
         """Async context manager exit"""
         if self._client:
             await self._client.aclose()
-    
+
+    @staticmethod
+    def _is_broker_enabled(config_obj: Any) -> bool:
+        """Determine broker mode from config-like object."""
+        explicit = getattr(config_obj, "IS_BROKER_ACCOUNT", None)
+        if isinstance(explicit, bool):
+            return explicit
+        if explicit is not None:
+            try:
+                return bool(explicit)
+            except Exception:
+                pass
+        mode_attr = getattr(config_obj, "is_broker_mode", None)
+        if isinstance(mode_attr, bool):
+            return mode_attr
+        if callable(mode_attr):
+            try:
+                return bool(mode_attr())
+            except Exception:
+                pass
+        mode = getattr(config_obj, "SUB_ACCOUNT_MODE", "SPOT")
+        return str(mode).upper() == "BROKER"
+
     def _generate_signature(self, params: Dict[str, Any]) -> str:
         """
         Generate HMAC SHA256 signature for authenticated requests
@@ -708,7 +730,8 @@ class MEXCClient:
         from config import config
         
         try:
-            if config.is_broker_mode:
+            is_broker = self._is_broker_enabled(config)
+            if is_broker:
                 logger.info("Using Broker API for sub-accounts")
                 result = await self.get_broker_sub_accounts()
                 return result.get("data", [])
@@ -742,13 +765,12 @@ class MEXCClient:
         """
         from config import config
         
-        if config.is_broker_mode:
+        if self._is_broker_enabled(config):
             return await self.get_broker_sub_account_assets(identifier)
-        else:
-            raise NotImplementedError(
-                "Spot API does not support querying sub-account balance from main account. "
-                "You must use the sub-account's own API key to query its balance."
-            )
+        raise NotImplementedError(
+            "Spot API does not support querying sub-account balance from main account. "
+            "You must use the sub-account's own API key to query its balance."
+        )
     
     async def close(self):
         """Close the HTTP client"""

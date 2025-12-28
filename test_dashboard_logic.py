@@ -48,7 +48,7 @@ def simulate_refresh_data(api_balances=None, redis_position=None, price=None):
         return None
 
 
-def test_scenario(name, api_balances, redis_position, price, expected_source):
+def run_scenario(name, api_balances, redis_position, price, expected_source):
     """Test a specific scenario"""
     logger.info(f"\n{'='*60}")
     logger.info(f"Scenario: {name}")
@@ -79,7 +79,7 @@ def main():
     results = []
     
     # Test 1: Normal case - API works, Redis has stale data
-    results.append(test_scenario(
+    results.append(run_scenario(
         "User deposited 1000 QRL, but bot hasn't run",
         api_balances={'qrlTotal': 1000, 'usdtTotal': 500},
         redis_position={'qrl_balance': '0', 'usdt_balance': '500'},
@@ -88,7 +88,7 @@ def main():
     ))
     
     # Test 2: API fails, use Redis fallback
-    results.append(test_scenario(
+    results.append(run_scenario(
         "API fails, Redis has data",
         api_balances=None,
         redis_position={'qrl_balance': '500', 'usdt_balance': '250'},
@@ -97,7 +97,7 @@ def main():
     ))
     
     # Test 3: Both API and Redis have data, API should win
-    results.append(test_scenario(
+    results.append(run_scenario(
         "Both sources available, API should be primary",
         api_balances={'qrlTotal': 1500, 'usdtTotal': 750},
         redis_position={'qrl_balance': '500', 'usdt_balance': '250'},
@@ -106,7 +106,7 @@ def main():
     ))
     
     # Test 4: User withdrew USDT manually
-    results.append(test_scenario(
+    results.append(run_scenario(
         "User withdrew 200 USDT manually (not tracked by bot)",
         api_balances={'qrlTotal': 1000, 'usdtTotal': 300},
         redis_position={'qrl_balance': '1000', 'usdt_balance': '500'},
@@ -115,7 +115,7 @@ def main():
     ))
     
     # Test 5: Bot bought QRL, API reflects real balance
-    results.append(test_scenario(
+    results.append(run_scenario(
         "Bot bought 500 QRL, user has total 1500 QRL",
         api_balances={'qrlTotal': 1500, 'usdtTotal': 250},
         redis_position={'qrl_balance': '500', 'usdt_balance': '250'},
