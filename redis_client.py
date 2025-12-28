@@ -205,7 +205,7 @@ class RedisClient:
                 "volume": str(volume) if volume else "0",
                 "timestamp": datetime.now().isoformat()
             }
-            await self.client.set(key, json.dumps(data), ex=300)  # 5 minutes TTL
+            await self.client.set(key, json.dumps(data), ex=config.CACHE_TTL_PRICE)
             return True
         except Exception as e:
             logger.error(f"Failed to set latest price: {e}")
@@ -393,6 +393,291 @@ class RedisClient:
         except Exception as e:
             logger.error(f"Failed to get cost data: {e}")
             return {}
+    
+    # ===== Market Data Caching (MEXC v3 API) =====
+    
+    async def set_ticker_24hr(self, symbol: str, ticker_data: Dict[str, Any]) -> bool:
+        """
+        Cache 24hr ticker statistics
+        
+        Args:
+            symbol: Trading symbol (e.g., "QRLUSDT")
+            ticker_data: Ticker data from MEXC API
+        """
+        try:
+            key = f"market:{symbol}:ticker:24hr"
+            data = {
+                **ticker_data,
+                "cached_at": datetime.now().isoformat()
+            }
+            await self.client.set(key, json.dumps(data), ex=config.CACHE_TTL_TICKER)
+            logger.debug(f"Cached 24hr ticker for {symbol}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to cache 24hr ticker: {e}")
+            return False
+    
+    async def get_ticker_24hr(self, symbol: str) -> Optional[Dict[str, Any]]:
+        """
+        Get cached 24hr ticker statistics
+        
+        Args:
+            symbol: Trading symbol (e.g., "QRLUSDT")
+        """
+        try:
+            key = f"market:{symbol}:ticker:24hr"
+            data = await self.client.get(key)
+            if data:
+                return json.loads(data)
+            return None
+        except Exception as e:
+            logger.error(f"Failed to get cached ticker: {e}")
+            return None
+    
+    async def set_order_book(self, symbol: str, order_book_data: Dict[str, Any]) -> bool:
+        """
+        Cache order book depth data
+        
+        Args:
+            symbol: Trading symbol
+            order_book_data: Order book data from MEXC API
+        """
+        try:
+            key = f"market:{symbol}:orderbook"
+            data = {
+                **order_book_data,
+                "cached_at": datetime.now().isoformat()
+            }
+            await self.client.set(key, json.dumps(data), ex=config.CACHE_TTL_ORDER_BOOK)
+            logger.debug(f"Cached order book for {symbol}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to cache order book: {e}")
+            return False
+    
+    async def get_order_book(self, symbol: str) -> Optional[Dict[str, Any]]:
+        """
+        Get cached order book depth data
+        
+        Args:
+            symbol: Trading symbol
+        """
+        try:
+            key = f"market:{symbol}:orderbook"
+            data = await self.client.get(key)
+            if data:
+                return json.loads(data)
+            return None
+        except Exception as e:
+            logger.error(f"Failed to get cached order book: {e}")
+            return None
+    
+    async def set_recent_trades(self, symbol: str, trades_data: List[Dict[str, Any]]) -> bool:
+        """
+        Cache recent trades list
+        
+        Args:
+            symbol: Trading symbol
+            trades_data: Recent trades from MEXC API
+        """
+        try:
+            key = f"market:{symbol}:trades:recent"
+            data = {
+                "trades": trades_data,
+                "cached_at": datetime.now().isoformat()
+            }
+            await self.client.set(key, json.dumps(data), ex=config.CACHE_TTL_TRADES)
+            logger.debug(f"Cached recent trades for {symbol}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to cache recent trades: {e}")
+            return False
+    
+    async def get_recent_trades(self, symbol: str) -> Optional[List[Dict[str, Any]]]:
+        """
+        Get cached recent trades list
+        
+        Args:
+            symbol: Trading symbol
+        """
+        try:
+            key = f"market:{symbol}:trades:recent"
+            data = await self.client.get(key)
+            if data:
+                parsed = json.loads(data)
+                return parsed.get("trades", [])
+            return None
+        except Exception as e:
+            logger.error(f"Failed to get cached recent trades: {e}")
+            return None
+    
+    async def set_klines(self, symbol: str, interval: str, klines_data: List[List]) -> bool:
+        """
+        Cache klines/candlestick data
+        
+        Args:
+            symbol: Trading symbol
+            interval: Kline interval (e.g., "1m", "5m", "1h")
+            klines_data: Klines data from MEXC API
+        """
+        try:
+            key = f"market:{symbol}:klines:{interval}"
+            data = {
+                "klines": klines_data,
+                "cached_at": datetime.now().isoformat()
+            }
+            await self.client.set(key, json.dumps(data), ex=config.CACHE_TTL_KLINES)
+            logger.debug(f"Cached klines for {symbol} ({interval})")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to cache klines: {e}")
+            return False
+    
+    async def get_klines(self, symbol: str, interval: str) -> Optional[List[List]]:
+        """
+        Get cached klines/candlestick data
+        
+        Args:
+            symbol: Trading symbol
+            interval: Kline interval (e.g., "1m", "5m", "1h")
+        """
+        try:
+            key = f"market:{symbol}:klines:{interval}"
+            data = await self.client.get(key)
+            if data:
+                parsed = json.loads(data)
+                return parsed.get("klines", [])
+            return None
+        except Exception as e:
+            logger.error(f"Failed to get cached klines: {e}")
+            return None
+    
+    # ===== Account Data Caching (MEXC v3 API) =====
+    
+    async def set_account_balance(self, balance_data: Dict[str, Any]) -> bool:
+        """
+        Cache account balance information
+        
+        Args:
+            balance_data: Account balance data from MEXC API
+        """
+        try:
+            key = f"account:balance"
+            data = {
+                **balance_data,
+                "cached_at": datetime.now().isoformat()
+            }
+            await self.client.set(key, json.dumps(data), ex=config.CACHE_TTL_ACCOUNT)
+            logger.debug("Cached account balance")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to cache account balance: {e}")
+            return False
+    
+    async def get_account_balance(self) -> Optional[Dict[str, Any]]:
+        """Get cached account balance information"""
+        try:
+            key = f"account:balance"
+            data = await self.client.get(key)
+            if data:
+                return json.loads(data)
+            return None
+        except Exception as e:
+            logger.error(f"Failed to get cached account balance: {e}")
+            return None
+    
+    async def set_open_orders(self, symbol: Optional[str], orders_data: List[Dict[str, Any]]) -> bool:
+        """
+        Cache open orders list
+        
+        Args:
+            symbol: Trading symbol (None for all symbols)
+            orders_data: Open orders from MEXC API
+        """
+        try:
+            key = f"account:orders:open:{symbol if symbol else 'all'}"
+            data = {
+                "orders": orders_data,
+                "cached_at": datetime.now().isoformat()
+            }
+            await self.client.set(key, json.dumps(data), ex=config.CACHE_TTL_ORDERS)
+            logger.debug(f"Cached open orders for {symbol if symbol else 'all symbols'}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to cache open orders: {e}")
+            return False
+    
+    async def get_open_orders(self, symbol: Optional[str]) -> Optional[List[Dict[str, Any]]]:
+        """
+        Get cached open orders list
+        
+        Args:
+            symbol: Trading symbol (None for all symbols)
+        """
+        try:
+            key = f"account:orders:open:{symbol if symbol else 'all'}"
+            data = await self.client.get(key)
+            if data:
+                parsed = json.loads(data)
+                return parsed.get("orders", [])
+            return None
+        except Exception as e:
+            logger.error(f"Failed to get cached open orders: {e}")
+            return None
+    
+    async def set_order_history(self, symbol: str, orders_data: List[Dict[str, Any]], 
+                                start_time: Optional[int] = None, end_time: Optional[int] = None) -> bool:
+        """
+        Cache order history
+        
+        Args:
+            symbol: Trading symbol
+            orders_data: Order history from MEXC API
+            start_time: Optional start timestamp
+            end_time: Optional end timestamp
+        """
+        try:
+            # Create a unique key based on parameters
+            time_suffix = ""
+            if start_time or end_time:
+                time_suffix = f":{start_time or 0}-{end_time or 0}"
+            key = f"account:orders:history:{symbol}{time_suffix}"
+            
+            data = {
+                "orders": orders_data,
+                "cached_at": datetime.now().isoformat()
+            }
+            await self.client.set(key, json.dumps(data), ex=config.CACHE_TTL_ORDERS)
+            logger.debug(f"Cached order history for {symbol}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to cache order history: {e}")
+            return False
+    
+    async def get_order_history(self, symbol: str, start_time: Optional[int] = None, 
+                                end_time: Optional[int] = None) -> Optional[List[Dict[str, Any]]]:
+        """
+        Get cached order history
+        
+        Args:
+            symbol: Trading symbol
+            start_time: Optional start timestamp
+            end_time: Optional end timestamp
+        """
+        try:
+            time_suffix = ""
+            if start_time or end_time:
+                time_suffix = f":{start_time or 0}-{end_time or 0}"
+            key = f"account:orders:history:{symbol}{time_suffix}"
+            
+            data = await self.client.get(key)
+            if data:
+                parsed = json.loads(data)
+                return parsed.get("orders", [])
+            return None
+        except Exception as e:
+            logger.error(f"Failed to get cached order history: {e}")
+            return None
     
     async def close(self):
         """Close Redis connection and connection pool"""

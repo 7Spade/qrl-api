@@ -320,11 +320,30 @@ async def execute_trading(request: ExecuteRequest, background_tasks: BackgroundT
 async def get_ticker(symbol: str):
     """Get market ticker for a symbol"""
     try:
+        # Try to get from cache first
+        if redis_client.connected:
+            cached_ticker = await redis_client.get_ticker_24hr(symbol)
+            if cached_ticker:
+                logger.debug(f"Retrieved ticker from cache for {symbol}")
+                return {
+                    "symbol": symbol,
+                    "data": cached_ticker,
+                    "timestamp": cached_ticker.get("cached_at"),
+                    "cached": True
+                }
+        
+        # Fetch from MEXC API if not cached
         ticker = await mexc_client.get_ticker_24hr(symbol)
+        
+        # Cache the result
+        if redis_client.connected:
+            await redis_client.set_ticker_24hr(symbol, ticker)
+        
         return {
             "symbol": symbol,
             "data": ticker,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
+            "cached": False
         }
     except Exception as e:
         logger.error(f"Failed to get ticker for {symbol}: {e}")
@@ -353,12 +372,131 @@ async def get_price(symbol: str):
         raise HTTPException(status_code=500, detail=f"Failed to get price: {str(e)}")
 
 
+@app.get("/market/orderbook/{symbol}")
+async def get_orderbook(symbol: str, limit: int = 100):
+    """
+    Get order book depth for a symbol
+    
+    Args:
+        symbol: Trading symbol (e.g., "QRLUSDT")
+        limit: Depth limit (default 100, max 5000)
+    """
+    try:
+        # Try to get from cache first
+        if redis_client.connected:
+            cached_orderbook = await redis_client.get_order_book(symbol)
+            if cached_orderbook:
+                logger.debug(f"Retrieved order book from cache for {symbol}")
+                return {
+                    "symbol": symbol,
+                    "data": cached_orderbook,
+                    "timestamp": cached_orderbook.get("cached_at"),
+                    "cached": True
+                }
+        
+        # Fetch from MEXC API if not cached
+        orderbook = await mexc_client.get_order_book(symbol, limit)
+        
+        # Cache the result
+        if redis_client.connected:
+            await redis_client.set_order_book(symbol, orderbook)
+        
+        return {
+            "symbol": symbol,
+            "data": orderbook,
+            "timestamp": datetime.now().isoformat(),
+            "cached": False
+        }
+    except Exception as e:
+        logger.error(f"Failed to get order book for {symbol}: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get order book: {str(e)}")
+
+
+@app.get("/market/trades/{symbol}")
+async def get_recent_trades_endpoint(symbol: str, limit: int = 500):
+    """
+    Get recent trades for a symbol
+    
+    Args:
+        symbol: Trading symbol (e.g., "QRLUSDT")
+        limit: Number of trades (default 500, max 1000)
+    """
+    try:
+        # Try to get from cache first
+        if redis_client.connected:
+            cached_trades = await redis_client.get_recent_trades(symbol)
+            if cached_trades:
+                logger.debug(f"Retrieved recent trades from cache for {symbol}")
+                return {
+                    "symbol": symbol,
+                    "trades": cached_trades,
+                    "cached": True
+                }
+        
+        # Fetch from MEXC API if not cached
+        trades = await mexc_client.get_recent_trades(symbol, limit)
+        
+        # Cache the result
+        if redis_client.connected:
+            await redis_client.set_recent_trades(symbol, trades)
+        
+        return {
+            "symbol": symbol,
+            "trades": trades,
+            "cached": False
+        }
+    except Exception as e:
+        logger.error(f"Failed to get recent trades for {symbol}: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get recent trades: {str(e)}")
+
+
+@app.get("/market/klines/{symbol}")
+async def get_klines_endpoint(symbol: str, interval: str = "1m", limit: int = 500):
+    """
+    Get klines/candlestick data for a symbol
+    
+    Args:
+        symbol: Trading symbol (e.g., "QRLUSDT")
+        interval: Kline interval (e.g., "1m", "5m", "15m", "1h", "1d")
+        limit: Number of klines (default 500, max 1000)
+    """
+    try:
+        # Try to get from cache first
+        if redis_client.connected:
+            cached_klines = await redis_client.get_klines(symbol, interval)
+            if cached_klines:
+                logger.debug(f"Retrieved klines from cache for {symbol} ({interval})")
+                return {
+                    "symbol": symbol,
+                    "interval": interval,
+                    "klines": cached_klines,
+                    "cached": True
+                }
+        
+        # Fetch from MEXC API if not cached
+        klines = await mexc_client.get_klines(symbol, interval, limit)
+        
+        # Cache the result
+        if redis_client.connected:
+            await redis_client.set_klines(symbol, interval, klines)
+        
+        return {
+            "symbol": symbol,
+            "interval": interval,
+            "klines": klines,
+            "cached": False
+        }
+    except Exception as e:
+        logger.error(f"Failed to get klines for {symbol}: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to get klines: {str(e)}")
+
+
 @app.get("/account/balance")
 async def get_account_balance():
     """
     Get account balance (requires API keys)
     
-    This endpoint fetches real-time balance from MEXC API.
+    This endpoint fetches real-time balance from MEXC API with Redis caching.
     Requires valid MEXC_API_KEY and MEXC_SECRET_KEY with spot trading permissions.
     
     Returns:
@@ -380,6 +518,16 @@ async def get_account_balance():
         )
     
     try:
+        # Try to get from cache first
+        if redis_client.connected:
+            cached_balance = await redis_client.get_account_balance()
+            if cached_balance:
+                logger.debug("Retrieved account balance from cache")
+                return {
+                    **cached_balance,
+                    "cached": True
+                }
+        
         logger.info("Fetching account balance from MEXC API")
         account_info = await mexc_client.get_account_info()
         
@@ -406,11 +554,18 @@ async def get_account_balance():
         if "USDT" not in balances:
             balances["USDT"] = {"free": "0", "locked": "0"}
         
-        return {
+        result = {
             "success": True,
             "balances": balances,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
+            "cached": False
         }
+        
+        # Cache the result
+        if redis_client.connected:
+            await redis_client.set_account_balance(result)
+        
+        return result
         
     except Exception as e:
         logger.error(f"Failed to get account balance: {e}", exc_info=True)
@@ -435,6 +590,124 @@ async def get_account_balance():
                 "error": "Failed to fetch account balance",
                 "message": str(e),
                 "help": "Check MEXC API status and your API key permissions"
+            }
+        )
+
+
+@app.get("/account/orders/open")
+async def get_open_orders_endpoint(symbol: Optional[str] = None):
+    """
+    Get open orders
+    
+    Args:
+        symbol: Optional trading symbol filter (e.g., "QRLUSDT")
+    
+    Returns:
+        dict: List of open orders with caching support
+    """
+    if not config.MEXC_API_KEY or not config.MEXC_SECRET_KEY:
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "error": "API keys not configured",
+                "message": "Set MEXC_API_KEY and MEXC_SECRET_KEY environment variables"
+            }
+        )
+    
+    try:
+        # Try to get from cache first
+        if redis_client.connected:
+            cached_orders = await redis_client.get_open_orders(symbol)
+            if cached_orders is not None:
+                logger.debug(f"Retrieved open orders from cache for {symbol or 'all symbols'}")
+                return {
+                    "symbol": symbol,
+                    "orders": cached_orders,
+                    "cached": True
+                }
+        
+        # Fetch from MEXC API if not cached
+        orders = await mexc_client.get_open_orders(symbol)
+        
+        # Cache the result
+        if redis_client.connected:
+            await redis_client.set_open_orders(symbol, orders)
+        
+        return {
+            "symbol": symbol,
+            "orders": orders,
+            "cached": False
+        }
+    except Exception as e:
+        logger.error(f"Failed to get open orders: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "Failed to get open orders",
+                "message": str(e)
+            }
+        )
+
+
+@app.get("/account/orders/history")
+async def get_order_history_endpoint(
+    symbol: str,
+    start_time: Optional[int] = None,
+    end_time: Optional[int] = None,
+    limit: int = 500
+):
+    """
+    Get order history for a symbol
+    
+    Args:
+        symbol: Trading symbol (e.g., "QRLUSDT")
+        start_time: Optional start timestamp (milliseconds)
+        end_time: Optional end timestamp (milliseconds)
+        limit: Number of orders (default 500, max 1000)
+    
+    Returns:
+        dict: List of historical orders with caching support
+    """
+    if not config.MEXC_API_KEY or not config.MEXC_SECRET_KEY:
+        raise HTTPException(
+            status_code=401,
+            detail={
+                "error": "API keys not configured",
+                "message": "Set MEXC_API_KEY and MEXC_SECRET_KEY environment variables"
+            }
+        )
+    
+    try:
+        # Try to get from cache first
+        if redis_client.connected:
+            cached_orders = await redis_client.get_order_history(symbol, start_time, end_time)
+            if cached_orders is not None:
+                logger.debug(f"Retrieved order history from cache for {symbol}")
+                return {
+                    "symbol": symbol,
+                    "orders": cached_orders,
+                    "cached": True
+                }
+        
+        # Fetch from MEXC API if not cached
+        orders = await mexc_client.get_all_orders(symbol, start_time=start_time, end_time=end_time, limit=limit)
+        
+        # Cache the result
+        if redis_client.connected:
+            await redis_client.set_order_history(symbol, orders, start_time, end_time)
+        
+        return {
+            "symbol": symbol,
+            "orders": orders,
+            "cached": False
+        }
+    except Exception as e:
+        logger.error(f"Failed to get order history: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "Failed to get order history",
+                "message": str(e)
             }
         )
 
