@@ -2,18 +2,18 @@
 # 此配置文件定義了 3 個 Cloud Scheduler jobs
 # 用於 Google Cloud Run 的自動化任務調度
 
-# Job 1: 餘額同步 - 每 3 分鐘執行一次
+# Job 1: 01-min-job (Balance Sync) - 每 1 分鐘執行一次
 ---
 apiVersion: cloudscheduler.cnrm.cloud.google.com/v1beta1
 kind: CloudSchedulerJob
 metadata:
-  name: qrl-sync-balance-job
+  name: qrl-01-min-job
   annotations:
     cnrm.cloud.google.com/project-id: "qrl-api"  # 替換為您的專案 ID
 spec:
   location: asia-southeast1
-  description: "Sync MEXC account balance to Redis every 3 minutes"
-  schedule: "*/3 * * * *"  # 每 3 分鐘執行
+  description: "01-min-job: Sync MEXC account balance to Redis every 1 minute"
+  schedule: "*/1 * * * *"  # 每 1 分鐘執行
   timeZone: "Asia/Taipei"
   attemptDeadline: "60s"
   retryConfig:
@@ -23,7 +23,7 @@ spec:
     maxBackoffDuration: "3600s"
     maxDoublings: 5
   httpTarget:
-    uri: "https://qrl-trading-api-545492969490.asia-southeast1.run.app/tasks/sync-balance"
+    uri: "https://qrl-trading-api-545492969490.asia-southeast1.run.app/tasks/01-min-job"
     httpMethod: "POST"
     headers:
       X-CloudScheduler: "true"
@@ -31,17 +31,17 @@ spec:
     body: "{}"
 
 ---
-# Job 2: 價格更新 - 每 3 分鐘執行一次
+# Job 2: 05-min-job (Price Update) - 每 5 分鐘執行一次
 apiVersion: cloudscheduler.cnrm.cloud.google.com/v1beta1
 kind: CloudSchedulerJob
 metadata:
-  name: qrl-update-price-job
+  name: qrl-05-min-job
   annotations:
     cnrm.cloud.google.com/project-id: "qrl-api"  # 替換為您的專案 ID
 spec:
   location: asia-southeast1
-  description: "Update QRL/USDT price from MEXC every 3 minutes"
-  schedule: "*/3 * * * *"  # 每 3 分鐘執行
+  description: "05-min-job: Update QRL/USDT price from MEXC every 5 minutes"
+  schedule: "*/5 * * * *"  # 每 5 分鐘執行
   timeZone: "Asia/Taipei"
   attemptDeadline: "60s"
   retryConfig:
@@ -51,7 +51,7 @@ spec:
     maxBackoffDuration: "3600s"
     maxDoublings: 5
   httpTarget:
-    uri: "https://qrl-trading-api-545492969490.asia-southeast1.run.app/tasks/update-price"
+    uri: "https://qrl-trading-api-545492969490.asia-southeast1.run.app/tasks/05-min-job"
     httpMethod: "POST"
     headers:
       X-CloudScheduler: "true"
@@ -59,16 +59,16 @@ spec:
     body: "{}"
 
 ---
-# Job 3: 成本更新 - 每 15 分鐘執行一次
+# Job 3: 15-min-job (Cost Update) - 每 15 分鐘執行一次
 apiVersion: cloudscheduler.cnrm.cloud.google.com/v1beta1
 kind: CloudSchedulerJob
 metadata:
-  name: qrl-update-cost-job
+  name: qrl-15-min-job
   annotations:
     cnrm.cloud.google.com/project-id: "qrl-api"  # 替換為您的專案 ID
 spec:
   location: asia-southeast1
-  description: "Update cost and PnL calculations every 15 minutes"
+  description: "15-min-job: Update cost and PnL calculations every 15 minutes"
   schedule: "*/15 * * * *"  # 每 15 分鐘執行
   timeZone: "Asia/Taipei"
   attemptDeadline: "60s"
@@ -79,7 +79,7 @@ spec:
     maxBackoffDuration: "3600s"
     maxDoublings: 5
   httpTarget:
-    uri: "https://qrl-trading-api-545492969490.asia-southeast1.run.app/tasks/update-cost"
+    uri: "https://qrl-trading-api-545492969490.asia-southeast1.run.app/tasks/15-min-job"
     httpMethod: "POST"
     headers:
       X-CloudScheduler: "true"
