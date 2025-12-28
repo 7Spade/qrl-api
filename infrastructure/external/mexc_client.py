@@ -35,6 +35,11 @@ class MEXCClient:
         self.base_url = config.MEXC_BASE_URL
         self.timeout = config.MEXC_TIMEOUT
         
+        # Time synchronization
+        self._time_offset: int = 0  # Milliseconds offset between local and server time
+        self._last_time_sync: int = 0  # Last time sync timestamp
+        self._time_sync_interval: int = 3600000  # Sync every hour (ms)
+        
         # Default headers
         self.headers = {
             "Content-Type": "application/json"
@@ -78,6 +83,42 @@ class MEXCClient:
         ).hexdigest()
         return signature
     
+    async def _sync_time(self) -> None:
+        """
+        Synchronize time with MEXC server to prevent timestamp errors
+        
+        This method fetches the server time and calculates the offset between
+        local time and server time. It's called automatically before signed requests
+        if the last sync was more than an hour ago.
+        """
+        try:
+            local_time_before = int(time.time() * 1000)
+            server_response = await self._request("GET", "/api/v3/time", signed=False)
+            local_time_after = int(time.time() * 1000)
+            
+            server_time = server_response.get("serverTime", 0)
+            
+            # Calculate offset (using average of before/after local time)
+            local_time_avg = (local_time_before + local_time_after) // 2
+            self._time_offset = server_time - local_time_avg
+            self._last_time_sync = local_time_after
+            
+            logger.info(f"Time synchronized with MEXC server. Offset: {self._time_offset}ms")
+        except Exception as e:
+            logger.warning(f"Failed to sync time with MEXC server: {e}")
+            # Use local time if sync fails
+            self._time_offset = 0
+    
+    def _get_timestamp(self) -> int:
+        """
+        Get current timestamp in milliseconds, adjusted for server time offset
+        
+        Returns:
+            Timestamp in milliseconds
+        """
+        local_timestamp = int(time.time() * 1000)
+        return local_timestamp + self._time_offset
+    
     async def _request(
         self,
         method: str,
@@ -107,7 +148,19 @@ class MEXCClient:
             if not self.api_key or not self.secret_key:
                 raise ValueError("API key and secret key required for authenticated requests")
             
-            params["timestamp"] = int(time.time() * 1000)
+            # Sync time if needed (every hour or first request)
+            current_time = int(time.time() * 1000)
+            if self._last_time_sync == 0 or (current_time - self._last_time_sync) > self._time_sync_interval:
+                await self._sync_time()
+            
+            # Add timestamp in milliseconds (with offset)
+            params["timestamp"] = self._get_timestamp()
+            
+            # Add recvWindow for signed requests (helps with time sync issues)
+            if "recvWindow" not in params:
+                params["recvWindow"] = config.MEXC_RECV_WINDOW
+            
+            # Generate signature
             params["signature"] = self._generate_signature(params)
         
         last_exception = None
@@ -135,13 +188,51 @@ class MEXCClient:
             
             except httpx.HTTPStatusError as e:
                 last_exception = e
-                if e.response.status_code in [429, 503, 504]:
+                status_code = e.response.status_code
+                
+                # Try to parse MEXC error response
+                try:
+                    error_data = e.response.json()
+                    mexc_code = error_data.get("code")
+                    mexc_msg = error_data.get("msg", str(e))
+                    
+                    # Log MEXC-specific error
+                    logger.warning(f"MEXC API error - Status: {status_code}, Code: {mexc_code}, Message: {mexc_msg}")
+                    
+                    # Handle specific MEXC error codes
+                    if mexc_code == -1021:
+                        # Timestamp out of recv_window
+                        logger.error("Timestamp sync issue - check server time")
+                    elif mexc_code == -1022:
+                        # Invalid signature
+                        logger.error("Invalid signature - check API credentials")
+                    elif mexc_code == -1003:
+                        # Too many requests
+                        logger.warning("Rate limit exceeded")
+                    
+                except Exception:
+                    # Failed to parse error response
+                    pass
+                
+                # Retry logic for specific status codes
+                if status_code in [429, 503, 504]:
                     # Rate limit or server error - retry with exponential backoff
                     wait_time = 2 ** attempt
-                    logger.warning(f"MEXC API error {e.response.status_code}, retrying in {wait_time}s (attempt {attempt + 1}/{max_retries})")
+                    logger.warning(f"MEXC API error {status_code}, retrying in {wait_time}s (attempt {attempt + 1}/{max_retries})")
                     if attempt < max_retries - 1:
                         await asyncio.sleep(wait_time)
                         continue
+                
+                # Don't retry client errors (4xx except 429)
+                if 400 <= status_code < 500 and status_code != 429:
+                    raise
+                
+                # Retry server errors (5xx) and rate limits
+                if attempt < max_retries - 1:
+                    wait_time = 2 ** attempt
+                    await asyncio.sleep(wait_time)
+                    continue
+                
                 raise
             
             except httpx.RequestError as e:
