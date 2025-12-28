@@ -98,7 +98,12 @@ async def task_sync_balance(
                 f"[Cloud Task] Balance synced - "
                 f"QRL: {qrl_balance:.4f} (locked: {all_balances.get('QRL', {}).get('locked', 0)}), "
                 f"USDT: {usdt_balance:.2f} (locked: {all_balances.get('USDT', {}).get('locked', 0)}), "
-                f"Total assets: {len(all_balances)}"
+                f"Total assets: {len(all_balances)}, "
+                f"Account type: {account_info.get('accountType')}, "
+                f"canTrade: {account_info.get('canTrade')}, "
+                f"Maker/Taker: {account_info.get('makerCommission')}/{account_info.get('takerCommission')}, "
+                f"Permissions: {account_info.get('permissions')}, "
+                f"Update time: {account_info.get('updateTime')}"
             )
             
             return {
