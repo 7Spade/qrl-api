@@ -16,6 +16,7 @@
 | 08-Costs-and-Controls.md | 成本/風控 | core | 成本估算、安全最小化 |
 | README.md | 專案總覽 | core | 根目錄主說明 |
 | INDEX.md | 導航 | core | 主索引，對應 00–09 |
+| 10-Doc-Optimization.md | 優化/壓縮 | core | 附錄壓縮摘要、索引與反膨脹守則 |
 | 1-qrl-accumulation-strategy.md | 策略詳解 | appendix | 深度案例與程式片段 |
 | 2-bot.md | 設計 | appendix | 機器人設計詳述 |
 | 3-cost.md | 成本 | appendix | 詳細成本分析 |
@@ -31,6 +32,6 @@
 | mexc-dev-url.md | 參考 | appendix | 官方連結彙整 |
 
 ### 標準化與維護建議
-- 仍有用的深度內容標記為 appendix；無過時項目需移除的暫無。  
-- 新增文檔時請跟隨 `NN-Title.md` 命名（核心）或放入 appendix 區。  
-- 每月快速檢查：新增檔是否登錄在此表、是否符合語氣與 H2 開頭。  
+- 核心閱讀集為 INDEX + 00–09 + 10（壓縮摘要）；appendix 保留為 archive，先查 10 再決定是否需全文。  
+- 新增文檔時請跟隨 `NN-Title.md` 命名（核心）或放入 appendix 區，並同步更新本表與 10。  
+- 每月快速檢查：新增檔是否登錄在此表、是否符合語氣與 H2 開頭；若與現有內容重複，優先合併至核心或 10。  

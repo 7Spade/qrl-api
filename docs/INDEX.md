@@ -15,6 +15,7 @@
 8. [07-Fixes-and-Troubleshooting.md](07-Fixes-and-Troubleshooting.md) — 核心修復與常見問題
 9. [08-Costs-and-Controls.md](08-Costs-and-Controls.md) — 成本、風險與安全守則
 10. [09-Doc-Inventory.md](09-Doc-Inventory.md) — 全量盤點與分類
+11. [10-Doc-Optimization.md](10-Doc-Optimization.md) — 附錄壓縮摘要與反膨脹守則（維護/審閱必讀）
 
 ---
 
@@ -32,6 +33,7 @@
 | 07 | 07-Fixes-and-Troubleshooting.md | Redis TTL、原始響應存放、OIDC/資料一致性修復；常見故障清單 |
 | 08 | 08-Costs-and-Controls.md | 成本估算、節省手段、安全最小權限 |
 | 09 | 09-Doc-Inventory.md | 全量盤點、分類與優先級 |
+| 10 | 10-Doc-Optimization.md | 附錄壓縮摘要、索引與維護守則 |
 
 ---
 
@@ -40,11 +42,12 @@
 - **部署工程師**：01 → 03 → 04 → 08  
 - **維運/排障**：01 → 04 → 07  
 - **策略/產品**：05 → 02 → 08  
+- **文檔維護者**：09 → 10（確認壓縮版、更新索引）  
 
 ---
 
 ## 🗄️ 備註與原始資料
-- 深度內容仍可查閱：1-qrl-accumulation-strategy.md、2-bot.md、3-cost.md、4-scheduler.md、5-SCHEDULED_TASKS_DESIGN.md、6-ARCHITECTURE_CHANGES.md、DATA_SOURCE_STRATEGY.md、MEXC_API_COMPLIANCE.md、MONITORING_GUIDE.md、POSITION_LAYERS.md、SUB_ACCOUNT_GUIDE.md、TROUBLESHOOTING.md、mexc-dev-url.md。
+- 深度內容仍可查閱：1-qrl-accumulation-strategy.md、2-bot.md、3-cost.md、4-scheduler.md、5-SCHEDULED_TASKS_DESIGN.md、6-ARCHITECTURE_CHANGES.md、DATA_SOURCE_STRATEGY.md、MEXC_API_COMPLIANCE.md、MONITORING_GUIDE.md、POSITION_LAYERS.md、SUB_ACCOUNT_GUIDE.md、TROUBLESHOOTING.md、mexc-dev-url.md。日常判讀請先參考 10 的壓縮摘要。
 - 冗餘的舊版彙總文件（CONSOLIDATED_*, QUICK_START.md）已移除，避免重複。
 - 檔名遵循 `NN-Title.md`，標題使用 H2（避免 H1），語氣統一、內容聚焦。
 - 日常查閱以 00–09 為主，深度或歷史決策再查原始細節檔。
