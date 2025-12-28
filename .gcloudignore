@@ -1,0 +1,72 @@
+# .gcloudignore - Optimizes Cloud Build by excluding unnecessary files
+# Similar to .dockerignore but for gcloud builds submit
+
+# Git files
+.git/
+.gitignore
+.github/
+
+# Documentation
+*.md
+!README.md
+docs/
+CHANGELOG.md
+
+# Python cache and virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+.DS_Store
+
+# Testing
+tests/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+*.cover
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Environment files (use Secret Manager instead)
+.env
+.env.*
+!.env.example
+
+# Temporary files
+*.log
+*.tmp
+*.temp
+.cache/
+
+# Docker files that aren't needed in Cloud Build context
+docker-compose*.yml
+
+# Cloud Build specific - these are in repo but handled separately
+cloudbuild-scheduler.yaml
+scheduler-config.yaml
+
+# Notebooks and development files
+*.ipynb
+.ipynb_checkpoints/
+
+# OS files
+Thumbs.db
+Desktop.ini
