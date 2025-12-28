@@ -14,6 +14,7 @@
 7. [06-API-Compliance-and-Accounts.md](06-API-Compliance-and-Accounts.md) — MEXC 規範與子帳號
 8. [07-Fixes-and-Troubleshooting.md](07-Fixes-and-Troubleshooting.md) — 核心修復與常見問題
 9. [08-Costs-and-Controls.md](08-Costs-and-Controls.md) — 成本、風險與安全守則
+10. [09-Doc-Inventory.md](09-Doc-Inventory.md) — 全量盤點與分類
 
 ---
 
@@ -30,6 +31,7 @@
 | 06 | 06-API-Compliance-and-Accounts.md | MEXC API 合規、簽名、子帳號查詢 |
 | 07 | 07-Fixes-and-Troubleshooting.md | Redis TTL、原始響應存放、OIDC/資料一致性修復；常見故障清單 |
 | 08 | 08-Costs-and-Controls.md | 成本估算、節省手段、安全最小權限 |
+| 09 | 09-Doc-Inventory.md | 全量盤點、分類與優先級 |
 
 ---
 
@@ -45,4 +47,4 @@
 - 深度內容仍可查閱：1-qrl-accumulation-strategy.md、2-bot.md、3-cost.md、4-scheduler.md、5-SCHEDULED_TASKS_DESIGN.md、6-ARCHITECTURE_CHANGES.md、DATA_SOURCE_STRATEGY.md、MEXC_API_COMPLIANCE.md、MONITORING_GUIDE.md、POSITION_LAYERS.md、SUB_ACCOUNT_GUIDE.md、TROUBLESHOOTING.md、mexc-dev-url.md。
 - 冗餘的舊版彙總文件（CONSOLIDATED_*, QUICK_START.md）已移除，避免重複。
 - 檔名遵循 `NN-Title.md`，標題使用 H2（避免 H1），語氣統一、內容聚焦。
-- 日常查閱以 00–08 為主，深度或歷史決策再查原始細節檔。
+- 日常查閱以 00–09 為主，深度或歷史決策再查原始細節檔。
