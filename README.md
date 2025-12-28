@@ -72,28 +72,52 @@ uvicorn main:app --host 0.0.0.0 --port 8080
 
 ### Google Cloud 部署 🚀
 
-**快速部署 (3 個命令):**
+**一鍵部署:**
 
 ```bash
-# 1. 設置 Secret Manager 密鑰
-./setup-secrets.sh
+# 直接使用 Cloud Build 部署
+gcloud builds submit --config=cloudbuild.yaml .
+```
 
-# 2. 部署到 Cloud Run
-./deploy.sh
+**前置準備 (首次部署):**
 
-# 3. 驗證部署
+```bash
+# 1. 啟用必要的 API
+gcloud services enable cloudbuild.googleapis.com run.googleapis.com \
+  artifactregistry.googleapis.com secretmanager.googleapis.com
+
+# 2. 建立 Artifact Registry
+gcloud artifacts repositories create qrl-trading-api \
+  --repository-format=docker --location=asia-southeast1
+
+# 3. 建立 Secret Manager 密鑰
+echo -n "your_api_key" | gcloud secrets create mexc-api-key --data-file=-
+echo -n "your_secret_key" | gcloud secrets create mexc-secret-key --data-file=-
+echo -n "redis://host:6379/0" | gcloud secrets create redis-url --data-file=-
+
+# 4. 授權 Cloud Run 存取密鑰
+PROJECT_NUMBER=$(gcloud projects describe $(gcloud config get-value project) --format='value(projectNumber)')
+for secret in mexc-api-key mexc-secret-key redis-url; do
+  gcloud secrets add-iam-policy-binding $secret \
+    --member="serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
+    --role="roles/secretmanager.secretAccessor"
+done
+```
+
+**驗證部署:**
+
+```bash
 SERVICE_URL=$(gcloud run services describe qrl-trading-api --region=asia-southeast1 --format='value(status.url)')
 curl "$SERVICE_URL/health"
+open "$SERVICE_URL/docs"
 ```
 
 **詳細說明:**
-- 📖 [快速部署指南](QUICK_DEPLOY.md) - 3 步驟快速部署
-- 📚 [完整部署文檔](DEPLOYMENT.md) - 詳細的部署說明和故障排除
-- 🔧 部署腳本:
-  - `setup-secrets.sh` - 設置 Secret Manager 密鑰
-  - `deploy.sh` - 自動化部署流程
+- 📖 [快速部署指南](QUICK_DEPLOY.md) - 完整部署流程
+- 📚 [完整部署文檔](DEPLOYMENT.md) - 詳細說明和故障排除
+- 🌏 [中文部署指南](docs/CLOUD_BUILD_GUIDE.md) - 完整中文說明
 - ⚙️ Cloud Build 配置:
-  - `cloudbuild.yaml` - 主要部署管道
+  - `cloudbuild.yaml` - 主要部署管道 (8 階段自動化)
   - `cloudbuild-scheduler.yaml` - Cloud Scheduler 任務部署
 
 **部署流程:**

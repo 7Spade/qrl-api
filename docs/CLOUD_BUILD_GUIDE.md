@@ -23,17 +23,14 @@ Dockerfile → Build Image (Cloud Build) → Push to Artifact Registry → Deplo
 
 ## 🚀 快速開始
 
-### 方式 1: 使用自動化腳本（推薦）
+### 部署方式
 
 ```bash
-# Step 1: 設置密鑰
-./setup-secrets.sh
-
-# Step 2: 部署
-./deploy.sh
+# 一鍵部署
+gcloud builds submit --config=cloudbuild.yaml .
 ```
 
-### 方式 2: 手動執行
+### 首次部署前置作業
 
 ```bash
 # 前置作業

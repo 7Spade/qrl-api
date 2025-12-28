@@ -1,45 +1,100 @@
 # 🚀 Quick Deployment Guide
 
-> **TL;DR**: Deploy QRL Trading API to Google Cloud in 3 commands
+> **TL;DR**: Deploy QRL Trading API to Google Cloud with direct gcloud commands
 
 ## Prerequisites
 
 - Google Cloud account with billing enabled
 - MEXC API credentials (API Key + Secret)
 - Redis instance (local, Redis Cloud, or Memorystore)
+- gcloud CLI installed and authenticated
 
-## Deployment Steps
-
-### 1. Setup Secrets
-
-```bash
-./setup-secrets.sh
-```
-
-**What it does:**
-- Creates Secret Manager secrets for MEXC API credentials and Redis URL
-- Can load from `.env` file or prompt interactively
-- Grants access to Cloud Run service account
-
-### 2. Deploy Application
+## One-Command Deployment
 
 ```bash
-./deploy.sh
+gcloud builds submit --config=cloudbuild.yaml .
 ```
 
-**What it does:**
-- Enables required Google Cloud APIs
-- Creates Artifact Registry repository
-- Runs Cloud Build pipeline:
-  - Validates Dockerfile and Python code
-  - Builds Docker image
-  - Tests the image
-  - Pushes to Artifact Registry
-  - Deploys to Cloud Run
-  - Verifies deployment
-- Optionally deploys Cloud Scheduler jobs
+**That's it!** The Cloud Build pipeline will:
+- Validate Dockerfile and Python code
+- Build Docker image
+- Test the image
+- Push to Artifact Registry
+- Deploy to Cloud Run
+- Verify deployment
 
-### 3. Verify Deployment
+## First-Time Setup
+
+Before your first deployment, complete these one-time setup steps:
+
+### 1. Enable Required APIs
+
+```bash
+gcloud services enable \
+    cloudbuild.googleapis.com \
+    run.googleapis.com \
+    artifactregistry.googleapis.com \
+    secretmanager.googleapis.com
+```
+
+### 2. Create Artifact Registry Repository
+
+```bash
+gcloud artifacts repositories create qrl-trading-api \
+    --repository-format=docker \
+    --location=asia-southeast1 \
+    --description="Docker repository for QRL Trading API"
+```
+
+### 3. Create Secret Manager Secrets
+
+```bash
+# Create secrets (replace with your actual values)
+echo -n "your_mexc_api_key" | gcloud secrets create mexc-api-key --data-file=-
+echo -n "your_mexc_secret_key" | gcloud secrets create mexc-secret-key --data-file=-
+echo -n "redis://your-redis-host:6379/0" | gcloud secrets create redis-url --data-file=-
+```
+
+### 4. Grant Secret Access to Cloud Run
+
+```bash
+# Get project number
+PROJECT_NUMBER=$(gcloud projects describe $(gcloud config get-value project) --format='value(projectNumber)')
+
+# Grant access to each secret
+for secret in mexc-api-key mexc-secret-key redis-url; do
+    gcloud secrets add-iam-policy-binding $secret \
+        --member="serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
+        --role="roles/secretmanager.secretAccessor"
+done
+```
+
+### 5. Grant Cloud Build Permissions (if needed)
+
+```bash
+PROJECT_NUMBER=$(gcloud projects describe $(gcloud config get-value project) --format='value(projectNumber)')
+
+# Grant Cloud Build permission to deploy to Cloud Run
+gcloud projects add-iam-policy-binding $(gcloud config get-value project) \
+    --member="serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com" \
+    --role="roles/run.admin"
+
+# Grant Cloud Build permission to act as Cloud Run service account
+gcloud iam service-accounts add-iam-policy-binding \
+    ${PROJECT_NUMBER}-compute@developer.gserviceaccount.com \
+    --member="serviceAccount:${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com" \
+    --role="roles/iam.serviceAccountUser"
+```
+
+## Deploy
+
+After completing the one-time setup, deploy with:
+
+```bash
+gcloud builds submit --config=cloudbuild.yaml .
+```
+
+## Verify Deployment
 
 ```bash
 # Get service URL
@@ -47,40 +102,13 @@ SERVICE_URL=$(gcloud run services describe qrl-trading-api \
     --region=asia-southeast1 \
     --format='value(status.url)')
 
-# Test health
+echo "Service URL: $SERVICE_URL"
+
+# Test health endpoint
 curl "$SERVICE_URL/health"
 
-# View API docs
+# View API documentation
 open "$SERVICE_URL/docs"
-```
-
-## Manual Deployment (Alternative)
-
-If you prefer manual control:
-
-```bash
-# 1. Enable APIs
-gcloud services enable \
-    cloudbuild.googleapis.com \
-    run.googleapis.com \
-    artifactregistry.googleapis.com \
-    secretmanager.googleapis.com
-
-# 2. Create secrets
-echo -n "your_api_key" | gcloud secrets create mexc-api-key --data-file=-
-echo -n "your_secret_key" | gcloud secrets create mexc-secret-key --data-file=-
-echo -n "redis://host:6379/0" | gcloud secrets create redis-url --data-file=-
-
-# 3. Grant access
-PROJECT_NUMBER=$(gcloud projects describe $(gcloud config get-value project) --format='value(projectNumber)')
-for secret in mexc-api-key mexc-secret-key redis-url; do
-    gcloud secrets add-iam-policy-binding $secret \
-        --member="serviceAccount:${PROJECT_NUMBER}-compute@developer.gserviceaccount.com" \
-        --role="roles/secretmanager.secretAccessor"
-done
-
-# 4. Deploy
-gcloud builds submit --config=cloudbuild.yaml .
 ```
 
 ## What Gets Deployed

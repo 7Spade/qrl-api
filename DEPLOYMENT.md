@@ -125,18 +125,17 @@ docker run -d -p 6379:6379 redis:7-alpine
 git clone https://github.com/7Spade/qrl-api.git
 cd qrl-api
 
-# 2. Setup secrets (interactive)
-./setup-secrets.sh
+# 2. Complete first-time setup (see Manual Deployment section below)
 
-# 3. Deploy everything
-./deploy.sh
+# 3. Deploy with Cloud Build
+gcloud builds submit --config=cloudbuild.yaml .
 ```
 
-That's it! The deployment script will:
-- Check prerequisites
-- Enable required APIs
-- Setup Artifact Registry
-- Run Cloud Build
+The Cloud Build pipeline will:
+- Validate Dockerfile and Python code
+- Build Docker image
+- Test the image
+- Push to Artifact Registry
 - Deploy to Cloud Run
 - Verify deployment
 - Optionally deploy Cloud Scheduler jobs

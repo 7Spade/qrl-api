@@ -20,14 +20,7 @@ Dockerfile → Build Image (Cloud Build) → Push to Artifact Registry → Deplo
 | `cloudbuild-scheduler.yaml` | Cloud Scheduler deployment | 149 | ✅ Existing |
 | `scheduler-config.yaml` | Scheduler job definitions | 79 | ✅ Existing |
 
-### 2. Automation Scripts
-
-| Script | Purpose | Lines | Status |
-|--------|---------|-------|--------|
-| `deploy.sh` | Complete automated deployment | 260 | ✅ New |
-| `setup-secrets.sh` | Secret Manager setup helper | 203 | ✅ New |
-
-### 3. Documentation
+### 2. Documentation
 
 | Document | Language | Size | Status |
 |----------|----------|------|--------|
@@ -38,25 +31,13 @@ Dockerfile → Build Image (Cloud Build) → Push to Artifact Registry → Deplo
 
 ## 🚀 How to Use
 
-### Option 1: Fully Automated (Recommended)
-
-```bash
-# One-time setup
-./setup-secrets.sh
-
-# Deploy (anytime)
-./deploy.sh
-```
-
-### Option 2: Single Command
-
+**Direct Deployment:**
 ```bash
 gcloud builds submit --config=cloudbuild.yaml .
 ```
 
-### Option 3: Manual Steps
-
-See `DEPLOYMENT.md` for complete manual deployment guide.
+**First-Time Setup (one-time):**
+See QUICK_DEPLOY.md or DEPLOYMENT.md for complete setup instructions.
 
 ## 📋 Pipeline Architecture
 
@@ -246,7 +227,7 @@ After deployment, verify:
 | Build fails | Check `gcloud builds log LATEST_BUILD_ID` |
 | Service crashes | Check `gcloud run services logs read SERVICE_NAME` |
 | Can't access service | Run `gcloud run services add-iam-policy-binding ...` |
-| Secret errors | Re-run `./setup-secrets.sh` |
+| Secret errors | Recreate secrets with proper IAM bindings |
 
 Full troubleshooting: See `DEPLOYMENT.md` section "Troubleshooting"
 
@@ -257,14 +238,13 @@ Full troubleshooting: See `DEPLOYMENT.md` section "Troubleshooting"
 .gitignore                       (modified) -2 lines
 README.md                        (modified) +46 lines
 cloudbuild.yaml                  (enhanced) +184 lines
-deploy.sh                        (new)      260 lines
-setup-secrets.sh                 (new)      203 lines
 DEPLOYMENT.md                    (new)      459 lines
 QUICK_DEPLOY.md                  (new)      174 lines
 docs/CLOUD_BUILD_GUIDE.md        (new)      450+ lines
+docs/PIPELINE_DIAGRAM.md         (new)      347 lines
 ```
 
-**Total:** 9 files, ~1,800 lines of code and documentation
+**Total:** 8 files, ~1,700 lines of code and documentation
 
 ## ✨ Conclusion
 
@@ -276,20 +256,22 @@ The implementation successfully achieves the goal stated in the problem statemen
 
 **Mission:** ✅ Complete
 
-Users can now deploy with a single command and get:
+Users can now deploy with a single command:
+
+```bash
+gcloud builds submit --config=cloudbuild.yaml .
+```
+
+And get:
 - Validated code
 - Tested image
 - Zero-downtime deployment
-- Comprehensive verification
+- Automatic verification
 - Complete documentation
 
 ## 🎉 Ready to Deploy!
 
 ```bash
-# Quick start (recommended)
-./deploy.sh
-
-# Or single command
 gcloud builds submit --config=cloudbuild.yaml .
 ```
 
