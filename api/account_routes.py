@@ -17,7 +17,7 @@ async def get_account_balance():
     Returns:
         Account balance with QRL and USDT totals
     """
-    from infrastructure.external.mexc_client from infrastructure.external import mexc_client
+    from infrastructure.external.mexc_client import mexc_client
     
     try:
         async with mexc_client:
@@ -42,7 +42,7 @@ async def get_account_balance():
             usdt_total = float(usdt_balance.get("free", 0)) + float(usdt_balance.get("locked", 0))
             
             logger.info(
-                f"Account balance fetched - QRL: {qrl_total:.4f}, USDT: {usdt_total:.2f}"
+                f"Account balance fetched - QRL: {qrl_total:.2f}, USDT: {usdt_total:.2f}"
             )
             
             return {
@@ -78,7 +78,7 @@ async def get_account_balance_from_redis():
     Returns:
         Cached position data from Redis
     """
-    from infrastructure.external.redis_client from infrastructure.external import redis_client
+    from infrastructure.external.redis_client import redis_client
     
     try:
         position = await redis_client.get_position()

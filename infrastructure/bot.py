@@ -227,8 +227,8 @@ class TradingBot:
         ma_short = sum(prices[-config.MA_SHORT_PERIOD:]) / config.MA_SHORT_PERIOD
         ma_long = sum(prices[-config.MA_LONG_PERIOD:]) / config.MA_LONG_PERIOD
         
-        self._log(f"MA Short ({config.MA_SHORT_PERIOD}): {ma_short:.6f}")
-        self._log(f"MA Long ({config.MA_LONG_PERIOD}): {ma_long:.6f}")
+        self._log(f"MA Short ({config.MA_SHORT_PERIOD}): {ma_short:.5f}")
+        self._log(f"MA Long ({config.MA_LONG_PERIOD}): {ma_long:.5f}")
         
         # Get position data for cost-based decisions
         position = await self.redis.get_position()
@@ -240,12 +240,12 @@ class TradingBot:
         # Buy signal: MA short crosses above MA long AND price below avg cost
         if ma_short > ma_long and price < avg_cost * 1.0:  # Only buy below or at cost
             signal = "BUY"
-            self._log(f"BUY signal: MA crossover (price {price:.6f} < cost {avg_cost:.6f})")
+            self._log(f"BUY signal: MA crossover (price {price:.5f} < cost {avg_cost:.5f})")
         
         # Sell signal: MA short crosses below MA long AND price above avg cost
         elif ma_short < ma_long and price > avg_cost * 1.03:  # Sell at 3%+ profit
             signal = "SELL"
-            self._log(f"SELL signal: MA crossover (price {price:.6f} > cost*1.03 {avg_cost*1.03:.6f})")
+            self._log(f"SELL signal: MA crossover (price {price:.5f} > cost*1.03 {avg_cost*1.03:.5f})")
         
         else:
             self._log(f"HOLD: No clear signal (MA spread: {((ma_short/ma_long-1)*100):.2f}%)")
@@ -325,7 +325,7 @@ class TradingBot:
                 usdt_to_use = usdt_balance * config.MAX_POSITION_SIZE
                 qrl_quantity = usdt_to_use / price
                 
-                self._log(f"BUY: {qrl_quantity:.4f} QRL @ {price:.6f} (Total: {usdt_to_use:.2f} USDT)")
+                self._log(f"BUY: {qrl_quantity:.2f} QRL @ {price:.5f} (Total: {usdt_to_use:.2f} USDT)")
                 
                 if not self.dry_run:
                     order = await self.mexc.create_order(
@@ -385,7 +385,7 @@ class TradingBot:
                 qrl_to_sell = tradeable_qrl * config.MAX_POSITION_SIZE
                 usdt_expected = qrl_to_sell * price
                 
-                self._log(f"SELL: {qrl_to_sell:.4f} QRL @ {price:.6f} (Expected: {usdt_expected:.2f} USDT)")
+                self._log(f"SELL: {qrl_to_sell:.2f} QRL @ {price:.5f} (Expected: {usdt_expected:.2f} USDT)")
                 
                 if not self.dry_run:
                     order = await self.mexc.create_order(
