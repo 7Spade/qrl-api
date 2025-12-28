@@ -531,6 +531,15 @@ async def get_account_balance():
         logger.info("Fetching account balance from MEXC API")
         account_info = await mexc_client.get_account_info()
         
+        # Store raw MEXC API response permanently
+        if redis_client.connected:
+            await redis_client.set_raw_mexc_response(
+                endpoint="account_info",
+                response_data=account_info,
+                metadata={"source": "account_balance_endpoint"}
+            )
+            logger.info(f"Stored raw account_info response with {len(account_info.get('balances', []))} balances")
+        
         # Extract QRL and USDT balances
         balances = {}
         all_assets = []
@@ -554,16 +563,33 @@ async def get_account_balance():
         if "USDT" not in balances:
             balances["USDT"] = {"free": "0", "locked": "0"}
         
+        # Store complete response with all MEXC fields
         result = {
             "success": True,
             "balances": balances,
+            # Include all MEXC account fields
+            "makerCommission": account_info.get("makerCommission", 0),
+            "takerCommission": account_info.get("takerCommission", 0),
+            "canTrade": account_info.get("canTrade", False),
+            "canWithdraw": account_info.get("canWithdraw", False),
+            "canDeposit": account_info.get("canDeposit", False),
+            "updateTime": account_info.get("updateTime", 0),
+            "accountType": account_info.get("accountType", "SPOT"),
+            "permissions": account_info.get("permissions", []),
             "timestamp": datetime.now().isoformat(),
             "cached": False
         }
         
-        # Cache the result
+        # Cache the complete result
         if redis_client.connected:
             await redis_client.set_account_balance(result)
+            logger.info(
+                f"Stored complete account balance - "
+                f"Type: {result['accountType']}, "
+                f"canTrade: {result['canTrade']}, "
+                f"Maker/Taker: {result['makerCommission']}/{result['takerCommission']}, "
+                f"Permissions: {result['permissions']}"
+            )
         
         return result
         

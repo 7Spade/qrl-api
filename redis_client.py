@@ -717,7 +717,7 @@ class RedisClient:
     
     async def set_account_balance(self, balance_data: Dict[str, Any]) -> bool:
         """
-        Cache account balance information
+        Store account balance information permanently (no TTL)
         
         Args:
             balance_data: Account balance data from MEXC API
@@ -728,11 +728,12 @@ class RedisClient:
                 **balance_data,
                 "cached_at": datetime.now().isoformat()
             }
-            await self.client.set(key, json.dumps(data), ex=config.CACHE_TTL_ACCOUNT)
-            logger.debug("Cached account balance")
+            # Store permanently without TTL to prevent data loss between Cloud Scheduler runs
+            await self.client.set(key, json.dumps(data))
+            logger.debug("Stored account balance (permanent)")
             return True
         except Exception as e:
-            logger.error(f"Failed to cache account balance: {e}")
+            logger.error(f"Failed to store account balance: {e}")
             return False
     
     async def get_account_balance(self) -> Optional[Dict[str, Any]]:
