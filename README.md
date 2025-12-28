@@ -228,6 +228,27 @@ qrl-api/
 - [MEXC API SDK](https://github.com/mexcdevelop/mexc-api-sdk)
 - [WebSocket 協議](https://github.com/mexcdevelop/websocket-proto)
 
+## MEXC 數據持久化
+
+所有從 MEXC API 獲取的數據都會**永久儲存在 Redis** 中，方便除錯和分析。查看 **[MEXC Redis 儲存指南](./docs/MEXC_REDIS_STORAGE.md)** 了解詳情：
+
+- 📦 完整 API 響應儲存
+- 💰 帳戶餘額數據
+- 📈 QRL 價格數據
+- 💵 總價值計算（USDT）
+- 🔍 詳細日誌記錄
+- 🛠️ 除錯工具和方法
+
+**Redis 儲存的數據:**
+- `mexc:raw_response:account_info` - 完整 MEXC API 響應
+- `mexc:account_balance` - 處理後的餘額數據
+- `mexc:qrl_price` - QRL 價格數據
+- `mexc:total_value` - 總價值計算
+
+**API 端點:**
+- `GET /account/balance` - 獲取餘額並儲存到 Redis
+- `GET /account/balance/redis` - 查看 Redis 中儲存的數據
+
 ## 疑難排解
 
 遇到問題？查看我們的 **[疑難排解指南](./TROUBLESHOOTING.md)** 了解常見問題和解決方案：

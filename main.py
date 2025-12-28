@@ -358,11 +358,17 @@ async def get_account_balance():
     """
     Get account balance (requires API keys)
     
-    This endpoint fetches real-time balance from MEXC API.
+    This endpoint fetches real-time balance from MEXC API and stores ALL data in Redis permanently.
     Requires valid MEXC_API_KEY and MEXC_SECRET_KEY with spot trading permissions.
     
+    Stores in Redis:
+    - mexc:raw_response:account_info - Complete API response
+    - mexc:account_balance - Processed balance data
+    - mexc:qrl_price - QRL price data
+    - mexc:total_value - Total account value in USDT
+    
     Returns:
-        dict: Account balances for QRL and USDT with free/locked amounts
+        dict: Account balances for QRL and USDT with free/locked amounts, QRL price, and total value
         
     Raises:
         HTTPException: 401 if API keys not configured, 500 if API call fails
@@ -380,10 +386,22 @@ async def get_account_balance():
         )
     
     try:
-        logger.info("Fetching account balance from MEXC API")
-        account_info = await mexc_client.get_account_info()
+        logger.info("=" * 80)
+        logger.info("FETCHING ACCOUNT BALANCE FROM MEXC API")
+        logger.info("=" * 80)
         
-        # Extract QRL and USDT balances
+        # Step 1: Fetch account info from MEXC
+        logger.info("Step 1: Fetching account info from MEXC API...")
+        account_info = await mexc_client.get_account_info()
+        logger.info(f"Received account info with {len(account_info.get('balances', []))} assets")
+        
+        # Step 2: Store raw response in Redis (PERMANENT - no expiration)
+        logger.info("Step 2: Storing raw MEXC API response in Redis...")
+        await redis_client.set_mexc_raw_response("account_info", account_info)
+        logger.info("✓ Raw response stored in Redis: mexc:raw_response:account_info")
+        
+        # Step 3: Extract QRL and USDT balances
+        logger.info("Step 3: Processing balance data...")
         balances = {}
         all_assets = []
         
@@ -394,26 +412,103 @@ async def get_account_balance():
             if asset in ["QRL", "USDT"]:
                 balances[asset] = {
                     "free": balance.get("free", "0"),
-                    "locked": balance.get("locked", "0")
+                    "locked": balance.get("locked", "0"),
+                    "total": str(float(balance.get("free", "0")) + float(balance.get("locked", "0")))
                 }
-        
-        # Log available assets for debugging
-        logger.info(f"Account has {len(all_assets)} assets, QRL/USDT found: {list(balances.keys())}")
+                logger.info(f"  {asset}: free={balances[asset]['free']}, locked={balances[asset]['locked']}, total={balances[asset]['total']}")
         
         # Ensure QRL and USDT are always in response (even if zero)
         if "QRL" not in balances:
-            balances["QRL"] = {"free": "0", "locked": "0"}
+            balances["QRL"] = {"free": "0", "locked": "0", "total": "0"}
+            logger.info("  QRL: Not found in account, using zero balance")
         if "USDT" not in balances:
-            balances["USDT"] = {"free": "0", "locked": "0"}
+            balances["USDT"] = {"free": "0", "locked": "0", "total": "0"}
+            logger.info("  USDT: Not found in account, using zero balance")
         
+        logger.info(f"Account has {len(all_assets)} total assets")
+        
+        # Step 4: Fetch QRL price
+        logger.info("Step 4: Fetching QRL price from MEXC API...")
+        try:
+            price_data = await mexc_client.get_ticker_price(config.TRADING_SYMBOL)
+            qrl_price = float(price_data.get("price", "0"))
+            logger.info(f"✓ QRL Price: {qrl_price} USDT")
+            
+            # Store QRL price in Redis (PERMANENT)
+            await redis_client.set_mexc_qrl_price(qrl_price, price_data)
+            logger.info("✓ QRL price stored in Redis: mexc:qrl_price")
+        except Exception as price_error:
+            logger.warning(f"Failed to fetch QRL price: {price_error}")
+            qrl_price = 0
+            price_data = {}
+        
+        # Step 5: Calculate total value in USDT
+        logger.info("Step 5: Calculating total account value in USDT...")
+        qrl_total = float(balances["QRL"]["total"])
+        usdt_total = float(balances["USDT"]["total"])
+        
+        qrl_value_usdt = qrl_total * qrl_price
+        total_value_usdt = qrl_value_usdt + usdt_total
+        
+        value_breakdown = {
+            "qrl_quantity": qrl_total,
+            "qrl_price_usdt": qrl_price,
+            "qrl_value_usdt": qrl_value_usdt,
+            "usdt_balance": usdt_total,
+            "total_value_usdt": total_value_usdt
+        }
+        
+        logger.info(f"  QRL Quantity: {qrl_total}")
+        logger.info(f"  QRL Price: {qrl_price} USDT")
+        logger.info(f"  QRL Value: {qrl_value_usdt} USDT")
+        logger.info(f"  USDT Balance: {usdt_total} USDT")
+        logger.info(f"  TOTAL VALUE: {total_value_usdt} USDT")
+        
+        # Store total value in Redis (PERMANENT)
+        await redis_client.set_mexc_total_value(total_value_usdt, value_breakdown)
+        logger.info("✓ Total value stored in Redis: mexc:total_value")
+        
+        # Step 6: Store processed balance data in Redis (PERMANENT)
+        logger.info("Step 6: Storing processed balance data in Redis...")
+        balance_data = {
+            "QRL": balances["QRL"],
+            "USDT": balances["USDT"],
+            "all_assets_count": len(all_assets)
+        }
+        await redis_client.set_mexc_account_balance(balance_data)
+        logger.info("✓ Balance data stored in Redis: mexc:account_balance")
+        
+        logger.info("=" * 80)
+        logger.info("ALL MEXC DATA SUCCESSFULLY STORED IN REDIS (PERMANENT)")
+        logger.info("Redis Keys Created:")
+        logger.info("  - mexc:raw_response:account_info")
+        logger.info("  - mexc:account_balance")
+        logger.info("  - mexc:qrl_price")
+        logger.info("  - mexc:total_value")
+        logger.info("=" * 80)
+        
+        # Return comprehensive response
         return {
             "success": True,
             "balances": balances,
-            "timestamp": datetime.now().isoformat()
+            "qrl_price": qrl_price,
+            "total_value": {
+                "usdt": total_value_usdt,
+                "breakdown": value_breakdown
+            },
+            "timestamp": datetime.now().isoformat(),
+            "redis_storage": {
+                "raw_response": "mexc:raw_response:account_info",
+                "account_balance": "mexc:account_balance",
+                "qrl_price": "mexc:qrl_price",
+                "total_value": "mexc:total_value"
+            }
         }
         
     except Exception as e:
-        logger.error(f"Failed to get account balance: {e}", exc_info=True)
+        logger.error("=" * 80)
+        logger.error(f"ERROR FETCHING ACCOUNT BALANCE: {e}", exc_info=True)
+        logger.error("=" * 80)
         
         # Check if it's an authentication error
         error_msg = str(e).lower()
@@ -435,6 +530,61 @@ async def get_account_balance():
                 "error": "Failed to fetch account balance",
                 "message": str(e),
                 "help": "Check MEXC API status and your API key permissions"
+            }
+        )
+
+
+@app.get("/account/balance/redis")
+async def get_account_balance_from_redis():
+    """
+    Get stored account balance data from Redis
+    
+    This endpoint retrieves all MEXC API data that has been stored in Redis.
+    Useful for debugging and verifying data persistence.
+    
+    Returns:
+        dict: All stored MEXC data from Redis including:
+            - raw_response: Complete MEXC API response
+            - account_balance: Processed balance data
+            - qrl_price: QRL price data
+            - total_value: Total account value calculation
+    """
+    try:
+        logger.info("Fetching MEXC data from Redis...")
+        
+        # Retrieve all stored data
+        raw_response = await redis_client.get_mexc_raw_response("account_info")
+        account_balance = await redis_client.get_mexc_account_balance()
+        qrl_price = await redis_client.get_mexc_qrl_price()
+        total_value = await redis_client.get_mexc_total_value()
+        
+        # Check what data is available
+        available_data = {
+            "raw_response": raw_response is not None,
+            "account_balance": account_balance is not None,
+            "qrl_price": qrl_price is not None,
+            "total_value": total_value is not None
+        }
+        
+        logger.info(f"Redis data availability: {available_data}")
+        
+        return {
+            "success": True,
+            "data_available": available_data,
+            "raw_response": raw_response,
+            "account_balance": account_balance,
+            "qrl_price": qrl_price,
+            "total_value": total_value,
+            "retrieved_at": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to get data from Redis: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "Failed to retrieve data from Redis",
+                "message": str(e)
             }
         )
 
