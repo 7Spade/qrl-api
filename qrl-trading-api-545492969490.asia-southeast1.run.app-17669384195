@@ -1,18 +1,24 @@
 (索引):516 === LOADING SUB-ACCOUNTS ===
 (索引):332 [FETCH] Calling /account/sub-accounts...
-(索引):333   GET https://qrl-trading-api-545492969490.asia-southeast1.run.app/account/sub-accounts 404 (Not Found)
+(索引):333   GET https://qrl-trading-api-545492969490.asia-southeast1.run.app/account/sub-accounts 500 (Internal Server Error)
 fetchData @ (索引):333
 loadSubAccounts @ (索引):517
 init @ (索引):593
 (匿名) @ (索引):598
-(索引):336 [FETCH] /account/sub-accounts - Status: 404 
-(索引):341  [FETCH] /account/sub-accounts - Error: {detail: 'Not Found'}
+(索引):336 [FETCH] /account/sub-accounts - Status: 500 
+(索引):341  [FETCH] /account/sub-accounts - Error: {detail: {…}}
 fetchData @ (索引):341
 await in fetchData
 loadSubAccounts @ (索引):517
 init @ (索引):593
 (匿名) @ (索引):598
-(索引):362  [FETCH] /account/sub-accounts - Exception: Error: HTTP 404: 
+(索引):351  ❌ Server error - MEXC API or backend issue
+fetchData @ (索引):351
+await in fetchData
+loadSubAccounts @ (索引):517
+init @ (索引):593
+(匿名) @ (索引):598
+(索引):362  [FETCH] /account/sub-accounts - Exception: Error: HTTP 500: No module named 'config'
     at fetchData ((索引):354:27)
     at async loadSubAccounts ((索引):517:26)
     at async init ((索引):593:13)
@@ -25,49 +31,14 @@ init @ (索引):593
 (索引):521 This is normal if API keys are not configured or lack permissions
 (索引):368 === LOADING ACCOUNT BALANCE ===
 (索引):332 [FETCH] Calling /account/balance...
-(索引):333   GET https://qrl-trading-api-545492969490.asia-southeast1.run.app/account/balance 500 (Internal Server Error)
-fetchData @ (索引):333
-loadAccountBalance @ (索引):369
-refreshData @ (索引):568
-init @ (索引):594
-await in init
-(匿名) @ (索引):598
-(索引):336 [FETCH] /account/balance - Status: 500 
-(索引):341  [FETCH] /account/balance - Error: {detail: "Illegal header value b'mx0vgluicGPyka9vwO\\r\\n'"}
-fetchData @ (索引):341
-await in fetchData
-loadAccountBalance @ (索引):369
-refreshData @ (索引):568
-init @ (索引):594
-await in init
-(匿名) @ (索引):598
-(索引):351  ❌ Server error - MEXC API or backend issue
-fetchData @ (索引):351
-await in fetchData
-loadAccountBalance @ (索引):369
-refreshData @ (索引):568
-init @ (索引):594
-await in init
-(匿名) @ (索引):598
-(索引):362  [FETCH] /account/balance - Exception: Error: HTTP 500: 
-    at fetchData ((索引):354:27)
-    at async loadAccountBalance ((索引):369:26)
-    at async refreshData ((索引):568:30)
-    at async init ((索引):594:13)
-fetchData @ (索引):362
-await in fetchData
-loadAccountBalance @ (索引):369
-refreshData @ (索引):568
-init @ (索引):594
-await in init
-(匿名) @ (索引):598
-(索引):373  ❌ Failed to fetch account balance - no response
-loadAccountBalance @ (索引):373
-await in loadAccountBalance
-refreshData @ (索引):568
-init @ (索引):594
-await in init
-(匿名) @ (索引):598
+(索引):336 [FETCH] /account/balance - Status: 200 
+(索引):358 [FETCH] /account/balance - Success: {success: true, source: 'api', balances: {…}, account_type: 'SPOT', can_trade: true, …}
+(索引):381 📊 Account balance response: {success: true, source: 'api', balances: {…}, account_type: 'SPOT', can_trade: true, …}
+(索引):392 💰 Available assets: (2) ['QRL', 'USDT']
+(索引):400 QRL: {free: 2.57, locked: 0, total: 2.57}
+(索引):413 USDT: {free: 45, locked: 0, total: 45}
+(索引):420 ✅ Balances loaded successfully
+(索引):421 === END ACCOUNT BALANCE ===
 (索引):332 [FETCH] Calling /market/ticker/QRLUSDT...
 (索引):333   GET https://qrl-trading-api-545492969490.asia-southeast1.run.app/market/ticker/QRLUSDT 500 (Internal Server Error)
 fetchData @ (索引):333
@@ -111,8 +82,8 @@ await in init
 (匿名) @ (索引):598
 (索引):332 [FETCH] Calling /status...
 (索引):336 [FETCH] /status - Status: 200 
-(索引):358 [FETCH] /status - Success: {bot_status: 'unknown', daily_trades: 0, position: null, position_layers: null, timestamp: '2025-12-28T16:13:31.168845'}
-(索引):446 Status response: {bot_status: 'unknown', daily_trades: 0, position: null, position_layers: null, timestamp: '2025-12-28T16:13:31.168845'}
+(索引):358 [FETCH] /status - Success: {bot_status: 'unknown', daily_trades: 0, position: null, position_layers: null, timestamp: '2025-12-28T16:36:45.277594'}
+(索引):446 Status response: {bot_status: 'unknown', daily_trades: 0, position: null, position_layers: null, timestamp: '2025-12-28T16:36:45.277594'}
 (索引):478  No position data in status response
 loadStatus @ (索引):478
 await in loadStatus
