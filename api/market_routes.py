@@ -150,7 +150,7 @@ async def get_orderbook(symbol: str, limit: int = 100):
         # Cache miss - get from MEXC API
         logger.info(f"[Cache MISS] Fetching order book for {symbol} from MEXC")
         async with mexc_client:
-            orderbook = await mexc_client.get_orderbook(symbol, limit)
+            orderbook = await mexc_client.get_order_book(symbol, limit)
             
             # Store in cache
             await redis_client.set_order_book(symbol, orderbook)
