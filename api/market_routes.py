@@ -234,12 +234,28 @@ async def get_klines(
     Get candlestick/kline data for a symbol
     
     Args:
-        symbol: Trading symbol
-        interval: Time interval (1m, 5m, 15m, 1h, 1d, etc.)
-        limit: Number of candles to return (default: 500)
+        symbol: Trading symbol (e.g., "QRLUSDT")
+        interval: Time interval - Valid values: 1m, 5m, 15m, 30m, 60m, 4h, 1d, 1W, 1M
+        limit: Number of candles to return (default: 500, max: 1000)
         
     Returns:
-        List of candlestick data
+        List of candlestick data with OHLCV information
+        
+    Kline data format (each element in the list):
+        [
+            openTime,      // Open time (timestamp)
+            open,          // Open price
+            high,          // High price
+            low,           // Low price
+            close,         // Close price
+            volume,        // Volume
+            closeTime,     // Close time (timestamp)
+            quoteVolume,   // Quote asset volume
+            trades,        // Number of trades
+            takerBuyBase,  // Taker buy base asset volume
+            takerBuyQuote, // Taker buy quote asset volume
+            ignore         // Ignore
+        ]
     """
     from infrastructure.external import mexc_client
     from infrastructure.external import redis_client
@@ -247,6 +263,21 @@ async def get_klines(
     import logging
     
     logger = logging.getLogger(__name__)
+    
+    # Validate interval
+    valid_intervals = ["1m", "5m", "15m", "30m", "60m", "4h", "1d", "1W", "1M"]
+    if interval not in valid_intervals:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Invalid interval. Valid values: {', '.join(valid_intervals)}"
+        )
+    
+    # Validate limit
+    if limit < 1 or limit > 1000:
+        raise HTTPException(
+            status_code=400,
+            detail="Limit must be between 1 and 1000"
+        )
     
     try:
         # Try to get from cache first
@@ -260,18 +291,33 @@ async def get_klines(
                 "symbol": symbol,
                 "interval": interval,
                 "data": cached_klines,
+                "count": len(cached_klines),
                 "timestamp": datetime.now().isoformat()
             }
         
         # Cache miss - get from MEXC API
         logger.info(f"[Cache MISS] Fetching klines for {cache_key} from MEXC")
         async with mexc_client:
-            klines = await mexc_client.get_klines(symbol, interval, limit)
+            klines = await mexc_client.get_klines(symbol, interval, limit=limit)
+            
+            # Store in cache with appropriate TTL based on interval
+            ttl_map = {
+                "1m": 60,      # 1 minute cache for 1m interval
+                "5m": 120,     # 2 minute cache for 5m interval
+                "15m": 300,    # 5 minute cache for 15m interval
+                "30m": 600,    # 10 minute cache for 30m interval
+                "60m": 900,    # 15 minute cache for 1h interval
+                "4h": 1800,    # 30 minute cache for 4h interval
+                "1d": 3600,    # 1 hour cache for 1d interval
+                "1W": 7200,    # 2 hour cache for 1W interval
+                "1M": 14400    # 4 hour cache for 1M interval
+            }
+            ttl = ttl_map.get(interval, 60)
             
             # Store in cache
-            await redis_client.set_klines(cache_key, klines)
+            await redis_client.set_klines(cache_key, klines, ttl=ttl)
             
-            logger.info(f"Klines fetched and cached for {cache_key}")
+            logger.info(f"Klines fetched and cached for {cache_key} (count: {len(klines)}, TTL: {ttl}s)")
             return {
                 "success": True,
                 "source": "api",

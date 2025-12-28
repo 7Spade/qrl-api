@@ -230,14 +230,21 @@ class MEXCClient:
         limit: int = 500
     ) -> List[List]:
         """
-        Get candlestick data
+        Get candlestick/kline data
         
         Args:
-            symbol: Trading symbol
-            interval: Kline interval (1m, 5m, 15m, 30m, 1h, 4h, 1d, 1w, 1M)
-            start_time: Start time in milliseconds
-            end_time: End time in milliseconds
+            symbol: Trading symbol (e.g., "QRLUSDT")
+            interval: Kline interval - Valid values:
+                     1m (1 minute), 5m (5 minutes), 15m (15 minutes), 30m (30 minutes),
+                     60m (60 minutes), 4h (4 hours), 1d (1 day), 1W (1 week), 1M (1 month)
+            start_time: Start time in milliseconds (optional)
+            end_time: End time in milliseconds (optional)
             limit: Number of klines (default 500, max 1000)
+            
+        Returns:
+            List of kline data arrays, each containing:
+            [openTime, open, high, low, close, volume, closeTime, quoteVolume, 
+             trades, takerBuyBase, takerBuyQuote, ignore]
         """
         params = {"symbol": symbol, "interval": interval, "limit": limit}
         if start_time:
