@@ -34,9 +34,9 @@ steps:
       - '-c'
       - |
         echo "Deleting existing scheduler jobs..."
-        gcloud scheduler jobs delete qrl-sync-balance-job --location=asia-southeast1 --quiet || true
-        gcloud scheduler jobs delete qrl-update-price-job --location=asia-southeast1 --quiet || true
-        gcloud scheduler jobs delete qrl-update-cost-job --location=asia-southeast1 --quiet || true
+        gcloud scheduler jobs delete 01-min-job --location=asia-southeast1 --quiet || true
+        gcloud scheduler jobs delete 05-min-job --location=asia-southeast1 --quiet || true
+        gcloud scheduler jobs delete 15-min-job --location=asia-southeast1 --quiet || true
         echo "Cleanup completed"
 
   # Step 4: 創建 Job 1 - 餘額同步（每分鐘）
@@ -47,7 +47,7 @@ steps:
       - 'jobs'
       - 'create'
       - 'http'
-      - 'qrl-sync-balance-job'
+      - '01-min-job'
       - '--location=asia-southeast1'
       - '--schedule=*/3 * * * *'
       - '--uri=https://qrl-trading-api-545492969490.asia-southeast1.run.app/tasks/sync-balance'
@@ -69,7 +69,7 @@ steps:
       - 'jobs'
       - 'create'
       - 'http'
-      - 'qrl-update-price-job'
+      - '05-min-job'
       - '--location=asia-southeast1'
       - '--schedule=*/3 * * * *'
       - '--uri=https://qrl-trading-api-545492969490.asia-southeast1.run.app/tasks/update-price'
@@ -91,7 +91,7 @@ steps:
       - 'jobs'
       - 'create'
       - 'http'
-      - 'qrl-update-cost-job'
+      - '15-min-job'
       - '--location=asia-southeast1'
       - '--schedule=*/15 * * * *'
       - '--uri=https://qrl-trading-api-545492969490.asia-southeast1.run.app/tasks/update-cost'
@@ -125,13 +125,13 @@ steps:
         sleep 30
         echo "Testing scheduler jobs..."
         echo "Triggering sync-balance-job..."
-        gcloud scheduler jobs run qrl-sync-balance-job --location=asia-southeast1 || true
+        gcloud scheduler jobs run 01-min-job --location=asia-southeast1 || true
         sleep 5
         echo "Triggering update-price-job..."
-        gcloud scheduler jobs run qrl-update-price-job --location=asia-southeast1 || true
+        gcloud scheduler jobs run 05-min-job --location=asia-southeast1 || true
         sleep 5
         echo "Triggering update-cost-job..."
-        gcloud scheduler jobs run qrl-update-cost-job --location=asia-southeast1 || true
+        gcloud scheduler jobs run 15-min-job --location=asia-southeast1 || true
         echo "All jobs triggered successfully"
 
 # 設置超時時間（15 分鐘）

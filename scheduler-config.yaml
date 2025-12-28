@@ -7,7 +7,7 @@
 apiVersion: cloudscheduler.cnrm.cloud.google.com/v1beta1
 kind: CloudSchedulerJob
 metadata:
-  name: qrl-sync-balance-job
+  name: 01-min-job
   annotations:
     cnrm.cloud.google.com/project-id: "qrl-api"  # 替換為您的專案 ID
 spec:
@@ -35,7 +35,7 @@ spec:
 apiVersion: cloudscheduler.cnrm.cloud.google.com/v1beta1
 kind: CloudSchedulerJob
 metadata:
-  name: qrl-update-price-job
+  name: 05-min-job
   annotations:
     cnrm.cloud.google.com/project-id: "qrl-api"  # 替換為您的專案 ID
 spec:
@@ -63,7 +63,7 @@ spec:
 apiVersion: cloudscheduler.cnrm.cloud.google.com/v1beta1
 kind: CloudSchedulerJob
 metadata:
-  name: qrl-update-cost-job
+  name: 15-min-job
   annotations:
     cnrm.cloud.google.com/project-id: "qrl-api"  # 替換為您的專案 ID
 spec:
