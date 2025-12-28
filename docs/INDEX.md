@@ -1,196 +1,50 @@
-# QRL Trading API - Documentation Index
+## QRL Trading API - 文檔導覽
 
-**Last Updated**: 2025-12-27  
-**Purpose**: Simplified navigation for QRL Trading API documentation
-
----
-
-## 📚 Quick Start (Start Here!)
-
-New to the project? Read in this order:
-
-1. **[README.md](README.md)** ⭐⭐⭐ - Complete project overview, features, and architecture
-2. **[CONSOLIDATED_IMPLEMENTATION_GUIDE.md](CONSOLIDATED_IMPLEMENTATION_GUIDE.md)** ⭐⭐⭐ - Implementation details, fixes, and features
-3. **[CONSOLIDATED_DEPLOYMENT.md](CONSOLIDATED_DEPLOYMENT.md)** ⭐⭐ - Deployment guide (local, Docker, Cloud Run)
+**目的**：以 00/01/02 編號提供「像讀書一樣」的閱讀順序。`docs/00-Cloud Run Deploy.md` 保留原樣。
 
 ---
 
-## 🗂️ Documentation Structure
-
-### Core Documentation (Read These First)
-| Document | Purpose | Priority |
-|----------|---------|----------|
-| **README.md** | Complete project documentation | ⭐⭐⭐ Essential |
-| **CONSOLIDATED_IMPLEMENTATION_GUIDE.md** | Architecture, implementations, and monitoring | ⭐⭐⭐ Essential |
-| **CONSOLIDATED_DEPLOYMENT.md** | Local, Docker, and Cloud Run deployment | ⭐⭐ Important |
-| **CONSOLIDATED_FIXES.md** | All fixes and issue resolutions | ⭐⭐ Important |
-
-### Protected Original Documentation
-These files are preserved as originally specified:
-- **[0-Cloud Run Deploy.md](0-Cloud%20Run%20Deploy.md)** - Quick Cloud Run deployment
-- **[00-Cloud Run Deploy.md](00-Cloud%20Run%20Deploy.md)** - Duplicate of above
-- **[1-qrl-accumulation-strategy.md](1-qrl-accumulation-strategy.md)** - QRL accumulation strategy analysis
-- **[2-bot.md](2-bot.md)** - Original bot design document
-- **[3-cost.md](3-cost.md)** - Cost analysis and estimation
-- **[4-scheduler.md](4-scheduler.md)** - Cloud Scheduler configuration
-- **[5-SCHEDULED_TASKS_DESIGN.md](5-SCHEDULED_TASKS_DESIGN.md)** - Task system design
-- **[6-ARCHITECTURE_CHANGES.md](6-ARCHITECTURE_CHANGES.md)** - Architecture diagrams and changes
-
-### Additional Reference Documentation
-- **[DATA_SOURCE_STRATEGY.md](DATA_SOURCE_STRATEGY.md)** - Data source best practices (API vs Redis)
-- **[MEXC_API_COMPLIANCE.md](MEXC_API_COMPLIANCE.md)** - MEXC API integration verification
-- **[mexc-dev-url.md](mexc-dev-url.md)** - MEXC API reference URLs
-- **[MONITORING_GUIDE.md](MONITORING_GUIDE.md)** - System monitoring and health checks
-- **[SUB_ACCOUNT_GUIDE.md](SUB_ACCOUNT_GUIDE.md)** - Multi-account management
-- **[POSITION_LAYERS.md](POSITION_LAYERS.md)** - Position layer system documentation
-- **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** - Common issues and solutions
+## 📚 推薦閱讀順序
+1. [00-Cloud Run Deploy.md](00-Cloud%20Run%20Deploy.md)（保留原版）
+2. [01-Quickstart-and-Map.md](01-Quickstart-and-Map.md) — 5 分鐘啟動與導覽
+3. [02-System-Overview.md](02-System-Overview.md) — 架構與資料流摘要
+4. [03-Deployment.md](03-Deployment.md) — 本地、Docker、Cloud Run 快速部署
+5. [04-Operations-and-Tasks.md](04-Operations-and-Tasks.md) — Scheduler、監控、日誌
+6. [05-Strategies-and-Data.md](05-Strategies-and-Data.md) — 屯幣策略、資料來源、倉位分層
+7. [06-API-Compliance-and-Accounts.md](06-API-Compliance-and-Accounts.md) — MEXC 規範與子帳號
+8. [07-Fixes-and-Troubleshooting.md](07-Fixes-and-Troubleshooting.md) — 核心修復與常見問題
+9. [08-Costs-and-Controls.md](08-Costs-and-Controls.md) — 成本、風險與安全守則
+10. [09-Doc-Inventory.md](09-Doc-Inventory.md) — 全量盤點與分類
 
 ---
 
-## 📖 Reading Guide by Role
+## 🗂️ 分類與用途
 
-### 👨‍💻 For New Developers
-```
-1. README.md                              → Project overview
-2. CONSOLIDATED_IMPLEMENTATION_GUIDE.md   → Architecture and features
-3. CONSOLIDATED_DEPLOYMENT.md             → Local setup
-4. 2-bot.md                              → Bot design details
-```
-
-### 🚀 For Deployment Engineers
-```
-1. CONSOLIDATED_DEPLOYMENT.md            → Complete deployment guide
-2. 4-scheduler.md                        → Scheduler configuration
-3. MONITORING_GUIDE.md                   → Monitoring setup
-4. TROUBLESHOOTING.md                    → Common issues
-```
-
-### 🔧 For Troubleshooting
-```
-1. TROUBLESHOOTING.md                    → Common issues
-2. CONSOLIDATED_FIXES.md                 → All implemented fixes
-3. DATA_SOURCE_STRATEGY.md               → Data source logic
-4. MEXC_API_COMPLIANCE.md                → API verification
-```
-
-### 💹 For Trading Strategy
-```
-1. 1-qrl-accumulation-strategy.md        → Complete strategy analysis
-2. README.md                             → Bot trading logic
-3. 3-cost.md                            → Cost analysis
-```
+| 編號 | 檔案 | 用途 |
+|------|------|------|
+| 00 | 00-Cloud Run Deploy.md | 原始 Cloud Run 部署筆記（不變動） |
+| 01 | 01-Quickstart-and-Map.md | 5 分鐘啟動、必要環境、路線圖 |
+| 02 | 02-System-Overview.md | 架構、資料流、核心模組摘要 |
+| 03 | 03-Deployment.md | 本地/Docker/Cloud Run 部署步驟與驗證 |
+| 04 | 04-Operations-and-Tasks.md | Scheduler 任務摘要、監控指標、日誌查詢 |
+| 05 | 05-Strategies-and-Data.md | 屯幣策略、資料來源權威、倉位分層 |
+| 06 | 06-API-Compliance-and-Accounts.md | MEXC API 合規、簽名、子帳號查詢 |
+| 07 | 07-Fixes-and-Troubleshooting.md | Redis TTL、原始響應存放、OIDC/資料一致性修復；常見故障清單 |
+| 08 | 08-Costs-and-Controls.md | 成本估算、節省手段、安全最小權限 |
+| 09 | 09-Doc-Inventory.md | 全量盤點、分類與優先級 |
 
 ---
 
-## 🎯 What Each Consolidated Document Contains
-
-### CONSOLIDATED_IMPLEMENTATION_GUIDE.md
-Combines content from multiple implementation documents:
-- **Project overview** and architecture
-- **Key implementations**: FastAPI lifespan, Redis pooling, data persistence
-- **Critical fixes** summary
-- **Deployment** quick guide
-- **Monitoring** essentials
-- **Testing** procedures
-
-### CONSOLIDATED_DEPLOYMENT.md
-Combines all deployment-related documentation:
-- **Local development** setup
-- **Docker** deployment
-- **Google Cloud Run** deployment
-- **Cloud Scheduler** configuration
-- **Redis** setup (local, Cloud, Memorystore)
-- **Monitoring** and verification
-- **Troubleshooting** common issues
-- **Cost estimation**
-
-### CONSOLIDATED_FIXES.md
-Combines all fix documentation:
-- **Redis TTL** data persistence fixes (Issue #24, #25)
-- **Cloud Scheduler** authentication (OIDC support)
-- **Dashboard logic** data consistency
-- **Position display** fixes
-- **Code quality** improvements (FastAPI lifespan, connection pooling)
-- **Verification** procedures
+## 🧭 角色導覽
+- **新進開發者**：01 → 02 → 05 → 06  
+- **部署工程師**：01 → 03 → 04 → 08  
+- **維運/排障**：01 → 04 → 07  
+- **策略/產品**：05 → 02 → 08  
 
 ---
 
-## 🧹 Documentation Cleanup (2025-12-27)
-
-### Consolidation Summary
-**Before**: 47 documentation files with significant overlap  
-**After**: 19 well-organized files (3 consolidated + 8 protected + 8 reference)
-
-### Files Consolidated and Removed
-The following redundant files were merged into consolidated documents:
-- Implementation summaries (5 files) → **CONSOLIDATED_IMPLEMENTATION_GUIDE.md**
-- Fix documentation (11 files) → **CONSOLIDATED_FIXES.md**
-- Deployment guides (6 files) → **CONSOLIDATED_DEPLOYMENT.md**
-
-**Total files removed**: 27 redundant documents  
-**Benefit**: Easier navigation, no duplicate information, clearer structure
-
----
-
-## 🔍 Search Tips
-
-```bash
-# Search all documentation
-grep -r "keyword" docs/
-
-# Find specific topics
-grep -r "redis" docs/
-grep -r "deployment" docs/
-grep -r "cloud scheduler" docs/
-
-# View file structure
-ls -lh docs/*.md
-```
-
----
-
-## 📝 Contributing New Documentation
-
-When adding documentation:
-1. Determine if it fits in an existing consolidated file
-2. If new standalone file needed:
-   - Use clear, descriptive filename (kebab-case)
-   - Add purpose statement at the top
-   - Update this INDEX.md
-   - Add to appropriate section above
-3. Keep documentation DRY (Don't Repeat Yourself)
-4. Link to related documents instead of duplicating
-
----
-
-## 💡 Need Help?
-
-**Quick answers**:
-1. Check **TROUBLESHOOTING.md** first
-2. Review **CONSOLIDATED_FIXES.md** for known issues
-3. Search documentation with `grep -r "error message" docs/`
-
-**Deployment issues**:
-1. Follow **CONSOLIDATED_DEPLOYMENT.md** step-by-step
-2. Check **MONITORING_GUIDE.md** for verification
-3. Review logs: `gcloud logging read` commands
-
-**API questions**:
-1. **MEXC_API_COMPLIANCE.md** - API verification
-2. **mexc-dev-url.md** - Official MEXC API docs links
-3. **README.md** - API integration details
-
----
-
-## 📊 Documentation Statistics
-
-| Category | File Count | Purpose |
-|----------|-----------|---------|
-| **Core Consolidated** | 3 | Main documentation |
-| **Protected Original** | 8 | Preserved as specified |
-| **Reference Docs** | 8 | Additional information |
-| **Total** | **19** | **Organized, non-duplicate** |
-
----
-
-**Documentation is now simplified and organized. Start with README.md and the 3 consolidated guides!**
+## 🗄️ 備註與原始資料
+- 深度內容仍可查閱：1-qrl-accumulation-strategy.md、2-bot.md、3-cost.md、4-scheduler.md、5-SCHEDULED_TASKS_DESIGN.md、6-ARCHITECTURE_CHANGES.md、DATA_SOURCE_STRATEGY.md、MEXC_API_COMPLIANCE.md、MONITORING_GUIDE.md、POSITION_LAYERS.md、SUB_ACCOUNT_GUIDE.md、TROUBLESHOOTING.md、mexc-dev-url.md。
+- 冗餘的舊版彙總文件（CONSOLIDATED_*, QUICK_START.md）已移除，避免重複。
+- 檔名遵循 `NN-Title.md`，標題使用 H2（避免 H1），語氣統一、內容聚焦。
+- 日常查閱以 00–09 為主，深度或歷史決策再查原始細節檔。
