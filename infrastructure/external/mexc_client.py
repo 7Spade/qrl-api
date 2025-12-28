@@ -29,8 +29,9 @@ class MEXCClient:
             api_key: MEXC API key
             secret_key: MEXC secret key
         """
-        self.api_key = api_key or config.MEXC_API_KEY
-        self.secret_key = secret_key or config.MEXC_SECRET_KEY
+        # Strip whitespace and newlines from API credentials to prevent header errors
+        self.api_key = (api_key or config.MEXC_API_KEY).strip() if (api_key or config.MEXC_API_KEY) else None
+        self.secret_key = (secret_key or config.MEXC_SECRET_KEY).strip() if (secret_key or config.MEXC_SECRET_KEY) else None
         self.base_url = config.MEXC_BASE_URL
         self.timeout = config.MEXC_TIMEOUT
         
