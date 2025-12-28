@@ -34,7 +34,6 @@ class Config:
     MEXC_BASE_URL: str = os.getenv("MEXC_BASE_URL", "https://api.mexc.com")
     MEXC_WS_URL: str = os.getenv("MEXC_WS_URL", "wss://wbs.mexc.com/ws")
     MEXC_TIMEOUT: int = int(os.getenv("MEXC_TIMEOUT", "10"))
-    MEXC_RECV_WINDOW: int = int(os.getenv("MEXC_RECV_WINDOW", "5000"))  # Default 5000ms
     
     # Sub-Account Configuration
     # MEXC v3 API supports two distinct sub-account systems:

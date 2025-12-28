@@ -109,13 +109,10 @@ async def get_account_balance_from_redis():
 @router.get("/sub-accounts")
 async def get_sub_accounts():
     """
-    Get configured sub-account information
-    
-    Note: In SPOT mode, the main account cannot query sub-account balances.
-    Only BROKER mode supports querying sub-account balances from the main account.
+    Get list of sub-accounts (alias for /account/sub-account/list)
     
     Returns:
-        Configured sub-account information and guidance
+        List of sub-accounts with details
     """
     from infrastructure.external.mexc_client import mexc_client
     from infrastructure.config.config import config
@@ -123,48 +120,31 @@ async def get_sub_accounts():
     try:
         # Check if API keys are configured
         if not config.MEXC_API_KEY or not config.MEXC_SECRET_KEY:
-            # Return configuration guidance without requiring API keys
-            return {
-                "success": False,
-                "configured": False,
-                "message": "API keys not configured",
-                "help": "Set MEXC_API_KEY and MEXC_SECRET_KEY environment variables",
-                "timestamp": datetime.now().isoformat()
-            }
+            raise HTTPException(
+                status_code=401,
+                detail={
+                    "error": "API keys not configured",
+                    "message": "Set MEXC_API_KEY and MEXC_SECRET_KEY environment variables"
+                }
+            )
         
         # Get configured sub-account identifier
         sub_account_id = config.active_sub_account_identifier
-        mode = "BROKER" if config.is_broker_mode else "SPOT"
         
         if not sub_account_id:
-            return {
-                "success": False,
-                "configured": False,
-                "mode": mode,
-                "message": "Sub-account not configured",
-                "help": {
-                    "SPOT": "Set SUB_ACCOUNT_ID environment variable",
-                    "BROKER": "Set SUB_ACCOUNT_NAME environment variable"
-                },
-                "timestamp": datetime.now().isoformat()
-            }
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "error": "Sub-account not configured",
+                    "message": "Set SUB_ACCOUNT_ID or SUB_ACCOUNT_NAME environment variable",
+                    "mode": config.SUB_ACCOUNT_MODE
+                }
+            )
         
-        # SPOT mode: Cannot query balance from main account
-        if mode == "SPOT":
-            logger.info(f"Sub-account configured in SPOT mode: {sub_account_id}")
-            return {
-                "success": True,
-                "configured": True,
-                "mode": mode,
-                "sub_account_id": sub_account_id,
-                "message": "Sub-account configured successfully",
-                "limitation": "SPOT API does not support querying sub-account balance from main account",
-                "solution": "To query balance, use the sub-account's own API key (SUB_ACCOUNT_ID as MEXC_API_KEY)",
-                "timestamp": datetime.now().isoformat()
-            }
-        
-        # BROKER mode: Try to query balance
         async with mexc_client:
+            # Get sub-account balance using the configured identifier
+            mode = "BROKER" if config.is_broker_mode else "SPOT"
+            
             try:
                 balance_data = await mexc_client.get_sub_account_balance(sub_account_id)
                 
@@ -172,31 +152,47 @@ async def get_sub_accounts():
                 
                 return {
                     "success": True,
-                    "configured": True,
                     "mode": mode,
                     "sub_account_id": sub_account_id,
                     "balance": balance_data,
                     "timestamp": datetime.now().isoformat()
                 }
-            except Exception as e:
-                logger.warning(f"Failed to query sub-account balance in BROKER mode: {e}")
+            except NotImplementedError as e:
+                # Spot API limitation - try alternative approach
+                logger.warning(f"Spot API limitation: {e}")
+                
+                # For SPOT mode, we can't query sub-account balance from main account
+                # Return configured sub-account info instead
                 return {
-                    "success": False,
-                    "configured": True,
+                    "success": True,
                     "mode": mode,
                     "sub_account_id": sub_account_id,
-                    "error": str(e),
-                    "help": "Ensure your MEXC account has BROKER API permissions",
+                    "message": "Sub-account configured in SPOT mode",
+                    "note": "Use sub-account's own API key to query balance",
                     "timestamp": datetime.now().isoformat()
                 }
     
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Unexpected error in sub-accounts endpoint: {e}")
+        logger.error(f"Failed to get sub-accounts: {e}")
+        
+        # Check for permission errors
+        error_msg = str(e).lower()
+        if "403" in error_msg or "permission" in error_msg or "forbidden" in error_msg:
+            raise HTTPException(
+                status_code=403,
+                detail={
+                    "error": "Insufficient permissions",
+                    "message": "Sub-account access requires proper API permissions",
+                    "help": "Ensure your MEXC account has the required API access enabled"
+                }
+            )
+        
         raise HTTPException(
             status_code=500,
             detail={
-                "error": "Internal server error",
-                "message": str(e),
-                "timestamp": datetime.now().isoformat()
+                "error": "Failed to fetch sub-accounts",
+                "message": str(e)
             }
         )
