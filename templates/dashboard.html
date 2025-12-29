@@ -1,799 +1,256 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QRL Trading Dashboard</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QRL Trading Monitor (Read-Only)</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        :root {
+            color-scheme: light dark;
+            --bg: #0f172a;
+            --card: #111827;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --accent: #6366f1;
+            --success: #22c55e;
+            --danger: #ef4444;
         }
-        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft JhengHei', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
-            padding: 20px;
         }
-        
-        .container {
-            max-width: 1400px;
+        .layout {
+            max-width: 1100px;
             margin: 0 auto;
+            padding: 32px 20px 48px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
-        
-        .header {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        header {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
         }
-        
-        .header h1 {
-            color: #667eea;
-            font-size: 32px;
-            margin-bottom: 10px;
+        h1 {
+            margin: 0;
+            font-size: 26px;
         }
-        
-        .header p {
-            color: #666;
+        .subtitle {
+            color: var(--muted);
             font-size: 14px;
         }
-        
-        .account-selector {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-        
-        .account-selector label {
-            display: block;
-            color: #333;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-        
-        .account-selector select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .account-selector select:hover {
-            border-color: #667eea;
-        }
-        
-        .account-selector select:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 12px;
         }
-        
         .card {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-        }
-        
-        .card-title {
-            font-size: 14px;
-            color: #999;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
-        }
-        
-        .card-value {
-            font-size: 36px;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 10px;
-        }
-        
-        .card-subtitle {
-            font-size: 14px;
-            color: #666;
-        }
-        
-        .card.qrl {
-            border-top: 4px solid #667eea;
-        }
-        
-        .card.usdt {
-            border-top: 4px solid #26de81;
-        }
-        
-        .card.price {
-            border-top: 4px solid #fc5c65;
-        }
-        
-        .price-chart {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-        
-        .price-chart h2 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-        
-        .balance-details {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        }
-        
-        .balance-details h2 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-        
-        .balance-row {
+            background: var(--card);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 16px;
             display: flex;
-            justify-content: space-between;
-            padding: 15px 0;
-            border-bottom: 1px solid #f0f0f0;
+            flex-direction: column;
+            gap: 8px;
         }
-        
-        .balance-row:last-child {
-            border-bottom: none;
+        .card h2 {
+            margin: 0;
+            font-size: 16px;
+            color: var(--muted);
+            letter-spacing: 0.3px;
         }
-        
-        .balance-label {
-            color: #666;
-            font-weight: 500;
-        }
-        
-        .balance-value {
-            color: #333;
+        .value {
+            font-size: 30px;
             font-weight: 700;
         }
-        
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #999;
+        .row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
         }
-        
-        .error {
-            background: #fee;
-            color: #c33;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+        .pill {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--muted);
         }
-        
-        .refresh-btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 8px;
+        .section-title {
+            margin: 18px 0 6px;
             font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 10px;
+            color: var(--muted);
+            letter-spacing: 0.2px;
         }
-        
-        .refresh-btn:hover {
-            background: #5568d3;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        ul {
+            margin: 0;
+            padding-left: 18px;
+            color: var(--muted);
         }
-        
-        .refresh-btn:active {
-            transform: translateY(0);
+        a { color: var(--accent); }
+        .status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--muted);
+            font-size: 13px;
         }
-        
-        .status-indicator {
-            display: inline-block;
+        .dot {
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            margin-right: 8px;
+            background: var(--success);
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
         }
-        
-        .status-indicator.online {
-            background: #26de81;
-            box-shadow: 0 0 10px rgba(38, 222, 129, 0.5);
+        .error { color: var(--danger); }
+        .hint { color: var(--muted); font-size: 13px; }
+        button {
+            align-self: flex-start;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-weight: 600;
+            cursor: pointer;
         }
-        
-        .status-indicator.offline {
-            background: #fc5c65;
-        }
+        button:active { opacity: 0.85; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>📊 QRL Trading Dashboard</h1>
-            <p><span class="status-indicator online"></span>即時監控 QRL/USDT 交易狀態</p>
-        </div>
-        
-        <div class="account-selector">
-            <label for="account-select">選擇帳戶 / Select Account</label>
-            <select id="account-select" onchange="switchAccount()">
-                <option value="main">主帳戶 (Main Account)</option>
-                <!-- Sub-accounts will be loaded dynamically -->
-            </select>
-        </div>
-        
-        <div class="grid">
-            <div class="card qrl">
-                <div class="card-title">QRL 餘額</div>
-                <div class="card-value" id="qrl-balance">--</div>
-                <div class="card-subtitle">可用: <span id="qrl-free">--</span> | 凍結: <span id="qrl-locked">--</span></div>
+    <div class="layout">
+        <header>
+            <div class="status" aria-live="polite">
+                <span class="dot" aria-hidden="true"></span>
+                <span>只讀儀表板 · 無交易操作</span>
             </div>
-            
-            <div class="card usdt">
-                <div class="card-title">USDT 餘額</div>
-                <div class="card-value" id="usdt-balance">--</div>
-                <div class="card-subtitle">可用: <span id="usdt-free">--</span> | 凍結: <span id="usdt-locked">--</span></div>
+            <h1>QRL/USDT Monitoring</h1>
+            <p class="subtitle">依照 docs/MEXC_v3.md，僅展示行情與餘額，沒有下單或轉帳功能。</p>
+        </header>
+
+        <div class="grid" aria-live="polite">
+            <div class="card">
+                <h2>QRL 餘額 (現貨)</h2>
+                <div class="value" id="qrl-total">--</div>
+                <div class="row hint">
+                    <span>可用</span><span id="qrl-free">--</span>
+                </div>
+                <div class="row hint">
+                    <span>凍結</span><span id="qrl-locked">--</span>
+                </div>
             </div>
-            
-            <div class="card price">
-                <div class="card-title">QRL/USDT 價格</div>
-                <div class="card-value" id="current-price">--</div>
-                <div class="card-subtitle">24h 變化: <span id="price-change">--</span></div>
+            <div class="card">
+                <h2>USDT 餘額 (現貨)</h2>
+                <div class="value" id="usdt-total">--</div>
+                <div class="row hint">
+                    <span>可用</span><span id="usdt-free">--</span>
+                </div>
+                <div class="row hint">
+                    <span>凍結</span><span id="usdt-locked">--</span>
+                </div>
             </div>
-        </div>
-        
-        <div class="price-chart">
-            <h2>價格趨勢</h2>
-            <div id="price-history" class="loading">正在載入價格數據...</div>
-        </div>
-        
-        <div class="balance-details">
-            <h2>詳細資訊</h2>
-            <div class="balance-row">
-                <span class="balance-label">總資產價值 (USDT)</span>
-                <span class="balance-value" id="total-value">--</span>
-            </div>
-            <div class="balance-row">
-                <span class="balance-label">平均成本</span>
-                <span class="balance-value" id="avg-cost">--</span>
-            </div>
-            <div class="balance-row">
-                <span class="balance-label">未實現盈虧</span>
-                <span class="balance-value" id="unrealized-pnl">--</span>
-            </div>
-            <div class="balance-row">
-                <span class="balance-label">今日交易次數</span>
-                <span class="balance-value" id="daily-trades">--</span>
-            </div>
-            <div class="balance-row">
-                <span class="balance-label">機器人狀態</span>
-                <span class="balance-value" id="bot-status">--</span>
-            </div>
-            <button class="refresh-btn" onclick="refreshData()">🔄 重新整理</button>
-        </div>
-        
-        <div class="balance-details">
-            <h2>🎯 倉位分層</h2>
-            <div class="balance-row">
-                <span class="balance-label">核心倉位 (Core)</span>
-                <span class="balance-value" id="core-position">--</span>
-            </div>
-            <div class="balance-row">
-                <span class="balance-label">波段倉位 (Swing)</span>
-                <span class="balance-value" id="swing-position">--</span>
-            </div>
-            <div class="balance-row">
-                <span class="balance-label">機動倉位 (Active)</span>
-                <span class="balance-value" id="active-position">--</span>
-            </div>
-            <div class="balance-row">
-                <span class="balance-label">總倉位 (Total QRL)</span>
-                <span class="balance-value" id="total-position">--</span>
-            </div>
-            <div class="balance-row">
-                <span class="balance-label">核心倉位佔比</span>
-                <span class="balance-value" id="core-percent">--</span>
-            </div>
-            <div class="balance-row">
-                <span class="balance-label">最後調整時間</span>
-                <span class="balance-value" id="last-adjust">--</span>
+            <div class="card">
+                <h2>QRL/USDT 價格</h2>
+                <div class="value" id="price">--</div>
+                <div class="row">
+                    <span class="hint">24h 變化</span>
+                    <span id="change" class="pill">--</span>
+                </div>
+                <div class="hint" id="updated">--</div>
             </div>
         </div>
-        
-        <div class="balance-details">
-            <h2>📋 我的訂單 (My Orders)</h2>
-            <div id="orders-container">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>訂單ID</th>
-                            <th>類型</th>
-                            <th>方向</th>
-                            <th>價格</th>
-                            <th>數量</th>
-                            <th>已成交</th>
-                            <th>狀態</th>
-                            <th>時間</th>
-                        </tr>
-                    </thead>
-                    <tbody id="orders-body">
-                        <tr>
-                            <td colspan="8" class="loading">正在載入訂單數據...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+
+        <div class="row" style="gap:12px; flex-wrap: wrap;">
+            <button id="refresh-btn" type="button">重新整理</button>
+            <span class="hint">每 30 秒自動更新一次；所有資料皆直接讀取 MEXC v3 公開/帳戶 API。</span>
         </div>
-        
-        <div class="balance-details">
-            <h2>💱 我的成交 (My Trades)</h2>
-            <div id="trades-container">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>成交ID</th>
-                            <th>方向</th>
-                            <th>價格</th>
-                            <th>數量</th>
-                            <th>成交金額</th>
-                            <th>手續費</th>
-                            <th>時間</th>
-                        </tr>
-                    </thead>
-                    <tbody id="trades-body">
-                        <tr>
-                            <td colspan="7" class="loading">正在載入成交數據...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+
+        <div>
+            <div class="section-title">MEXC v3 參考</div>
+            <ul>
+                <li><a href="https://www.mexc.com/api-docs/spot-v3/market-data-endpoints" target="_blank" rel="noopener noreferrer">Market Data Endpoints</a></li>
+                <li><a href="https://www.mexc.com/api-docs/spot-v3/spot-account-trade" target="_blank" rel="noopener noreferrer">Spot Account &amp; Trade</a></li>
+                <li><a href="https://www.mexc.com/api-docs/spot-v3/subaccount-endpoints" target="_blank" rel="noopener noreferrer">Sub-Account Endpoints</a></li>
+                <li><a href="https://github.com/mexcdevelop/mexc-api-sdk" target="_blank" rel="noopener noreferrer">Official SDK</a></li>
+            </ul>
+            <p class="hint">僅供監控展示，不會在瀏覽器執行下單、轉帳或任何具副作用的操作。</p>
         </div>
     </div>
-    
-    <style>
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        
-        .data-table th {
-            background-color: #f5f5f5;
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-            color: #333;
-            border-bottom: 2px solid #ddd;
-        }
-        
-        .data-table td {
-            padding: 10px 12px;
-            border-bottom: 1px solid #eee;
-            color: #555;
-        }
-        
-        .data-table tr:hover {
-            background-color: #f9f9f9;
-        }
-        
-        .data-table .loading {
-            text-align: center;
-            color: #999;
-            font-style: italic;
-            padding: 20px;
-        }
-        
-        .data-table .no-data {
-            text-align: center;
-            color: #999;
-            padding: 20px;
-        }
-        
-        .buy-side {
-            color: #26de81;
-            font-weight: 600;
-        }
-        
-        .sell-side {
-            color: #fc5c65;
-            font-weight: 600;
-        }
-        
-        .order-status {
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        
-        .status-new {
-            background-color: #e3f2fd;
-            color: #1976d2;
-        }
-        
-        .status-filled {
-            background-color: #e8f5e9;
-            color: #388e3c;
-        }
-        
-        .status-partially-filled {
-            background-color: #fff3e0;
-            color: #f57c00;
-        }
-        
-        .status-canceled {
-            background-color: #ffebee;
-            color: #d32f2f;
-        }
-    </style>
-    
+
     <script>
-        let currentAccount = 'main';
-        
-        async function fetchData(endpoint) {
+        const setText = (id, text, color) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.textContent = text;
+            el.style.color = color || "";
+        };
+
+        const formatNumber = (num, digits = 4) => {
+            if (Number.isNaN(num)) return "--";
+            return num.toFixed(digits);
+        };
+
+        async function loadBalances() {
             try {
-                console.log(`[FETCH] Calling ${endpoint}...`);
-                const response = await fetch(endpoint);
-                
-                // Log response status
-                console.log(`[FETCH] ${endpoint} - Status: ${response.status} ${response.statusText}`);
-                
-                if (!response.ok) {
-                    // Try to parse error details from response
-                    const errorData = await response.json().catch(() => null);
-                    console.error(`[FETCH] ${endpoint} - Error:`, errorData);
-                    
-                    // Show user-friendly error message
-                    if (response.status === 401) {
-                        console.error('❌ API Keys not configured or invalid');
-                        console.error('Help: Check MEXC_API_KEY and MEXC_SECRET_KEY in Cloud Run environment variables');
-                    } else if (response.status === 403) {
-                        console.error('❌ Insufficient permissions');
-                        console.error('Help: Ensure API keys have required permissions');
-                    } else if (response.status >= 500) {
-                        console.error('❌ Server error - MEXC API or backend issue');
-                    }
-                    
-                    throw new Error(`HTTP ${response.status}: ${errorData?.detail?.message || response.statusText}`);
-                }
-                
-                const data = await response.json();
-                console.log(`[FETCH] ${endpoint} - Success:`, data);
-                return data;
-                
-            } catch (error) {
-                console.error(`[FETCH] ${endpoint} - Exception:`, error);
-                return null;
+                const res = await fetch('/account/balance');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                const balances = data.balances || {};
+                const qrl = balances.QRL || { free: '0', locked: '0' };
+                const usdt = balances.USDT || { free: '0', locked: '0' };
+
+                const qrlFree = parseFloat(qrl.free || '0');
+                const qrlLocked = parseFloat(qrl.locked || '0');
+                const usdtFree = parseFloat(usdt.free || '0');
+                const usdtLocked = parseFloat(usdt.locked || '0');
+
+                setText('qrl-total', formatNumber(qrlFree + qrlLocked));
+                setText('qrl-free', formatNumber(qrlFree));
+                setText('qrl-locked', formatNumber(qrlLocked));
+                setText('usdt-total', formatNumber(usdtFree + usdtLocked, 2));
+                setText('usdt-free', formatNumber(usdtFree, 2));
+                setText('usdt-locked', formatNumber(usdtLocked, 2));
+            } catch (err) {
+                setText('qrl-total', 'ERROR', 'var(--danger)');
+                setText('usdt-total', 'ERROR', 'var(--danger)');
+                console.error('Balance load failed', err);
             }
         }
-        
-        async function loadAccountBalance() {
-            console.log('=== LOADING ACCOUNT BALANCE ===');
-            const data = await fetchData('/account/balance');
-            
-            // Check if request failed
-            if (!data) {
-                console.error('❌ Failed to fetch account balance - no response');
-                document.getElementById('qrl-balance').textContent = 'ERROR';
-                document.getElementById('qrl-balance').style.color = '#fc5c65';
-                document.getElementById('usdt-balance').textContent = 'ERROR';
-                document.getElementById('usdt-balance').style.color = '#fc5c65';
-                return null;
-            }
-            
-            console.log('📊 Account balance response:', data);
-            
-            // Check if balances property exists
-            if (!data.balances) {
-                console.error('❌ No balances property in response');
-                console.error('Response data:', data);
-                document.getElementById('qrl-balance').textContent = 'N/A';
-                document.getElementById('usdt-balance').textContent = 'N/A';
-                return null;
-            }
-            
-            console.log('💰 Available assets:', Object.keys(data.balances));
-            
-            // QRL Balance
-            const qrl = data.balances.QRL || { free: '0', locked: '0' };
-            const qrlFree = parseFloat(qrl.free || '0');
-            const qrlLocked = parseFloat(qrl.locked || '0');
-            const qrlTotal = qrlFree + qrlLocked;
-            
-            console.log('QRL:', { free: qrlFree, locked: qrlLocked, total: qrlTotal });
-            
-            document.getElementById('qrl-balance').textContent = qrlTotal.toFixed(4);
-            document.getElementById('qrl-balance').style.color = ''; // Reset color
-            document.getElementById('qrl-free').textContent = qrlFree.toFixed(4);
-            document.getElementById('qrl-locked').textContent = qrlLocked.toFixed(4);
-            
-            // USDT Balance
-            const usdt = data.balances.USDT || { free: '0', locked: '0' };
-            const usdtFree = parseFloat(usdt.free || '0');
-            const usdtLocked = parseFloat(usdt.locked || '0');
-            const usdtTotal = usdtFree + usdtLocked;
-            
-            console.log('USDT:', { free: usdtFree, locked: usdtLocked, total: usdtTotal });
-            
-            document.getElementById('usdt-balance').textContent = usdtTotal.toFixed(2);
-            document.getElementById('usdt-balance').style.color = ''; // Reset color
-            document.getElementById('usdt-free').textContent = usdtFree.toFixed(2);
-            document.getElementById('usdt-locked').textContent = usdtLocked.toFixed(2);
-            
-            console.log('✅ Balances loaded successfully');
-            console.log('=== END ACCOUNT BALANCE ===');
-            
-            return { qrlTotal, usdtTotal };
-        }
-        
+
         async function loadPrice() {
-            const data = await fetchData('/market/ticker/QRLUSDT');
-            if (data && data.data) {
-                const ticker = data.data;
-                const price = parseFloat(ticker.lastPrice || 0);
-                const change = parseFloat(ticker.priceChangePercent || 0);
-                
-                document.getElementById('current-price').textContent = price.toFixed(6);
-                
-                const changeElem = document.getElementById('price-change');
-                changeElem.textContent = change.toFixed(2) + '%';
-                changeElem.style.color = change >= 0 ? '#26de81' : '#fc5c65';
-                
-                return price;
-            }
-            return null;
-        }
-        
-        async function loadStatus() {
-            const data = await fetchData('/status');
-            console.log('Status response:', data);
-            if (data) {
-                document.getElementById('daily-trades').textContent = data.daily_trades || 0;
-                document.getElementById('bot-status').textContent = data.bot_status || 'unknown';
-                
-                if (data.position) {
-                    console.log('Position data:', data.position);
-                    
-                    // NOTE: Do NOT update balance from Redis position data
-                    // Balance should come from real-time API (/account/balance)
-                    // Redis position data may be stale (only updates when bot runs)
-                    
-                    // Update average cost (bot-specific analysis)
-                    const avgCost = data.position.avg_cost;
-                    if (avgCost && avgCost !== '0') {
-                        document.getElementById('avg-cost').textContent = parseFloat(avgCost).toFixed(6);
-                    } else {
-                        document.getElementById('avg-cost').textContent = 'N/A';
-                    }
-                    
-                    // Update unrealized PnL (bot-specific analysis)
-                    const unrealizedPnl = data.position.unrealized_pnl;
-                    if (unrealizedPnl !== undefined && unrealizedPnl !== null) {
-                        const pnlValue = parseFloat(unrealizedPnl);
-                        const pnlElement = document.getElementById('unrealized-pnl');
-                        pnlElement.textContent = pnlValue.toFixed(2) + ' USDT';
-                        // Color code: green for profit, red for loss
-                        pnlElement.style.color = pnlValue >= 0 ? '#26de81' : '#fc5c65';
-                    } else {
-                        document.getElementById('unrealized-pnl').textContent = 'N/A';
-                    }
-                } else {
-                    console.error('No position data in status response');
-                }
-                
-                // Update position layers
-                if (data.position_layers) {
-                    console.log('Position layers data:', data.position_layers);
-                    const layers = data.position_layers;
-                    
-                    document.getElementById('core-position').textContent = 
-                        layers.core_qrl ? parseFloat(layers.core_qrl).toFixed(4) + ' QRL' : 'N/A';
-                    document.getElementById('swing-position').textContent = 
-                        layers.swing_qrl ? parseFloat(layers.swing_qrl).toFixed(4) + ' QRL' : 'N/A';
-                    document.getElementById('active-position').textContent = 
-                        layers.active_qrl ? parseFloat(layers.active_qrl).toFixed(4) + ' QRL' : 'N/A';
-                    document.getElementById('total-position').textContent = 
-                        layers.total_qrl ? parseFloat(layers.total_qrl).toFixed(4) + ' QRL' : 'N/A';
-                    document.getElementById('core-percent').textContent = 
-                        layers.core_percent ? (parseFloat(layers.core_percent) * 100).toFixed(2) + '%' : 'N/A';
-                    document.getElementById('last-adjust').textContent = 
-                        layers.last_adjust ? new Date(layers.last_adjust).toLocaleString('zh-TW') : 'N/A';
-                } else {
-                    console.log('No position layers data available');
-                    // Set default N/A values
-                    document.getElementById('core-position').textContent = 'N/A';
-                    document.getElementById('swing-position').textContent = 'N/A';
-                    document.getElementById('active-position').textContent = 'N/A';
-                    document.getElementById('total-position').textContent = 'N/A';
-                    document.getElementById('core-percent').textContent = 'N/A';
-                    document.getElementById('last-adjust').textContent = 'N/A';
-                }
-                
-                return data.position || {};
-            }
-            console.error('Failed to load status - no data');
-            return {};
-        }
-        
-async function loadSubAccounts() {
-            console.log('=== LOADING SUB-ACCOUNTS ===');
-            const data = await fetchData('/account/sub-accounts');
-            
-            if (!data) {
-                console.log('⚠️ No response from sub-accounts endpoint');
-                console.log('This is normal if API keys are not configured or lack permissions');
-                return;
-            }
-            
-            console.log('📋 Sub-accounts response:', data);
-            console.log(`Mode: ${data.mode || 'UNKNOWN'}`);
-            
-            if (data.sub_accounts && data.sub_accounts.length > 0) {
-                console.log(`✅ Found ${data.sub_accounts.length} sub-accounts (${data.mode} mode)`);
-                const select = document.getElementById('account-select');
-                
-                data.sub_accounts.forEach(account => {
-                    const option = document.createElement('option');
-                    
-                    // Handle different formats based on mode
-                    if (data.mode === 'BROKER') {
-                        // Broker API format: subAccount (string name)
-                        option.value = account.subAccount;
-                        option.textContent = `子帳戶: ${account.subAccount} - ${account.note || 'N/A'}`;
-                    } else {
-                        // Spot API format: subAccountId (numeric ID)
-                        option.value = account.subAccountId;
-                        option.textContent = `子帳戶: ${account.subAccountId} - ${account.note || 'N/A'} (${account.status || ''})`;
-                    }
-                    
-                    select.appendChild(option);
-                });
-            } else {
-                console.log('ℹ️ No sub-accounts found or not available');
-                if (data.message) {
-                    console.log('Message:', data.message);
-                }
-                if (data.help) {
-                    console.log('Help:', data.help);
-                }
-            }
-        }
-        
-        function calculateTotalValue(qrlBalance, usdtBalance, qrlPrice) {
-            if (qrlBalance !== null && usdtBalance !== null && qrlPrice !== null) {
-                const totalValue = (qrlBalance * qrlPrice) + usdtBalance;
-                document.getElementById('total-value').textContent = totalValue.toFixed(2) + ' USDT';
-            }
-        }
-        
-        async function loadOrders() {
             try {
-                const data = await fetchData('/account/orders?symbol=QRLUSDT&limit=20');
-                const ordersBody = document.getElementById('orders-body');
-                
-                if (data && data.orders && data.orders.length > 0) {
-                    ordersBody.innerHTML = data.orders.map(order => {
-                        const side = order.side === 'BUY' ? 'buy-side' : 'sell-side';
-                        const statusClass = `status-${order.status.toLowerCase().replace('_', '-')}`;
-                        const time = new Date(order.time || order.updateTime).toLocaleString('zh-TW');
-                        
-                        return `
-                            <tr>
-                                <td>${order.orderId}</td>
-                                <td>${order.type}</td>
-                                <td class="${side}">${order.side}</td>
-                                <td>${parseFloat(order.price).toFixed(6)}</td>
-                                <td>${parseFloat(order.origQty).toFixed(4)}</td>
-                                <td>${parseFloat(order.executedQty).toFixed(4)}</td>
-                                <td><span class="order-status ${statusClass}">${order.status}</span></td>
-                                <td>${time}</td>
-                            </tr>
-                        `;
-                    }).join('');
-                } else {
-                    ordersBody.innerHTML = '<tr><td colspan="8" class="no-data">目前沒有未完成訂單</td></tr>';
-                }
-            } catch (error) {
-                console.error('Failed to load orders:', error);
-                document.getElementById('orders-body').innerHTML = 
-                    '<tr><td colspan="8" class="no-data">載入訂單失敗</td></tr>';
+                const res = await fetch('/market/ticker/QRLUSDT');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                const ticker = data.data || {};
+                const price = parseFloat(ticker.lastPrice || ticker.price || '0');
+                const change = parseFloat(ticker.priceChangePercent || '0');
+
+                setText('price', formatNumber(price, 6));
+                setText('change', `${formatNumber(change, 2)}%`, change >= 0 ? 'var(--success)' : 'var(--danger)');
+                setText('updated', new Date().toLocaleString('zh-TW'));
+            } catch (err) {
+                setText('price', 'ERROR', 'var(--danger)');
+                setText('change', '--');
+                setText('updated', '');
+                console.error('Price load failed', err);
             }
         }
-        
-        async function loadTrades() {
-            try {
-                const data = await fetchData('/account/trades?symbol=QRLUSDT&limit=20');
-                const tradesBody = document.getElementById('trades-body');
-                
-                if (data && data.trades && data.trades.length > 0) {
-                    tradesBody.innerHTML = data.trades.map(trade => {
-                        const side = trade.isBuyer ? 'buy-side' : 'sell-side';
-                        const sideText = trade.isBuyer ? 'BUY' : 'SELL';
-                        const time = new Date(trade.time).toLocaleString('zh-TW');
-                        const quoteQty = parseFloat(trade.quoteQty || 0);
-                        const commission = parseFloat(trade.commission || 0);
-                        const commissionAsset = trade.commissionAsset || '';
-                        
-                        return `
-                            <tr>
-                                <td>${trade.id}</td>
-                                <td class="${side}">${sideText}</td>
-                                <td>${parseFloat(trade.price).toFixed(6)}</td>
-                                <td>${parseFloat(trade.qty).toFixed(4)}</td>
-                                <td>${quoteQty.toFixed(2)} USDT</td>
-                                <td>${commission.toFixed(6)} ${commissionAsset}</td>
-                                <td>${time}</td>
-                            </tr>
-                        `;
-                    }).join('');
-                } else {
-                    tradesBody.innerHTML = '<tr><td colspan="7" class="no-data">目前沒有成交記錄</td></tr>';
-                }
-            } catch (error) {
-                console.error('Failed to load trades:', error);
-                document.getElementById('trades-body').innerHTML = 
-                    '<tr><td colspan="7" class="no-data">載入成交記錄失敗</td></tr>';
-            }
+
+        async function refreshAll() {
+            await Promise.all([loadBalances(), loadPrice()]);
         }
-        
-        async function refreshData() {
-            // Load all data sources
-            const balances = await loadAccountBalance();  // Real-time API balance (PRIMARY and ONLY source)
-            const price = await loadPrice();               // Current market price
-            const position = await loadStatus();           // Bot analytics only (avg_cost, PnL, position layers)
-            await loadOrders();                            // User's open orders
-            await loadTrades();                            // User's trade history
-            
-            // ONLY USE real-time API balance - it's the most accurate and up-to-date
-            // API balance reflects all activities (bot trades + manual deposits/withdrawals)
-            // Redis position data is ONLY for bot analytics (avg_cost, PnL, layers), NOT for balance
-            if (balances && price) {
-                calculateTotalValue(balances.qrlTotal, balances.usdtTotal, price);
-            } else {
-                // If API balance fails, show error instead of using stale Redis data
-                console.error('Failed to load real-time balance from API');
-                document.getElementById('total-value').textContent = 'N/A (API Error)';
-            }
-        }
-        
-        async function switchAccount() {
-            const select = document.getElementById('account-select');
-            currentAccount = select.value;
-            console.log('Switched to account:', currentAccount);
-            await refreshData();
-        }
-        
-        // Initial load
-        (async function init() {
-            await loadSubAccounts();
-            await refreshData();
-            
-            // Auto refresh every 30 seconds
-            setInterval(refreshData, 30000);
-        })();
+
+        document.getElementById('refresh-btn').addEventListener('click', refreshAll);
+        refreshAll();
+        setInterval(refreshAll, 30000);
     </script>
 </body>
 </html>
