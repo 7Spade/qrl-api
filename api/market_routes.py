@@ -234,4 +234,11 @@ async def get_klines(
             }
     except Exception as e:
         logger.error(f"Failed to get klines for {symbol}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        return {
+            "success": False,
+            "symbol": symbol,
+            "interval": interval,
+            "data": [],
+            "error": str(e),
+            "timestamp": datetime.now().isoformat(),
+        }
