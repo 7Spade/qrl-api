@@ -31,3 +31,32 @@ Spot Account Deals
 https://www.mexc.com/api-docs/spot-v3/websocket-user-data-streams#spot-account-deals
 Spot Account Orders
 https://www.mexc.com/api-docs/spot-v3/websocket-user-data-streams#spot-account-orders
+
+Live Subscription/Unsubscription to Data Streams
+https://www.mexc.com/api-docs/spot-v3/websocket-market-streams#live-subscriptionunsubscription-to-data-streams
+Protocol Buffers Integration
+https://www.mexc.com/api-docs/spot-v3/websocket-market-streams#protocol-buffers-integration
+Subscribe to a Data Stream
+https://www.mexc.com/api-docs/spot-v3/websocket-market-streams#subscribe-to-a-data-stream
+Unsubscribe from a Data Stream
+https://www.mexc.com/api-docs/spot-v3/websocket-market-streams#unsubscribe-from-a-data-stream
+PING/PONG Mechanism
+https://www.mexc.com/api-docs/spot-v3/websocket-market-streams#pingpong-mechanism
+Trade Streams
+https://www.mexc.com/api-docs/spot-v3/websocket-market-streams#trade-streams
+K-line Streams
+https://www.mexc.com/api-docs/spot-v3/websocket-market-streams#k-line-streams
+Diff.Depth Stream
+https://www.mexc.com/api-docs/spot-v3/websocket-market-streams#diffdepth-stream
+Partial Book Depth Streams
+https://www.mexc.com/api-docs/spot-v3/websocket-market-streams#partial-book-depth-streams
+Individual Symbol Book Ticker Streams
+https://www.mexc.com/api-docs/spot-v3/websocket-market-streams#individual-symbol-book-ticker-streams
+Individual Symbol Book Ticker Streams(Batch Aggregation)
+https://www.mexc.com/api-docs/spot-v3/websocket-market-streams#individual-symbol-book-ticker-streamsbatch-aggregation
+MiniTickers
+https://www.mexc.com/api-docs/spot-v3/websocket-market-streams#minitickers
+MiniTicker
+https://www.mexc.com/api-docs/spot-v3/websocket-market-streams#miniticker
+How to Properly Maintain a Local Copy of the Order Book
+https://www.mexc.com/api-docs/spot-v3/websocket-market-streams#how-to-properly-maintain-a-local-copy-of-the-order-book
