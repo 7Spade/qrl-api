@@ -6,6 +6,7 @@ import time
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 
+from infrastructure.bot.bot_utils import compute_cost_metrics, derive_ma_pair
 from infrastructure.config.config import config
 
 logger = logging.getLogger(__name__)
@@ -120,14 +121,9 @@ class TradingBot:
                     await self.redis.set_position(position_data)
 
                     cost_data = await self.redis.get_cost_data()
-                    avg_cost = float(cost_data.get("avg_cost", 0)) if cost_data.get("avg_cost") else price
-                    total_invested = qrl_balance * avg_cost
-                    unrealized_pnl = (price - avg_cost) * qrl_balance if avg_cost > 0 else 0
-                    await self.redis.set_cost_data(
-                        avg_cost=avg_cost,
-                        total_invested=total_invested,
-                        unrealized_pnl=unrealized_pnl,
-                    )
+                    avg_cost_value = cost_data.get("avg_cost") if cost_data else None
+                    cost_metrics = compute_cost_metrics(price, qrl_balance, avg_cost_value)
+                    await self.redis.set_cost_data(**cost_metrics)
                 except Exception as e:
                     self._log(f"Failed to get account balance: {e}", "warning")
 
@@ -145,13 +141,12 @@ class TradingBot:
 
     async def _phase_3_strategy(self, market_data: Dict[str, Any]) -> str:
         self._log("Phase 3: Strategy Execution")
-        price = market_data.get("price", 0)
         price_history = market_data.get("price_history", [])
-        if not price_history or len(price_history) < config.MA_LONG_PERIOD:
+        ma_pair = derive_ma_pair(price_history, config.MA_SHORT_PERIOD, config.MA_LONG_PERIOD)
+        if not ma_pair:
             self._log("Insufficient price history for MA calculation", "warning")
             return "HOLD"
-        short_ma = sum(price_history[-config.MA_SHORT_PERIOD:]) / config.MA_SHORT_PERIOD
-        long_ma = sum(price_history[-config.MA_LONG_PERIOD:]) / config.MA_LONG_PERIOD
+        short_ma, long_ma = ma_pair
         self._log(f"MA Short: {short_ma:.5f}, MA Long: {long_ma:.5f}")
         if short_ma > long_ma * (1 + config.SIGNAL_THRESHOLD):
             return "BUY"
