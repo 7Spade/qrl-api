@@ -1,6 +1,6 @@
 """
 Configuration management
 """
-from .config import Config
+from .config import Config, config
 
-__all__ = ['Config']
+__all__ = ['Config', 'config']
