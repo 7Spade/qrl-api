@@ -12,6 +12,11 @@ https://mexcdevelop.github.io/apidocs/spot_v3_en/#rebate-endpoints Rebate Endpoi
 https://mexcdevelop.github.io/apidocs/spot_v3_en/#public-api-definitions Public API Definitions
 https://github.com/mexcdevelop/mexc-api-sdk mexc-api-sdk
 
+Data formats & auth
+- REST endpoints return JSON; signed endpoints require `X-MEXC-APIKEY` and HMAC-SHA256 signature on query parameters (see each endpoint page).
+- Websocket market streams use Protocol Buffers payloads (see “Protocol Buffers Integration” section) over `wss://wbs-api.mexc.com/ws`.
+- Methods are listed below for quick lookup alongside the official anchors.
+
 
 Websocket User Data Streams
 https://mexcdevelop.github.io/apidocs/spot_v3_en/#websocket-user-data-streams
