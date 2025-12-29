@@ -9,11 +9,11 @@
 - [Official SDK](https://github.com/mexcdevelop/mexc-api-sdk)
 
 ### REST – Public & Market Data
-- [GET /api/v3/ping](https://www.mexc.com/api-docs/spot-v3/market-data-endpoints) – Test connectivity.
-- [GET /api/v3/time](https://www.mexc.com/api-docs/spot-v3/market-data-endpoints) – Server time.
-- [GET /api/v3/exchangeInfo](https://www.mexc.com/api-docs/spot-v3/market-data-endpoints) – Symbols and rules.
-- [GET /api/v3/defaultSymbols](https://www.mexc.com/api-docs/spot-v3/market-data-endpoints) – Default trading pairs.
-- [GET /api/v3/symbol/offline](https://www.mexc.com/api-docs/spot-v3/market-data-endpoints) – Suspended/delisted symbols.
+- [GET /api/v3/ping](https://www.mexc.com/api-docs/spot-v3/market-data-endpoints#test-connectivity) – Test connectivity.
+- [GET /api/v3/time](https://www.mexc.com/api-docs/spot-v3/market-data-endpoints#check-server-time) – Server time.
+- [GET /api/v3/exchangeInfo](https://www.mexc.com/api-docs/spot-v3/market-data-endpoints#exchange-information) – Symbols and rules.
+- [GET /api/v3/defaultSymbols](https://www.mexc.com/api-docs/spot-v3/market-data-endpoints#default-symbols) – Default trading pairs.
+- [GET /api/v3/symbol/offline](https://www.mexc.com/api-docs/spot-v3/market-data-endpoints#offline-symbols) – Suspended/delisted symbols.
 - [GET /api/v3/depth](https://www.mexc.com/api-docs/spot-v3/market-data-endpoints#order-book) – Order book.
 - [GET /api/v3/trades](https://www.mexc.com/api-docs/spot-v3/market-data-endpoints#recent-trades-list) – Recent trades.
 - [GET /api/v3/historicalTrades](https://www.mexc.com/api-docs/spot-v3/market-data-endpoints#old-trade-lookup) – Older trades.
