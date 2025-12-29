@@ -20,3 +20,19 @@
 - [GET /api/v3/rebate/history](https://www.mexc.com/api-docs/spot-v3/rebate-endpoints#get-rebate-history-records) – Rebate summary (invitee totals).
 - [GET /api/v3/rebate/records/detail](https://www.mexc.com/api-docs/spot-v3/rebate-endpoints#get-rebate-records-detail) – Invitee detail (order, fee, rebate).
 - [GET /api/v3/rebate/self-records/detail](https://www.mexc.com/api-docs/spot-v3/rebate-endpoints#get-self-rebate-records-detail) – Self rebate records.
+
+### Sample Responses (wallet/sub/rebate)
+```json
+// config/getall (one coin/network)
+[ { "coin":"USDT","networkList":[{"network":"ERC20","withdrawEnable":true,"depositEnable":true}] } ]
+// deposit history
+[ { "coin":"USDT","amount":"10","network":"ERC20","status":1,"txId":"0xabc","insertTime":1700000000000 } ]
+// withdraw
+{ "id":"10001","status":"Processing" }
+// sub-account list
+[ { "subAccount":"uid123","status":1,"createTime":1700000000000 } ]
+// universal transfer
+{ "transferId":"9001","status":"SUCCESS" }
+// rebate detail
+[ { "symbol":"BTCUSDT","orderId":1,"rebate":"0.1","commission":"1","rebateAsset":"USDT" } ]
+```

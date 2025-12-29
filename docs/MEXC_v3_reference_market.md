@@ -28,3 +28,21 @@
 - [GET /api/v3/ticker/24hr](https://www.mexc.com/api-docs/spot-v3/market-data-endpoints#24hr-ticker-price-change-statistics) – 24h stats (change %, volumes).
 - [GET /api/v3/ticker/price](https://www.mexc.com/api-docs/spot-v3/market-data-endpoints#symbol-price-ticker) – `symbol/price`.
 - [GET /api/v3/ticker/bookTicker](https://www.mexc.com/api-docs/spot-v3/market-data-endpoints#symbol-order-book-ticker) – `bidPrice/bidQty/askPrice/askQty`.
+
+### Sample Responses (market)
+```json
+// depth
+{ "lastUpdateId": 1, "bids": [["100.0","5"]], "asks": [["100.5","2"]] }
+// trades
+[ { "id": 123, "price": "100.1", "qty": "1", "time": 1700000000000, "isBuyerMaker": false } ]
+// aggTrades
+[ { "a": 10, "p": "100.0", "q": "2", "f": 1, "l": 2, "T": 1700000000000, "m": false, "M": true } ]
+// klines (single entry)
+[1700000000000,"100","101","99","100.5","10","1700000060000","1000"]
+// ticker/24hr
+{ "symbol":"BTCUSDT","priceChange":"10","priceChangePercent":"1.0","lastPrice":"100" }
+// price
+{ "symbol":"BTCUSDT","price":"100" }
+// bookTicker
+{ "symbol":"BTCUSDT","bidPrice":"99.9","bidQty":"1","askPrice":"100.1","askQty":"2" }
+```

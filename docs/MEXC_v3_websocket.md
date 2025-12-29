@@ -17,9 +17,29 @@
 - [MiniTickers](https://www.mexc.com/api-docs/spot-v3/websocket-market-streams#minitickers) / [MiniTicker](https://www.mexc.com/api-docs/spot-v3/websocket-market-streams#miniticker)
 - [Maintain local order book](https://www.mexc.com/api-docs/spot-v3/websocket-market-streams#how-to-properly-maintain-a-local-copy-of-the-order-book)
 
+#### Sample payloads (market)
+```json
+// subscribe
+{ "method": "SUBSCRIPTION", "params": ["spot@public.deals.v3.api@BTCUSDT"], "id": 1 }
+// trade update
+{ "c":"spot@public.deals.v3.api@BTCUSDT","d":{"p":"100","v":"0.1","S":1,"t":1700000000000}}
+// depth diff
+{ "c":"spot@public.depth.v3.api@BTCUSDT","d":{"bids":[["100","1"]],"asks":[["101","2"]],"u":123}}
+```
+
 ### WebSocket User Data Streams
 - [Listen key lifecycle](https://www.mexc.com/api-docs/spot-v3/websocket-user-data-streams#listen-key) – Key validity rules.
 - [Generate](https://www.mexc.com/api-docs/spot-v3/websocket-user-data-streams#generate-listen-key) / [Extend](https://www.mexc.com/api-docs/spot-v3/websocket-user-data-streams#extend-listen-key-validity) / [Close](https://www.mexc.com/api-docs/spot-v3/websocket-user-data-streams#close-listen-key) / [List](https://www.mexc.com/api-docs/spot-v3/websocket-user-data-streams#get-valid-listen-keys)
 - [Spot account update](https://www.mexc.com/api-docs/spot-v3/websocket-user-data-streams#spot-account-update)
 - [Spot account deals](https://www.mexc.com/api-docs/spot-v3/websocket-user-data-streams#spot-account-deals)
 - [Spot account orders](https://www.mexc.com/api-docs/spot-v3/websocket-user-data-streams#spot-account-orders)
+
+#### Sample payloads (user data)
+```json
+// account update
+{ "c":"spot@private.account.v3.api","d":{"balances":[{"a":"USDT","f":"100","l":"0"}]}}
+// order update
+{ "c":"spot@private.orders.v3.api","d":{"E":1700000000000,"s":"BTCUSDT","i":1,"X":"FILLED","p":"100","q":"1"}}
+// deals update
+{ "c":"spot@private.deals.v3.api","d":{"s":"BTCUSDT","i":1,"t":10,"p":"100","q":"0.5","S":1}}
+```
