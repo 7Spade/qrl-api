@@ -73,10 +73,14 @@ class BalanceService:
     @staticmethod
     def to_usd_values(snapshot: Dict[str, Any]) -> Dict[str, Any]:
         """Simple helper to enrich balances with USD values."""
-        qrl = snapshot.get("balances", {}).get("QRL", {})
+        balances = snapshot.get("balances") or {}
+        if "QRL" not in balances:
+            return snapshot
+        qrl = balances.get("QRL") or {}
         price = safe_float(qrl.get("price"))
         qrl_total = safe_float(qrl.get("total", 0))
-        snapshot["balances"]["QRL"].update(
+        balances.setdefault("QRL", {})
+        balances["QRL"].update(
             {
                 "value_usdt": qrl_total * price,
                 "value_usdt_free": safe_float(qrl.get("free")) * price,

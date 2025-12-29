@@ -76,3 +76,10 @@ async def test_balance_service_cache_fallback():
     result = await service.get_account_balance()
     assert result["source"] == "cache"
     assert result["balances"]["USDT"]["free"] == "5"
+
+
+def test_to_usd_values_without_qrl():
+    snapshot = {"balances": {"USDT": {"free": "1", "locked": "0", "total": 1}}}
+    result = BalanceService.to_usd_values(snapshot)
+    assert result["balances"]["USDT"]["total"] == 1
+    assert "QRL" not in result["balances"]
