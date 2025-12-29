@@ -70,42 +70,6 @@ async def get_account_balance():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/balance/redis")
-async def get_account_balance_from_redis():
-    """
-    Get account balance from Redis cache (may be stale)
-    
-    Returns:
-        Cached position data from Redis
-    """
-    from infrastructure.external.redis_client import redis_client
-    
-    try:
-        position = await redis_client.get_position()
-        
-        if not position:
-            raise HTTPException(
-                status_code=404,
-                detail="No position data in Redis - run /tasks/sync-balance first"
-            )
-        
-        logger.info("Position data retrieved from Redis")
-        
-        return {
-            "success": True,
-            "source": "redis",
-            "position": position,
-            "warning": "This data may be stale - use /account/balance for real-time data",
-            "timestamp": datetime.now().isoformat()
-        }
-    
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Failed to get position from Redis: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
 @router.get("/sub-accounts")
 async def get_sub_accounts():
     """
