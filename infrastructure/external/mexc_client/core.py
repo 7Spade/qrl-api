@@ -14,12 +14,13 @@ from urllib.parse import urlencode
 import httpx
 
 from infrastructure.config.config import config
+from infrastructure.external.mexc_client.market_endpoints import MarketEndpointsMixin
 from infrastructure.external.mexc_client.account import build_balance_map, fetch_balance_snapshot
 
 logger = logging.getLogger(__name__)
 
 
-class MEXCClient:
+class MEXCClient(MarketEndpointsMixin):
     """MEXC Spot API v3 Client (Async)"""
     
     def __init__(self, api_key: Optional[str] = None, secret_key: Optional[str] = None):
@@ -159,126 +160,6 @@ class MEXCClient:
         logger.error(f"MEXC API request failed after {max_retries} attempts: {last_exception}")
         raise last_exception if last_exception else Exception("Unknown error")
     
-    # ===== Public Market Data Endpoints =====
-    
-    async def ping(self) -> Dict[str, Any]:
-        """Test connectivity to MEXC API"""
-        return await self._request("GET", "/api/v3/ping")
-    
-    async def get_server_time(self) -> Dict[str, Any]:
-        """Get current server time"""
-        return await self._request("GET", "/api/v3/time")
-    
-    async def get_exchange_info(self, symbol: Optional[str] = None) -> Dict[str, Any]:
-        """
-        Get exchange trading rules and symbol information
-        
-        Args:
-            symbol: Trading symbol (e.g., "QRLUSDT")
-        """
-        params = {}
-        if symbol:
-            params["symbol"] = symbol
-        return await self._request("GET", "/api/v3/exchangeInfo", params=params)
-    
-    async def get_ticker_24hr(self, symbol: str) -> Dict[str, Any]:
-        """
-        Get 24hr ticker price change statistics
-        
-        Args:
-            symbol: Trading symbol (e.g., "QRLUSDT")
-        """
-        params = {"symbol": symbol}
-        return await self._request("GET", "/api/v3/ticker/24hr", params=params)
-    
-    async def get_ticker_price(self, symbol: str) -> Dict[str, Any]:
-        """
-        Get latest price for a symbol
-        
-        Args:
-            symbol: Trading symbol (e.g., "QRLUSDT")
-        """
-        params = {"symbol": symbol}
-        return await self._request("GET", "/api/v3/ticker/price", params=params)
-    
-    async def get_order_book(self, symbol: str, limit: int = 100) -> Dict[str, Any]:
-        """
-        Get order book depth
-        
-        Args:
-            symbol: Trading symbol
-            limit: Depth limit (default 100, max 5000)
-        """
-        params = {"symbol": symbol, "limit": limit}
-        return await self._request("GET", "/api/v3/depth", params=params)
-
-    async def get_orderbook(self, symbol: str, limit: int = 100) -> Dict[str, Any]:
-        """Alias for depth (compat)"""
-        return await self.get_order_book(symbol, limit)
-
-    async def get_recent_trades(self, symbol: str, limit: int = 500) -> List[Dict[str, Any]]:
-        """
-        Get recent trades
-        
-        Args:
-            symbol: Trading symbol
-            limit: Number of trades (default 500, max 1000)
-        """
-        params = {"symbol": symbol, "limit": limit}
-        return await self._request("GET", "/api/v3/trades", params=params)
-    
-    async def get_klines(
-        self,
-        symbol: str,
-        interval: str,
-        start_time: Optional[int] = None,
-        end_time: Optional[int] = None,
-        limit: int = 500
-    ) -> List[List]:
-        """
-        Get candlestick data
-        
-        Args:
-            symbol: Trading symbol
-            interval: Kline interval (1m, 5m, 15m, 30m, 1h, 4h, 1d, 1w, 1M)
-            start_time: Start time in milliseconds
-            end_time: End time in milliseconds
-            limit: Number of klines (default 500, max 1000)
-        """
-        params = {"symbol": symbol, "interval": interval, "limit": limit}
-        if start_time:
-            params["startTime"] = start_time
-        if end_time:
-            params["endTime"] = end_time
-        return await self._request("GET", "/api/v3/klines", params=params)
-
-    async def get_aggregate_trades(
-        self,
-        symbol: str,
-        limit: int = 500,
-        from_id: Optional[int] = None,
-        start_time: Optional[int] = None,
-        end_time: Optional[int] = None,
-    ) -> List[Dict[str, Any]]:
-        """
-        Get compressed/aggregate trades list
-        """
-        params: Dict[str, Any] = {"symbol": symbol, "limit": limit}
-        if from_id is not None:
-            params["fromId"] = from_id
-        if start_time is not None:
-            params["startTime"] = start_time
-        if end_time is not None:
-            params["endTime"] = end_time
-        return await self._request("GET", "/api/v3/aggTrades", params=params)
-
-    async def get_book_ticker(self, symbol: str) -> Dict[str, Any]:
-        """
-        Best bid/ask for symbol (order book ticker)
-        """
-        params = {"symbol": symbol}
-        return await self._request("GET", "/api/v3/ticker/bookTicker", params=params)
-
     # ===== Account Endpoints (Authenticated) =====
     
     async def get_account_info(self) -> Dict[str, Any]:

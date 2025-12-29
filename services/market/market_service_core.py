@@ -36,27 +36,14 @@ class MarketService:
         Cache TTL: 60 seconds
         """
         try:
-            # Try cache first
             cached = await self.redis.get_ticker_24hr(symbol)
             if cached:
-                return {
-                    "source": "cache",
-                    "data": cached,
-                    "timestamp": datetime.now().isoformat()
-                }
+                return self._wrap_response("cache", cached)
             
-            # Fetch from MEXC
             async with self.mexc:
                 ticker = await self.mexc.get_ticker_24hr(symbol)
-            
-            # Cache for 60 seconds
             await self.redis.set_ticker_24hr(symbol, ticker, ttl=60)
-            
-            return {
-                "source": "api",
-                "data": ticker,
-                "timestamp": datetime.now().isoformat()
-            }
+            return self._wrap_response("api", ticker)
             
         except Exception as e:
             logger.error(f"Failed to get ticker for {symbol}: {str(e)}")
@@ -98,27 +85,14 @@ class MarketService:
         Cache TTL: 10 seconds
         """
         try:
-            # Try cache first
             cached = await self.redis.get_orderbook(symbol)
             if cached:
-                return {
-                    "source": "cache",
-                    "data": cached,
-                    "timestamp": datetime.now().isoformat()
-                }
+                return self._wrap_response("cache", cached)
             
-            # Fetch from MEXC
             async with self.mexc:
                 orderbook = await self.mexc.get_orderbook(symbol, limit=limit)
-            
-            # Cache for 10 seconds
             await self.redis.set_orderbook(symbol, orderbook, ttl=10)
-            
-            return {
-                "source": "api",
-                "data": orderbook,
-                "timestamp": datetime.now().isoformat()
-            }
+            return self._wrap_response("api", orderbook)
             
         except Exception as e:
             logger.error(f"Failed to get orderbook for {symbol}: {str(e)}")
@@ -134,27 +108,14 @@ class MarketService:
         Cache TTL: 30 seconds
         """
         try:
-            # Try cache first
             cached = await self.redis.get_recent_trades(symbol)
             if cached:
-                return {
-                    "source": "cache",
-                    "data": cached,
-                    "timestamp": datetime.now().isoformat()
-                }
+                return self._wrap_response("cache", cached)
             
-            # Fetch from MEXC
             async with self.mexc:
                 trades = await self.mexc.get_recent_trades(symbol, limit=limit)
-            
-            # Cache for 30 seconds
             await self.redis.set_recent_trades(symbol, trades, ttl=30)
-            
-            return {
-                "source": "api",
-                "data": trades,
-                "timestamp": datetime.now().isoformat()
-            }
+            return self._wrap_response("api", trades)
             
         except Exception as e:
             logger.error(f"Failed to get recent trades for {symbol}: {str(e)}")
@@ -181,27 +142,14 @@ class MarketService:
             # Determine cache TTL based on interval
             ttl = kline_ttl(interval)
             
-            # Try cache first
             cached = await self.redis.get_klines(symbol, interval)
             if cached:
-                return {
-                    "source": "cache",
-                    "data": cached,
-                    "timestamp": datetime.now().isoformat()
-                }
+                return self._wrap_response("cache", cached)
             
-            # Fetch from MEXC
             async with self.mexc:
                 klines = await self.mexc.get_klines(symbol, interval=interval, limit=limit)
-            
-            # Cache with appropriate TTL
             await self.redis.set_klines(symbol, interval, klines, ttl=ttl)
-            
-            return {
-                "source": "api",
-                "data": klines,
-                "timestamp": datetime.now().isoformat()
-            }
+            return self._wrap_response("api", klines)
             
         except Exception as e:
             logger.error(f"Failed to get klines for {symbol}: {str(e)}")
@@ -247,6 +195,14 @@ class MarketService:
                 "timestamp": datetime.now().isoformat()
             }
     
+
+    def _wrap_response(self, source: str, data):
+        return {
+            "source": source,
+            "data": data,
+            "timestamp": datetime.now().isoformat()
+        }
+
     async def get_price_statistics(self, symbol: str, limit: int = 100) -> Dict:
         """
         Get price statistics from history

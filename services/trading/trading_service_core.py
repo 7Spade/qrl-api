@@ -73,22 +73,10 @@ class TradingService:
                 }
             
             # Phase 2: Get current price
-            price_data = await self.price_repo.get_latest_price(symbol)
-            if not price_data:
-                # Fetch from MEXC if not cached
-                async with self.mexc:
-                    ticker = await self.mexc.get_ticker_24hr(symbol)
-                    current_price = float(ticker.get("lastPrice", 0))
-                    await self.price_repo.set_latest_price(symbol, current_price)
-            else:
-                current_price = float(price_data)
+            current_price = await self._get_current_price(symbol)
             
             # Get price history for MA calculation
-            price_history = await self.price_repo.get_price_history(limit=60)
-            if not price_history or len(price_history) < 60:
-                # Fallback: synthesize history with current price to allow strategy execution
-                price_history = price_history or []
-                price_history = price_history + [{"price": current_price}] * (60 - len(price_history))
+            price_history = await self._get_price_history(current_price)
             
             # Phase 3: Generate signal (domain logic)
             prices = [float(p.get('price', current_price)) for p in price_history]
@@ -120,20 +108,7 @@ class TradingService:
             position_layers = await self.position_repo.get_position_layers()
             
             # Get account balance with cache fallback for stability
-            usdt_balance = 0.0
-            try:
-                async with self.mexc:
-                    balance_data = await self.mexc.get_balance()
-                usdt_balance = float(balance_data.get("USDT", {}).get("free", 0))
-            except Exception:
-                logger.warning("Primary balance fetch failed, attempting cache fallback")
-            
-            if usdt_balance <= 0 and hasattr(self.redis, "get_cached_account_balance"):
-                cached_balance = await self.redis.get_cached_account_balance()
-                if cached_balance:
-                    usdt_balance = float(
-                        cached_balance.get("balances", {}).get("USDT", {}).get("free", 0)
-                    )
+            usdt_balance = await self._get_usdt_balance()
             
             risk_check = self.risk_manager.check_all_risks(
                 signal=signal,
@@ -255,6 +230,40 @@ class TradingService:
                 "timestamp": datetime.now().isoformat()
             }
     
+
+    async def _get_current_price(self, symbol: str) -> float:
+        price_data = await self.price_repo.get_latest_price(symbol)
+        if price_data:
+            return float(price_data)
+        async with self.mexc:
+            ticker = await self.mexc.get_ticker_24hr(symbol)
+            current_price = float(ticker.get("lastPrice", 0))
+            await self.price_repo.set_latest_price(symbol, current_price)
+            return current_price
+
+    async def _get_price_history(self, current_price: float) -> list:
+        price_history = await self.price_repo.get_price_history(limit=60)
+        if not price_history or len(price_history) < 60:
+            price_history = price_history or []
+            price_history = price_history + [{"price": current_price}] * (60 - len(price_history))
+        return price_history
+
+    async def _get_usdt_balance(self) -> float:
+        usdt_balance = 0.0
+        try:
+            async with self.mexc:
+                balance_data = await self.mexc.get_balance()
+            usdt_balance = float(balance_data.get("USDT", {}).get("free", 0))
+        except Exception:
+            logger.warning("Primary balance fetch failed, attempting cache fallback")
+        if usdt_balance <= 0 and hasattr(self.redis, "get_cached_account_balance"):
+            cached_balance = await self.redis.get_cached_account_balance()
+            if cached_balance:
+                usdt_balance = float(
+                    cached_balance.get("balances", {}).get("USDT", {}).get("free", 0)
+                )
+        return usdt_balance
+
     async def get_trading_status(self) -> Dict:
         """Get comprehensive trading status"""
         try:
