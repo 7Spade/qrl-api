@@ -137,7 +137,13 @@ async def get_trades(symbol: str = "QRLUSDT", limit: int = 50):
     
     except Exception as e:
         logger.error(f"Failed to get trades for {symbol}: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        # Graceful degradation for read-only dashboard
+        return {
+            "success": False,
+            "symbol": symbol,
+            "trades": [],
+            "error": str(e),
+        }
 
 
 @router.get("/sub-accounts")

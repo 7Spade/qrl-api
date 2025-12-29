@@ -210,7 +210,11 @@ class MEXCClient:
         """
         params = {"symbol": symbol, "limit": limit}
         return await self._request("GET", "/api/v3/depth", params=params)
-    
+
+    async def get_orderbook(self, symbol: str, limit: int = 100) -> Dict[str, Any]:
+        """Alias for depth (compat)"""
+        return await self.get_order_book(symbol, limit)
+
     async def get_recent_trades(self, symbol: str, limit: int = 500) -> List[Dict[str, Any]]:
         """
         Get recent trades
@@ -246,7 +250,34 @@ class MEXCClient:
         if end_time:
             params["endTime"] = end_time
         return await self._request("GET", "/api/v3/klines", params=params)
-    
+
+    async def get_aggregate_trades(
+        self,
+        symbol: str,
+        limit: int = 500,
+        from_id: Optional[int] = None,
+        start_time: Optional[int] = None,
+        end_time: Optional[int] = None,
+    ) -> List[Dict[str, Any]]:
+        """
+        Get compressed/aggregate trades list
+        """
+        params: Dict[str, Any] = {"symbol": symbol, "limit": limit}
+        if from_id is not None:
+            params["fromId"] = from_id
+        if start_time is not None:
+            params["startTime"] = start_time
+        if end_time is not None:
+            params["endTime"] = end_time
+        return await self._request("GET", "/api/v3/aggTrades", params=params)
+
+    async def get_book_ticker(self, symbol: str) -> Dict[str, Any]:
+        """
+        Best bid/ask for symbol (order book ticker)
+        """
+        params = {"symbol": symbol}
+        return await self._request("GET", "/api/v3/ticker/bookTicker", params=params)
+
     # ===== Account Endpoints (Authenticated) =====
     
     async def get_account_info(self) -> Dict[str, Any]:
