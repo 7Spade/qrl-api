@@ -402,3 +402,10 @@ askprice	string	Best ask price
 askquantity	string	Best ask quantity
 symbol	string	Trading pair
 sendtime	long	Event time
+
+## 應用程式使用重點與疑難排解
+
+- `/account/balance` 會先呼叫 **GET /api/v3/account (簽名)** 取得帳戶餘額，再呼叫 **GET /api/v3/ticker/price?symbol=QRLUSDT** 估值；若餘額沒有顯示，通常是 API Key 沒有 SPOT 讀取權限、`MEXC_API_KEY/MEXC_SECRET_KEY` 未設、或使用了 Broker key 卻在 SPOT 模式。
+- 市場資料（如 `/market/klines`）僅使用公開端點（`/api/v3/klines` 等），與帳戶/交易的簽名請求分開，不會混用。
+- `/account/orders` 使用 **GET /api/v3/openOrders (簽名)** 僅針對 `QRLUSDT` 查詢，與行情/健康檢查路徑互不影響。
+- 若 Cloud Run 上僅回 500，請檢查上述簽名端點所需的環境變數與權限，並先用 `/health` 看 `missing` 欄位是否缺 Key/Secret。
