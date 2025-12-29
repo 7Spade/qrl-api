@@ -16,34 +16,13 @@
             --danger: #ef4444;
             --border: rgba(255, 255, 255, 0.08);
         }
-        body {
-            margin: 0;
-            font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-        }
-        .layout {
-            max-width: 1150px;
-            margin: 0 auto;
-            padding: 32px 20px 48px;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
+        body { margin: 0; font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+        .layout { max-width: 1150px; margin: 0 auto; padding: 32px 20px 48px; display: flex; flex-direction: column; gap: 16px; }
         header { display: flex; flex-direction: column; gap: 6px; }
         h1 { margin: 0; font-size: 26px; }
         .subtitle { color: var(--muted); font-size: 14px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
         .card h2 { margin: 0; font-size: 16px; color: var(--muted); letter-spacing: 0.3px; }
         .value { font-size: 30px; font-weight: 700; }
         .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
@@ -94,6 +73,11 @@
                 <div class="row"><span class="hint">24h 變化</span><span id="change" class="pill">--</span></div>
                 <div class="hint" id="updated">--</div>
             </div>
+            <div class="card">
+                <h2>最佳買賣價</h2>
+                <div class="row"><span class="hint">買一</span><span id="best-bid">--</span></div>
+                <div class="row"><span class="hint">賣一</span><span id="best-ask">--</span></div>
+            </div>
         </div>
 
         <div class="row" style="gap:12px; flex-wrap: wrap;">
@@ -102,40 +86,50 @@
         </div>
 
         <div class="card table-card" aria-live="polite">
+            <h2>交易規則 (Exchange Info)</h2>
+            <table aria-label="Exchange info">
+                <thead><tr><th>Symbol</th><th>Status</th><th>最小下單量</th><th>最小金額</th></tr></thead>
+                <tbody id="info-body"><tr><td colspan="4" class="hint">載入中...</td></tr></tbody>
+            </table>
+        </div>
+
+        <div class="card table-card" aria-live="polite">
+            <h2>委託簿前 5 檔</h2>
+            <table aria-label="Order book">
+                <thead><tr><th>檔</th><th>買價</th><th>買量</th><th>賣價</th><th>賣量</th></tr></thead>
+                <tbody id="depth-body"><tr><td colspan="5" class="hint">載入中...</td></tr></tbody>
+            </table>
+        </div>
+
+        <div class="card table-card" aria-live="polite">
+            <h2>Aggregate Trades (只讀)</h2>
+            <table aria-label="Agg trades">
+                <thead><tr><th>時間</th><th>方向</th><th>價格</th><th>數量</th></tr></thead>
+                <tbody id="agg-body"><tr><td colspan="4" class="hint">載入中...</td></tr></tbody>
+            </table>
+        </div>
+
+        <div class="card table-card" aria-live="polite">
+            <h2>Kline 最近 5 根</h2>
+            <table aria-label="Klines">
+                <thead><tr><th>時間</th><th>開</th><th>高</th><th>低</th><th>收</th></tr></thead>
+                <tbody id="kline-body"><tr><td colspan="5" class="hint">載入中...</td></tr></tbody>
+            </table>
+        </div>
+
+        <div class="card table-card" aria-live="polite">
             <h2>我的訂單 (只讀)</h2>
             <table aria-label="Open orders">
-                <thead>
-                    <tr>
-                        <th>時間</th>
-                        <th>方向</th>
-                        <th>價格</th>
-                        <th>數量</th>
-                        <th>已成交</th>
-                        <th>狀態</th>
-                    </tr>
-                </thead>
-                <tbody id="orders-body">
-                    <tr><td colspan="6" class="hint">載入中...</td></tr>
-                </tbody>
+                <thead><tr><th>時間</th><th>方向</th><th>價格</th><th>數量</th><th>已成交</th><th>狀態</th></tr></thead>
+                <tbody id="orders-body"><tr><td colspan="6" class="hint">載入中...</td></tr></tbody>
             </table>
         </div>
 
         <div class="card table-card" aria-live="polite">
             <h2>我的成交 (只讀)</h2>
             <table aria-label="Trades">
-                <thead>
-                    <tr>
-                        <th>時間</th>
-                        <th>方向</th>
-                        <th>價格</th>
-                        <th>數量</th>
-                        <th>金額</th>
-                        <th>手續費</th>
-                    </tr>
-                </thead>
-                <tbody id="trades-body">
-                    <tr><td colspan="6" class="hint">載入中...</td></tr>
-                </tbody>
+                <thead><tr><th>時間</th><th>方向</th><th>價格</th><th>數量</th><th>金額</th><th>手續費</th></tr></thead>
+                <tbody id="trades-body"><tr><td colspan="6" class="hint">載入中...</td></tr></tbody>
             </table>
         </div>
 
@@ -158,17 +152,11 @@
             el.textContent = text;
             el.style.color = color || "";
         };
-
-        const formatNumber = (num, digits = 4) => {
-            if (Number.isNaN(num)) return "--";
-            return num.toFixed(digits);
-        };
-
+        const formatNumber = (num, digits = 4) => Number.isNaN(num) ? "--" : num.toFixed(digits);
         const formatTime = (ts) => {
             if (!ts) return "--";
             const d = new Date(ts);
-            if (Number.isNaN(d.getTime())) return "--";
-            return d.toLocaleString('zh-TW');
+            return Number.isNaN(d.getTime()) ? "--" : d.toLocaleString('zh-TW');
         };
 
         async function loadBalances() {
@@ -179,12 +167,10 @@
                 const balances = data.balances || {};
                 const qrl = balances.QRL || { free: '0', locked: '0' };
                 const usdt = balances.USDT || { free: '0', locked: '0' };
-
                 const qrlFree = parseFloat(qrl.free || '0');
                 const qrlLocked = parseFloat(qrl.locked || '0');
                 const usdtFree = parseFloat(usdt.free || '0');
                 const usdtLocked = parseFloat(usdt.locked || '0');
-
                 setText('qrl-total', formatNumber(qrlFree + qrlLocked));
                 setText('qrl-free', formatNumber(qrlFree));
                 setText('qrl-locked', formatNumber(qrlLocked));
@@ -206,7 +192,6 @@
                 const ticker = data.data || {};
                 const price = parseFloat(ticker.lastPrice || ticker.price || '0');
                 const change = parseFloat(ticker.priceChangePercent || '0');
-
                 setText('price', formatNumber(price, 6));
                 setText('change', `${formatNumber(change, 2)}%`, change >= 0 ? 'var(--success)' : 'var(--danger)');
                 setText('updated', new Date().toLocaleString('zh-TW'));
@@ -215,6 +200,103 @@
                 setText('change', '--');
                 setText('updated', '');
                 console.error('Price load failed', err);
+            }
+        }
+
+        async function loadBookTicker() {
+            try {
+                const res = await fetch('/market/book-ticker/QRLUSDT');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                const book = data.data || {};
+                setText('best-bid', `${book.bidPrice || '--'} / ${book.bidQty || '--'}`);
+                setText('best-ask', `${book.askPrice || '--'} / ${book.askQty || '--'}`);
+            } catch (err) {
+                setText('best-bid', 'ERROR', 'var(--danger)');
+                setText('best-ask', 'ERROR', 'var(--danger)');
+                console.error('Book ticker failed', err);
+            }
+        }
+
+        async function loadExchangeInfo() {
+            const body = document.getElementById('info-body');
+            try {
+                const res = await fetch('/market/exchange-info?symbol=QRLUSDT');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                const info = data.data || {};
+                const symbols = info.symbols || [];
+                if (!symbols.length) {
+                    body.innerHTML = '<tr><td colspan="4" class="hint">無資料</td></tr>';
+                    return;
+                }
+                const s = symbols[0];
+                const lot = s?.filters?.find?.(f => f.filterType === 'LOT_SIZE');
+                const minQty = lot?.minQty || '--';
+                const notional = s?.filters?.find?.(f => f.filterType === 'NOTIONAL');
+                const minNotional = notional?.minNotional || '--';
+                body.innerHTML = `<tr><td>${s.symbol}</td><td>${s.status || '--'}</td><td>${minQty}</td><td>${minNotional}</td></tr>`;
+            } catch (err) {
+                body.innerHTML = '<tr><td colspan="4" class="error">載入失敗</td></tr>';
+                console.error('Exchange info failed', err);
+            }
+        }
+
+        async function loadDepth() {
+            const body = document.getElementById('depth-body');
+            try {
+                const res = await fetch('/market/orderbook/QRLUSDT?limit=10');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                const bids = data.data?.bids || [];
+                const asks = data.data?.asks || [];
+                const rows = [];
+                for (let i = 0; i < 5; i++) {
+                    const b = bids[i] || [];
+                    const a = asks[i] || [];
+                    rows.push(`<tr><td>${i+1}</td><td>${b[0] || '--'}</td><td>${b[1] || '--'}</td><td>${a[0] || '--'}</td><td>${a[1] || '--'}</td></tr>`);
+                }
+                body.innerHTML = rows.join('');
+            } catch (err) {
+                body.innerHTML = '<tr><td colspan="5" class="error">深度載入失敗</td></tr>';
+                console.error('Depth failed', err);
+            }
+        }
+
+        async function loadAggTrades() {
+            const body = document.getElementById('agg-body');
+            try {
+                const res = await fetch('/market/agg-trades/QRLUSDT?limit=10');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                const trades = data.data || [];
+                if (!trades.length) {
+                    body.innerHTML = '<tr><td colspan="4" class="hint">無成交</td></tr>';
+                    return;
+                }
+                body.innerHTML = trades.slice(0, 10).map(t => {
+                    const side = t.isBuyerMaker ? 'SELL' : 'BUY';
+                    return `<tr><td>${formatTime(t.T || t.time)}</td><td><span class="tag">${side}</span></td><td>${t.p || '--'}</td><td>${t.q || '--'}</td></tr>`;
+                }).join('');
+            } catch (err) {
+                body.innerHTML = '<tr><td colspan="4" class="error">Agg trades 載入失敗</td></tr>';
+                console.error('Agg trades failed', err);
+            }
+        }
+
+        async function loadKlines() {
+            const body = document.getElementById('kline-body');
+            try {
+                const res = await fetch('/market/klines/QRLUSDT?interval=1m&limit=5');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                const klines = data.data || [];
+                body.innerHTML = klines.slice(-5).map(k => {
+                    return `<tr><td>${formatTime(k[0])}</td><td>${k[1]}</td><td>${k[2]}</td><td>${k[3]}</td><td>${k[4]}</td></tr>`;
+                }).join('');
+            } catch (err) {
+                body.innerHTML = '<tr><td colspan="5" class="error">Kline 載入失敗</td></tr>';
+                console.error('Klines failed', err);
             }
         }
 
@@ -232,14 +314,7 @@
                 body.innerHTML = orders.map(o => {
                     const side = (o.side || '').toUpperCase();
                     const ts = o.time || o.updateTime || o.transactTime;
-                    return `<tr>
-                        <td>${formatTime(ts)}</td>
-                        <td><span class="tag">${side || '--'}</span></td>
-                        <td>${o.price || '--'}</td>
-                        <td>${o.origQty || '--'}</td>
-                        <td>${o.executedQty || '--'}</td>
-                        <td>${o.status || '--'}</td>
-                    </tr>`;
+                    return `<tr><td>${formatTime(ts)}</td><td><span class="tag">${side || '--'}</span></td><td>${o.price || '--'}</td><td>${o.origQty || '--'}</td><td>${o.executedQty || '--'}</td><td>${o.status || '--'}</td></tr>`;
                 }).join('');
             } catch (err) {
                 body.innerHTML = `<tr><td colspan="6" class="error">訂單載入失敗</td></tr>`;
@@ -262,14 +337,7 @@
                     const isBuyer = t.isBuyer || t.isBuyerMaker;
                     const side = isBuyer ? 'BUY' : 'SELL';
                     const amount = t.quoteQty || (t.price && t.qty ? (parseFloat(t.price) * parseFloat(t.qty)).toFixed(4) : '--');
-                    return `<tr>
-                        <td>${formatTime(t.time || t.transactTime)}</td>
-                        <td><span class="tag">${side}</span></td>
-                        <td>${t.price || '--'}</td>
-                        <td>${t.qty || '--'}</td>
-                        <td>${amount}</td>
-                        <td>${t.commission || '--'} ${t.commissionAsset || ''}</td>
-                    </tr>`;
+                    return `<tr><td>${formatTime(t.time || t.transactTime)}</td><td><span class="tag">${side}</span></td><td>${t.price || '--'}</td><td>${t.qty || '--'}</td><td>${amount}</td><td>${t.commission || '--'} ${t.commissionAsset || ''}</td></tr>`;
                 }).join('');
             } catch (err) {
                 body.innerHTML = `<tr><td colspan="6" class="error">成交載入失敗</td></tr>`;
@@ -278,7 +346,17 @@
         }
 
         async function refreshAll() {
-            await Promise.all([loadBalances(), loadPrice(), loadOrders(), loadTrades()]);
+            await Promise.all([
+                loadBalances(),
+                loadPrice(),
+                loadBookTicker(),
+                loadExchangeInfo(),
+                loadDepth(),
+                loadAggTrades(),
+                loadKlines(),
+                loadOrders(),
+                loadTrades(),
+            ]);
         }
 
         document.getElementById('refresh-btn').addEventListener('click', refreshAll);
