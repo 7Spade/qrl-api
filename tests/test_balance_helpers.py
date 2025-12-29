@@ -48,6 +48,14 @@ class FakeRedis:
         self.storage["price"] = price
         return True
 
+    async def set_mexc_raw_response(self, endpoint: str, data):
+        self.storage[f"raw:{endpoint}"] = data
+        return True
+
+    async def set_mexc_total_value(self, total_value_usdt: float, breakdown):
+        self.storage["total_value"] = {"total_value_usdt": total_value_usdt, "breakdown": breakdown}
+        return True
+
 
 def test_build_balance_map_totals():
     data = {
@@ -76,3 +84,23 @@ async def test_balance_service_cache_fallback():
     result = await service.get_account_balance()
     assert result["source"] == "cache"
     assert result["balances"]["USDT"]["free"] == "5"
+
+
+@pytest.mark.asyncio
+async def test_balance_service_persists_totals_and_raw():
+    snapshot = {
+        "balances": {
+            "QRL": {"free": "1", "locked": "1", "total": 2},
+            "USDT": {"free": "3", "locked": "0", "total": 3},
+        },
+        "prices": {"QRLUSDT": 0.5},
+        "raw": {"id": 123},
+    }
+    redis_client = FakeRedis()
+    service = BalanceService(FakeMexcClient(snapshot=snapshot), redis_client)
+
+    result = await service.get_account_balance()
+
+    assert redis_client.storage["raw:account_balance"] == {"id": 123}
+    assert redis_client.storage["total_value"]["total_value_usdt"] == pytest.approx(4.0)
+    assert result["totals"]["total_value_usdt"] == pytest.approx(4.0)

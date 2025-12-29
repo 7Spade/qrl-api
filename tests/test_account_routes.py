@@ -1,5 +1,6 @@
 import sys
 from pathlib import Path
+import importlib
 
 import pytest
 from fastapi import HTTPException
@@ -8,10 +9,10 @@ from fastapi import HTTPException
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 from api import account_routes
-import importlib
 from infrastructure.external.mexc_client.account import fetch_balance_snapshot
 
 mexc_module = importlib.import_module("infrastructure.external.mexc_client")
+redis_module = importlib.import_module("infrastructure.external.redis_client")
 
 
 class DummyMexcClient:
@@ -72,3 +73,56 @@ async def test_balance_requires_price(monkeypatch):
 
     with pytest.raises(HTTPException):
         await account_routes.get_account_balance()
+
+
+class DummyRedisClient:
+    def __init__(self) -> None:
+        self.calls = []
+
+    async def get_mexc_raw_response(self, endpoint: str):
+        self.calls.append(endpoint)
+        return {"endpoint": endpoint, "data": {"foo": "bar"}}
+
+    async def get_mexc_account_balance(self):
+        return {"balances": {"QRL": {"total": "1"}, "USDT": {"total": "2"}}}
+
+    async def get_mexc_qrl_price(self):
+        return {"price": "0.5", "price_float": 0.5}
+
+    async def get_mexc_total_value(self):
+        return {"total_value_usdt": "2.5", "total_value_float": 2.5}
+
+
+class EmptyRedisClient:
+    async def get_mexc_raw_response(self, endpoint: str):
+        return None
+
+    async def get_mexc_account_balance(self):
+        return None
+
+    async def get_mexc_qrl_price(self):
+        return None
+
+    async def get_mexc_total_value(self):
+        return None
+
+
+@pytest.mark.asyncio
+async def test_balance_redis_returns_data(monkeypatch):
+    dummy_redis = DummyRedisClient()
+    monkeypatch.setattr(redis_module, "redis_client", dummy_redis)
+
+    result = await account_routes.get_balance_redis()
+
+    assert result["source"] == "redis"
+    assert result["raw"]["endpoint"] == "account_balance"
+    assert result["price"]["price"] == "0.5"
+    assert dummy_redis.calls == ["account_balance"]
+
+
+@pytest.mark.asyncio
+async def test_balance_redis_missing_data(monkeypatch):
+    monkeypatch.setattr(redis_module, "redis_client", EmptyRedisClient())
+
+    with pytest.raises(HTTPException):
+        await account_routes.get_balance_redis()
