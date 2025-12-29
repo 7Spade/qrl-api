@@ -14,6 +14,7 @@
             --accent: #6366f1;
             --success: #22c55e;
             --danger: #ef4444;
+            --border: rgba(255, 255, 255, 0.08);
         }
         body {
             margin: 0;
@@ -23,105 +24,44 @@
             min-height: 100vh;
         }
         .layout {
-            max-width: 1100px;
+            max-width: 1150px;
             margin: 0 auto;
             padding: 32px 20px 48px;
             display: flex;
             flex-direction: column;
             gap: 16px;
         }
-        header {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        h1 {
-            margin: 0;
-            font-size: 26px;
-        }
-        .subtitle {
-            color: var(--muted);
-            font-size: 14px;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 12px;
-        }
+        header { display: flex; flex-direction: column; gap: 6px; }
+        h1 { margin: 0; font-size: 26px; }
+        .subtitle { color: var(--muted); font-size: 14px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
         .card {
             background: var(--card);
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border);
             border-radius: 12px;
             padding: 16px;
             display: flex;
             flex-direction: column;
             gap: 8px;
         }
-        .card h2 {
-            margin: 0;
-            font-size: 16px;
-            color: var(--muted);
-            letter-spacing: 0.3px;
-        }
-        .value {
-            font-size: 30px;
-            font-weight: 700;
-        }
-        .row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-        }
-        .pill {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            background: rgba(255, 255, 255, 0.06);
-            color: var(--muted);
-        }
-        .section-title {
-            margin: 18px 0 6px;
-            font-size: 16px;
-            color: var(--muted);
-            letter-spacing: 0.2px;
-        }
-        ul {
-            margin: 0;
-            padding-left: 18px;
-            color: var(--muted);
-        }
+        .card h2 { margin: 0; font-size: 16px; color: var(--muted); letter-spacing: 0.3px; }
+        .value { font-size: 30px; font-weight: 700; }
+        .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .pill { padding: 4px 10px; border-radius: 20px; font-size: 12px; background: rgba(255, 255, 255, 0.06); color: var(--muted); }
+        .section-title { margin: 18px 0 6px; font-size: 16px; color: var(--muted); letter-spacing: 0.2px; }
+        ul { margin: 0; padding-left: 18px; color: var(--muted); }
         a { color: var(--accent); }
-        .status {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 10px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--muted);
-            font-size: 13px;
-        }
-        .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: var(--success);
-            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
-        }
+        .status { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); color: var(--muted); font-size: 13px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18); }
         .error { color: var(--danger); }
         .hint { color: var(--muted); font-size: 13px; }
-        button {
-            align-self: flex-start;
-            background: var(--accent);
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            padding: 10px 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
+        button { align-self: flex-start; background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 10px 14px; font-weight: 600; cursor: pointer; }
         button:active { opacity: 0.85; }
+        table { width: 100%; border-collapse: collapse; color: var(--text); }
+        th, td { padding: 10px 8px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14px; }
+        th { color: var(--muted); font-weight: 600; background: rgba(255, 255, 255, 0.02); }
+        .table-card { overflow: hidden; }
+        .tag { padding: 3px 8px; border-radius: 8px; font-size: 12px; background: rgba(255, 255, 255, 0.06); }
     </style>
 </head>
 <body>
@@ -132,37 +72,26 @@
                 <span>只讀儀表板 · 無交易操作</span>
             </div>
             <h1>QRL/USDT Monitoring</h1>
-            <p class="subtitle">依照 docs/MEXC_v3.md，僅展示行情與餘額，沒有下單或轉帳功能。</p>
+            <p class="subtitle">依照 docs/MEXC_v3.md，僅展示行情、餘額、訂單與成交，沒有下單或轉帳功能。</p>
         </header>
 
         <div class="grid" aria-live="polite">
             <div class="card">
                 <h2>QRL 餘額 (現貨)</h2>
                 <div class="value" id="qrl-total">--</div>
-                <div class="row hint">
-                    <span>可用</span><span id="qrl-free">--</span>
-                </div>
-                <div class="row hint">
-                    <span>凍結</span><span id="qrl-locked">--</span>
-                </div>
+                <div class="row hint"><span>可用</span><span id="qrl-free">--</span></div>
+                <div class="row hint"><span>凍結</span><span id="qrl-locked">--</span></div>
             </div>
             <div class="card">
                 <h2>USDT 餘額 (現貨)</h2>
                 <div class="value" id="usdt-total">--</div>
-                <div class="row hint">
-                    <span>可用</span><span id="usdt-free">--</span>
-                </div>
-                <div class="row hint">
-                    <span>凍結</span><span id="usdt-locked">--</span>
-                </div>
+                <div class="row hint"><span>可用</span><span id="usdt-free">--</span></div>
+                <div class="row hint"><span>凍結</span><span id="usdt-locked">--</span></div>
             </div>
             <div class="card">
                 <h2>QRL/USDT 價格</h2>
                 <div class="value" id="price">--</div>
-                <div class="row">
-                    <span class="hint">24h 變化</span>
-                    <span id="change" class="pill">--</span>
-                </div>
+                <div class="row"><span class="hint">24h 變化</span><span id="change" class="pill">--</span></div>
                 <div class="hint" id="updated">--</div>
             </div>
         </div>
@@ -170,6 +99,44 @@
         <div class="row" style="gap:12px; flex-wrap: wrap;">
             <button id="refresh-btn" type="button">重新整理</button>
             <span class="hint">每 30 秒自動更新一次；所有資料皆直接讀取 MEXC v3 公開/帳戶 API。</span>
+        </div>
+
+        <div class="card table-card" aria-live="polite">
+            <h2>我的訂單 (只讀)</h2>
+            <table aria-label="Open orders">
+                <thead>
+                    <tr>
+                        <th>時間</th>
+                        <th>方向</th>
+                        <th>價格</th>
+                        <th>數量</th>
+                        <th>已成交</th>
+                        <th>狀態</th>
+                    </tr>
+                </thead>
+                <tbody id="orders-body">
+                    <tr><td colspan="6" class="hint">載入中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card table-card" aria-live="polite">
+            <h2>我的成交 (只讀)</h2>
+            <table aria-label="Trades">
+                <thead>
+                    <tr>
+                        <th>時間</th>
+                        <th>方向</th>
+                        <th>價格</th>
+                        <th>數量</th>
+                        <th>金額</th>
+                        <th>手續費</th>
+                    </tr>
+                </thead>
+                <tbody id="trades-body">
+                    <tr><td colspan="6" class="hint">載入中...</td></tr>
+                </tbody>
+            </table>
         </div>
 
         <div>
@@ -195,6 +162,13 @@
         const formatNumber = (num, digits = 4) => {
             if (Number.isNaN(num)) return "--";
             return num.toFixed(digits);
+        };
+
+        const formatTime = (ts) => {
+            if (!ts) return "--";
+            const d = new Date(ts);
+            if (Number.isNaN(d.getTime())) return "--";
+            return d.toLocaleString('zh-TW');
         };
 
         async function loadBalances() {
@@ -244,8 +218,67 @@
             }
         }
 
+        async function loadOrders() {
+            const body = document.getElementById('orders-body');
+            try {
+                const res = await fetch('/account/orders');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                const orders = data.orders || [];
+                if (!orders.length) {
+                    body.innerHTML = '<tr><td colspan="6" class="hint">目前沒有訂單</td></tr>';
+                    return;
+                }
+                body.innerHTML = orders.map(o => {
+                    const side = (o.side || '').toUpperCase();
+                    const ts = o.time || o.updateTime || o.transactTime;
+                    return `<tr>
+                        <td>${formatTime(ts)}</td>
+                        <td><span class="tag">${side || '--'}</span></td>
+                        <td>${o.price || '--'}</td>
+                        <td>${o.origQty || '--'}</td>
+                        <td>${o.executedQty || '--'}</td>
+                        <td>${o.status || '--'}</td>
+                    </tr>`;
+                }).join('');
+            } catch (err) {
+                body.innerHTML = `<tr><td colspan="6" class="error">訂單載入失敗</td></tr>`;
+                console.error('Orders load failed', err);
+            }
+        }
+
+        async function loadTrades() {
+            const body = document.getElementById('trades-body');
+            try {
+                const res = await fetch('/account/trades');
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                const trades = data.trades || [];
+                if (!trades.length) {
+                    body.innerHTML = '<tr><td colspan="6" class="hint">目前沒有成交</td></tr>';
+                    return;
+                }
+                body.innerHTML = trades.map(t => {
+                    const isBuyer = t.isBuyer || t.isBuyerMaker;
+                    const side = isBuyer ? 'BUY' : 'SELL';
+                    const amount = t.quoteQty || (t.price && t.qty ? (parseFloat(t.price) * parseFloat(t.qty)).toFixed(4) : '--');
+                    return `<tr>
+                        <td>${formatTime(t.time || t.transactTime)}</td>
+                        <td><span class="tag">${side}</span></td>
+                        <td>${t.price || '--'}</td>
+                        <td>${t.qty || '--'}</td>
+                        <td>${amount}</td>
+                        <td>${t.commission || '--'} ${t.commissionAsset || ''}</td>
+                    </tr>`;
+                }).join('');
+            } catch (err) {
+                body.innerHTML = `<tr><td colspan="6" class="error">成交載入失敗</td></tr>`;
+                console.error('Trades load failed', err);
+            }
+        }
+
         async function refreshAll() {
-            await Promise.all([loadBalances(), loadPrice()]);
+            await Promise.all([loadBalances(), loadPrice(), loadOrders(), loadTrades()]);
         }
 
         document.getElementById('refresh-btn').addEventListener('click', refreshAll);
