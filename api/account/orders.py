@@ -5,15 +5,18 @@ from datetime import datetime
 import logging
 from fastapi import APIRouter, HTTPException
 
+from infrastructure.external.mexc_client.account import QRL_USDT_SYMBOL
+
 router = APIRouter(prefix="/account", tags=["Account"])
 logger = logging.getLogger(__name__)
 
 
 @router.get("/orders")
-async def get_orders(symbol: str = "QRLUSDT", limit: int = 50):
-    """Get user's open orders (real-time from MEXC API)."""
+async def get_orders():
+    """Get user's open orders for QRL/USDT (real-time from MEXC API)."""
     from infrastructure.external.mexc_client import mexc_client
 
+    symbol = QRL_USDT_SYMBOL
     try:
         async with mexc_client:
             orders = await mexc_client.get_open_orders(symbol)
