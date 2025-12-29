@@ -1,1 +1,3 @@
-User request: Investigate backend shared dependency failures on Cloud Run causing 500s for /account/balance, /account/orders, /market/klines; implement minimal changes to add diagnostics/protection per problem statement.
+User request: Review all URLs in docs/MEXC_v3.md, identify issues related to MEXC v3 API, and fix them in the repository.
+Repository: 7Spade/qrl-api
+Notes: Follow minimal-change instructions, update relevant docs/code/tests.
