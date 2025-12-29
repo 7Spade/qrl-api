@@ -36,7 +36,14 @@ async def lifespan(app: FastAPI):
     logger.info("Starting QRL Trading API (Cloud Run mode - Direct MEXC API, No Redis)...")
     logger.info(f"Listening on port: {config.PORT}")
     logger.info(f"Host: {config.HOST}")
-    
+    logger.info(
+        "Config status env=%s has_key=%s has_secret=%s has_redis_url=%s",
+        getattr(config, "FLASK_ENV", "unknown"),
+        bool(getattr(config, "MEXC_API_KEY", None)),
+        bool(getattr(config, "MEXC_SECRET_KEY", None)),
+        bool(getattr(config, "REDIS_URL", None)),
+    )
+
     # Test MEXC API (non-blocking)
     try:
         logger.info("Testing MEXC API connection...")
