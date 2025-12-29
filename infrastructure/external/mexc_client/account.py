@@ -41,6 +41,7 @@ async def fetch_balance_snapshot(client: "MEXCClient", symbol: str = "QRLUSDT") 
         },
         "raw": account_info,
         "price": {symbol: price},
+        "prices": {symbol: price},
     }
 
 __all__ = ["build_balance_map", "fetch_balance_snapshot"]

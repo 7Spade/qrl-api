@@ -2,23 +2,26 @@
 Account balance route with cache-aware balance service.
 """
 from datetime import datetime
+import importlib
 import logging
 from fastapi import APIRouter, HTTPException
 
-from infrastructure.external.mexc_client import mexc_client
 from infrastructure.external.redis_client import redis_client
 from services.account import BalanceService
+
+mexc_module = importlib.import_module("infrastructure.external.mexc_client")
 
 router = APIRouter(prefix="/account", tags=["Account"])
 logger = logging.getLogger(__name__)
 
-balance_service = BalanceService(mexc_client, redis_client)
+balance_service = BalanceService(mexc_module.mexc_client, redis_client)
 
 
 @router.get("/balance")
 async def get_account_balance():
     """Get account balance with fallback to cached snapshot."""
     try:
+        balance_service.mexc = mexc_module.mexc_client
         snapshot = await balance_service.get_account_balance()
         BalanceService.to_usd_values(snapshot)
         return snapshot

@@ -47,8 +47,13 @@ class BalanceService:
 
     async def get_account_balance(self, symbol: str = "QRLUSDT") -> Dict[str, Any]:
         try:
-            async with self.mexc:
-                snapshot = await self.mexc.get_balance_snapshot(symbol)
+            async with self.mexc as client:
+                if hasattr(client, "get_balance_snapshot"):
+                    snapshot = await client.get_balance_snapshot(symbol)
+                else:
+                    from infrastructure.external.mexc_client.account import fetch_balance_snapshot
+
+                    snapshot = await fetch_balance_snapshot(client, symbol)
             await self._cache_snapshot(snapshot)
             snapshot.update(
                 {
