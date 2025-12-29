@@ -45,3 +45,35 @@ async def get_cached_balance():
         cached["timestamp"] = datetime.now().isoformat()
         return cached
     raise HTTPException(status_code=404, detail="No cached balance available")
+
+
+@router.get("/balance/redis")
+async def get_balance_redis():
+    """Return persisted MEXC balance data stored in Redis."""
+    from infrastructure.external.redis_client import redis_client
+
+    raw = await redis_client.get_mexc_raw_response("account_balance")
+    balances = await redis_client.get_mexc_account_balance()
+    price = await redis_client.get_mexc_qrl_price()
+    total_value = await redis_client.get_mexc_total_value()
+
+    if not any([raw, balances, price, total_value]):
+        raise HTTPException(status_code=404, detail="No persisted balance data available")
+
+    return {
+        "success": True,
+        "source": "redis",
+        "raw": raw,
+        "balances": balances,
+        "price": price,
+        "total_value": total_value,
+        "timestamp": datetime.now().isoformat(),
+    }
+
+
+__all__ = [
+    "router",
+    "get_account_balance",
+    "get_cached_balance",
+    "get_balance_redis",
+]

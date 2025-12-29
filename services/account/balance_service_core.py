@@ -24,15 +24,34 @@ class BalanceService:
             return True
         return bool(getattr(self.mexc, "api_key", None) and getattr(self.mexc, "secret_key", None))
 
+    @staticmethod
+    def _compute_totals(snapshot: Dict[str, Any]) -> Dict[str, float]:
+        balances = snapshot.get("balances", {})
+        qrl = balances.get("QRL", {})
+        usdt = balances.get("USDT", {})
+        qrl_value_usdt = safe_float(qrl.get("value_usdt", 0))
+        usdt_total = safe_float(usdt.get("total", 0))
+        return {
+            "qrl_value_usdt": qrl_value_usdt,
+            "usdt_total": usdt_total,
+            "total_value_usdt": qrl_value_usdt + usdt_total,
+        }
+
     async def _cache_snapshot(self, snapshot: Dict[str, Any]) -> None:
         if not self.redis:
             return
+        totals = snapshot.get("totals") or self._compute_totals(snapshot)
         try:
             await self.redis.set_cached_account_balance(snapshot, ttl=self.cache_ttl)
             await self.redis.set_mexc_account_balance(snapshot.get("balances", {}))
             price = snapshot.get("prices", {}).get(QRL_USDT_SYMBOL)
             if price is not None:
                 await self.redis.set_mexc_qrl_price(price)
+            raw_data = snapshot.get("raw")
+            if raw_data is not None:
+                await self.redis.set_mexc_raw_response("account_balance", raw_data)
+            if totals:
+                await self.redis.set_mexc_total_value(totals.get("total_value_usdt", 0), totals)
         except Exception as exc:  # pragma: no cover - best-effort caching
             logger.debug(f"Skipping balance cache write: {exc}")
 
@@ -69,6 +88,8 @@ class BalanceService:
             async with self.mexc:
                 snapshot = await self.mexc.get_balance_snapshot()
             self._assert_required_fields(snapshot)
+            self.to_usd_values(snapshot)
+            snapshot["totals"] = self._compute_totals(snapshot)
             await self._cache_snapshot(snapshot)
             snapshot.update(
                 {
