@@ -7,6 +7,9 @@ from typing import Dict, Optional, List
 from datetime import datetime
 
 from .cache_policy import kline_ttl
+from .cache_strategy import CacheStrategy
+from .price_resolver import PriceResolver
+from .price_history_manager import PriceHistoryManager
 
 logger = logging.getLogger(__name__)
 
@@ -38,12 +41,12 @@ class MarketService:
         try:
             cached = await self.redis.get_ticker_24hr(symbol)
             if cached:
-                return self._wrap_response("cache", cached)
+                return self.cache_strategy.wrap("cache", cached)
             
             async with self.mexc:
                 ticker = await self.mexc.get_ticker_24hr(symbol)
             await self.redis.set_ticker_24hr(symbol, ticker, ttl=60)
-            return self._wrap_response("api", ticker)
+            return self.cache_strategy.wrap("api", ticker)
             
         except Exception as e:
             logger.error(f"Failed to get ticker for {symbol}: {str(e)}")
@@ -52,78 +55,7 @@ class MarketService:
                 "timestamp": datetime.now().isoformat()
             }
     
-    async def get_current_price(self, symbol: str) -> Optional[float]:
-        """
-        Get current price with cache
-        
-        Returns latest price or fetches from API
-        """
-        try:
-            # Check cached price first
-            cached_price = await self.price_repo.get_latest_price(symbol)
-            if cached_price:
-                return float(cached_price)
-            
-            # Fetch from API
-            async with self.mexc:
-                ticker = await self.mexc.get_ticker_24hr(symbol)
-                price = float(ticker.get("lastPrice", 0))
-            
-            # Update cache
-            await self.price_repo.set_latest_price(symbol, price)
-            
-            return price
-            
-        except Exception as e:
-            logger.error(f"Failed to get current price for {symbol}: {str(e)}")
-            return None
-    
-    async def get_orderbook(self, symbol: str, limit: int = 100) -> Dict:
-        """
-        Get order book depth
-        
-        Cache TTL: 10 seconds
-        """
-        try:
-            cached = await self.redis.get_orderbook(symbol)
-            if cached:
-                return self._wrap_response("cache", cached)
-            
-            async with self.mexc:
-                orderbook = await self.mexc.get_orderbook(symbol, limit=limit)
-            await self.redis.set_orderbook(symbol, orderbook, ttl=10)
-            return self._wrap_response("api", orderbook)
-            
-        except Exception as e:
-            logger.error(f"Failed to get orderbook for {symbol}: {str(e)}")
-            return {
-                "error": str(e),
-                "timestamp": datetime.now().isoformat()
-            }
-    
-    async def get_recent_trades(self, symbol: str, limit: int = 500) -> Dict:
-        """
-        Get recent trades
-        
-        Cache TTL: 30 seconds
-        """
-        try:
-            cached = await self.redis.get_recent_trades(symbol)
-            if cached:
-                return self._wrap_response("cache", cached)
-            
-            async with self.mexc:
-                trades = await self.mexc.get_recent_trades(symbol, limit=limit)
-            await self.redis.set_recent_trades(symbol, trades, ttl=30)
-            return self._wrap_response("api", trades)
-            
-        except Exception as e:
-            logger.error(f"Failed to get recent trades for {symbol}: {str(e)}")
-            return {
-                "error": str(e),
-                "timestamp": datetime.now().isoformat()
-            }
-    
+
     async def get_klines(
         self,
         symbol: str,
@@ -144,12 +76,12 @@ class MarketService:
             
             cached = await self.redis.get_klines(symbol, interval)
             if cached:
-                return self._wrap_response("cache", cached)
+                return self.cache_strategy.wrap("cache", cached)
             
             async with self.mexc:
                 klines = await self.mexc.get_klines(symbol, interval=interval, limit=limit)
             await self.redis.set_klines(symbol, interval, klines, ttl=ttl)
-            return self._wrap_response("api", klines)
+            return self.cache_strategy.wrap("api", klines)
             
         except Exception as e:
             logger.error(f"Failed to get klines for {symbol}: {str(e)}")
@@ -166,7 +98,7 @@ class MarketService:
         """
         try:
             # Get current price
-            price = await self.get_current_price(symbol)
+            price = await self.price_resolver.current_price(symbol)
             if not price:
                 return {
                     "success": False,
@@ -175,7 +107,7 @@ class MarketService:
                 }
             
             # Add to price history
-            await self.price_repo.add_price_to_history(symbol, price)
+            await self.price_history_manager.add(symbol, price)
             
             # Update latest price cache
             await self.price_repo.set_cached_price(symbol, price)
@@ -196,12 +128,6 @@ class MarketService:
             }
     
 
-    def _wrap_response(self, source: str, data):
-        return {
-            "source": source,
-            "data": data,
-            "timestamp": datetime.now().isoformat()
-        }
 
     async def get_price_statistics(self, symbol: str, limit: int = 100) -> Dict:
         """
