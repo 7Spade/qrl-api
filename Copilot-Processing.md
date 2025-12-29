@@ -1,1 +1,1 @@
-User request: 查看#63 https://github.com/7Spade/qrl-api/pull/63 根據內容進行修復。要求：使用 MCP 工具（Sequential Thinking → Software Planning Tool → Context7），並全程使用 Sequential Thinking 進行相依分析與遷移優先排序。
+User request: Implement layered jobs (01/05/15-min) with repo/service usage, fallback, metrics, Redis keys, partial snapshots; migrate direct mexc_client calls to repos; add tests; address 500 errors; follow constraints (4000 char file limit, use Context7 for MEXC API info).
