@@ -72,6 +72,9 @@ class BalanceService:
         price = safe_float(qrl.get("price"))
         qrl_total = safe_float(qrl.get("total", 0))
         snapshot["balances"]["QRL"].update(
-            {"value_usdt": qrl_total * price, "value_usdt_free": safe_float(qrl.get("free")) * price}
+            {
+                "value_usdt": qrl_total * price,
+                "value_usdt_free": safe_float(qrl.get("free")) * price,
+            }
         )
         return snapshot
