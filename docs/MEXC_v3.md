@@ -17,13 +17,13 @@ Websocket User Data Streams
 https://mexcdevelop.github.io/apidocs/spot_v3_en/#websocket-user-data-streams
 Listen Key
 https://mexcdevelop.github.io/apidocs/spot_v3_en/#listen-key
-Generate Listen Key
+Generate Listen Key (POST /api/v3/userDataStream)
 https://mexcdevelop.github.io/apidocs/spot_v3_en/#generate-listen-key
-Get Valid Listen Keys
+Get Valid Listen Keys (GET /api/v3/userDataStream)
 https://mexcdevelop.github.io/apidocs/spot_v3_en/#get-valid-listen-keys
-Extend Listen Key Validity
+Extend Listen Key Validity (PUT /api/v3/userDataStream)
 https://mexcdevelop.github.io/apidocs/spot_v3_en/#extend-listen-key-validity
-Close Listen Key
+Close Listen Key (DELETE /api/v3/userDataStream)
 https://mexcdevelop.github.io/apidocs/spot_v3_en/#close-listen-key
 Spot Account Update
 https://mexcdevelop.github.io/apidocs/spot_v3_en/#spot-account-update
@@ -61,8 +61,8 @@ https://mexcdevelop.github.io/apidocs/spot_v3_en/#miniticker
 How to Properly Maintain a Local Copy of the Order Book
 https://mexcdevelop.github.io/apidocs/spot_v3_en/#how-to-properly-maintain-a-local-copy-of-the-order-book
 
-All Orders:
-https://mexcdevelop.github.io/apidocs/spot_v3_en/#all-orders
+All Orders (GET /api/v3/allOrders):
+https://mexcdevelop.github.io/apidocs/spot_v3_en/#query-all-orders
 [
   {
     "symbol": "LTCBTC",
@@ -87,7 +87,7 @@ https://mexcdevelop.github.io/apidocs/spot_v3_en/#all-orders
     "origQuoteOrderQty": "0.000000"
   }
 ]
-Account Trade List: 應該要
+Account Trade List (GET /api/v3/myTrades):
 https://mexcdevelop.github.io/apidocs/spot_v3_en/#account-trade-list
 [
   {
@@ -109,7 +109,7 @@ https://mexcdevelop.github.io/apidocs/spot_v3_en/#account-trade-list
   }
 ]
 
-Account Information: 應該要
+Account Information (GET /api/v3/account):
 https://mexcdevelop.github.io/apidocs/spot_v3_en/#account-information
 {
     "makerCommission": null,
@@ -135,7 +135,7 @@ https://mexcdevelop.github.io/apidocs/spot_v3_en/#account-information
     "permissions": ["SPOT"]
 }
 
-Recent Trades List: 
+Recent Trades List (GET /api/v3/trades): 
 https://mexcdevelop.github.io/apidocs/spot_v3_en/#recent-trades-list
 [
   {
@@ -150,7 +150,7 @@ https://mexcdevelop.github.io/apidocs/spot_v3_en/#recent-trades-list
 ]
 
 
-Compressed/Aggregate Trades List:
+Compressed/Aggregate Trades List (GET /api/v3/aggTrades):
 https://mexcdevelop.github.io/apidocs/spot_v3_en/#compressedaggregate-trades-list
 [
   {
@@ -165,7 +165,7 @@ https://mexcdevelop.github.io/apidocs/spot_v3_en/#compressedaggregate-trades-lis
   }
 ]
 
-Kline/Candlestick Data: 
+Kline/Candlestick Data (GET /api/v3/klines): 
 https://mexcdevelop.github.io/apidocs/spot_v3_en/#klinecandlestick-data
 [
   [
