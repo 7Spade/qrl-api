@@ -1,0 +1,37 @@
+(索引):162   GET https://qrl-trading-api-545492969490.asia-southeast1.run.app/account/balance 500 (Internal Server Error)
+loadBalances @ (索引):162
+refreshAll @ (索引):356
+(匿名) @ (索引):369
+(索引):185  Balance load failed Error: HTTP 500
+    at loadBalances ((索引):163:36)
+    at async Promise.all (/index 0)
+    at async refreshAll ((索引):355:13)
+loadBalances @ (索引):185
+await in loadBalances
+refreshAll @ (索引):356
+(匿名) @ (索引):369
+(索引):312   GET https://qrl-trading-api-545492969490.asia-southeast1.run.app/account/orders 500 (Internal Server Error)
+loadOrders @ (索引):312
+refreshAll @ (索引):363
+(匿名) @ (索引):369
+(索引):327  Orders load failed Error: HTTP 500
+    at loadOrders ((索引):313:36)
+    at async Promise.all (/index 7)
+    at async refreshAll ((索引):355:13)
+loadOrders @ (索引):327
+await in loadOrders
+refreshAll @ (索引):363
+(匿名) @ (索引):369
+favicon.ico:1   GET https://qrl-trading-api-545492969490.asia-southeast1.run.app/favicon.ico 404 (Not Found)
+(索引):292   GET https://qrl-trading-api-545492969490.asia-southeast1.run.app/market/klines/QRLUSDT?interval=1m&limit=5 500 (Internal Server Error)
+loadKlines @ (索引):292
+refreshAll @ (索引):362
+(匿名) @ (索引):369
+(索引):305  Klines failed Error: HTTP 500
+    at loadKlines ((索引):293:36)
+    at async Promise.all (/index 6)
+    at async refreshAll ((索引):355:13)
+loadKlines @ (索引):305
+await in loadKlines
+refreshAll @ (索引):362
+(匿名) @ (索引):369
