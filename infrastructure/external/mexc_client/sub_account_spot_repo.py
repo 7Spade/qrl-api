@@ -4,6 +4,15 @@ from typing import Any, Dict, Optional
 
 
 class SubAccountSpotRepoMixin:
+
+    async def get_sub_account_asset(self, sub_account: str, account_type: str = "SPOT") -> Dict[str, Any]:
+        params = {
+            "subAccount": sub_account,
+            "accountType": account_type,
+            "timestamp": int(time.time() * 1000),
+        }
+        return await self._request("GET", "/api/v3/sub-account/asset", params=params, signed=True)
+
     async def get_sub_accounts_spot(self, sub_account_id: Optional[str] = None, page: int = 1, limit: int = 10) -> Dict[str, Any]:
         params = {"page": page, "limit": limit, "timestamp": int(time.time() * 1000)}
         if sub_account_id:

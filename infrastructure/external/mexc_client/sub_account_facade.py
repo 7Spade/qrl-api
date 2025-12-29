@@ -22,7 +22,4 @@ class SubAccountFacadeMixin:
     async def get_sub_account_balance(self, identifier: str) -> Dict[str, Any]:
         if config.is_broker_mode:
             return await self.get_broker_sub_account_assets(identifier)
-        raise NotImplementedError(
-            "Spot API does not support querying sub-account balance from main account. "
-            "You must use the sub-account's own API key to query its balance."
-        )
+        return await self.get_sub_account_asset(identifier, account_type="SPOT")

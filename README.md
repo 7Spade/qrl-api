@@ -107,6 +107,21 @@ uvicorn main:app --host 0.0.0.0 --port 8080
 curl http://localhost:8080/health
 ```
 
+範例回應（用於快速檢查 Cloud Run 環境變數與外部服務連線）：
+```json
+{
+  "status": "degraded",
+  "env": "prod",
+  "mexc_api_configured": false,
+  "mexc_secret_configured": false,
+  "redis_configured": false,
+  "redis_connected": false,
+  "mexc_reachable": false,
+  "missing": ["MEXC_API_KEY", "MEXC_SECRET_KEY", "REDIS_URL"],
+  "timestamp": "2024-01-01T00:00:00"
+}
+```
+
 ### 2. 獲取機器人狀態
 
 ```bash
