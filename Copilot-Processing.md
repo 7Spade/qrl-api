@@ -1,1 +1,1 @@
-User request: 查看#63 https://github.com/7Spade/qrl-api/pull/63 根據內容進行修復。要求：使用 MCP 工具（Sequential Thinking → Software Planning Tool → Context7），並全程使用 Sequential Thinking 進行相依分析與遷移優先排序。
+User request: Investigate backend shared dependency failures on Cloud Run causing 500s for /account/balance, /account/orders, /market/klines; implement minimal changes to add diagnostics/protection per problem statement.
