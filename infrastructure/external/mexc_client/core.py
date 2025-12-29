@@ -74,6 +74,17 @@ class MEXCClient(
         if self._client:
             await self._client.aclose()
     
+    def _generate_signature(self, params: Dict[str, Any]) -> str:
+        """
+        Generate HMAC SHA256 signature for signed requests.
+        
+        Args:
+            params: Request parameters including timestamp.
+        """
+        if not self.secret_key:
+            raise ValueError("Secret key required for authenticated requests")
+        return generate_signature(self.secret_key, params)
+    
 
     async def _request(
         self,
@@ -156,6 +167,32 @@ class MEXCClient(
         raise last_exception if last_exception else Exception("Unknown error")
     
     # ===== Account Endpoints (Authenticated) =====
+
+    async def place_market_order(
+        self,
+        symbol: str,
+        side: str,
+        quantity: Optional[float] = None,
+        quote_order_qty: Optional[float] = None,
+    ) -> Dict[str, Any]:
+        """
+        Convenience helper for market orders.
+        
+        Args:
+            symbol: Trading symbol (e.g., QRLUSDT)
+            side: BUY or SELL
+            quantity: Base asset quantity
+            quote_order_qty: Quote asset quantity (mutually exclusive with quantity)
+        """
+        if quantity is None and quote_order_qty is None:
+            raise ValueError("Either quantity or quote_order_qty is required for market orders")
+        return await self.create_order(
+            symbol=symbol,
+            side=side.upper(),
+            order_type="MARKET",
+            quantity=quantity,
+            quote_order_qty=quote_order_qty,
+        )
     
 
 
