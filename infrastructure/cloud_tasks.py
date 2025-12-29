@@ -36,7 +36,7 @@ async def task_sync_balance(
         raise HTTPException(status_code=401, detail="Unauthorized - Cloud Scheduler only")
     
     auth_method = "OIDC" if authorization else "X-CloudScheduler"
-    logger.info(f"[Cloud Task] sync-balance authenticated via {auth_method}")
+    logger.info(f"[Cloud Task] 01-min-job authenticated via {auth_method}")
     
     try:
         if not config.MEXC_API_KEY or not config.MEXC_SECRET_KEY:
@@ -76,7 +76,7 @@ async def task_sync_balance(
             
             return {
                 "status": "success",
-                "task": "sync-balance",
+                "task": "01-min-job",
                 "data": {
                     "qrl_balance": qrl_balance,
                     "usdt_balance": usdt_balance,
@@ -110,7 +110,7 @@ async def task_update_price(
         raise HTTPException(status_code=401, detail="Unauthorized - Cloud Scheduler only")
     
     auth_method = "OIDC" if authorization else "X-CloudScheduler"
-    logger.info(f"[Cloud Task] update-price authenticated via {auth_method}")
+    logger.info(f"[Cloud Task] 05-min-job authenticated via {auth_method}")
     
     try:
         async with mexc_client:
@@ -131,7 +131,7 @@ async def task_update_price(
             
             return {
                 "status": "success",
-                "task": "update-price",
+                "task": "05-min-job",
                 "data": {
                     "price": price,
                     "volume_24h": volume_24h,
@@ -167,7 +167,7 @@ async def task_update_cost(
         raise HTTPException(status_code=401, detail="Unauthorized - Cloud Scheduler only")
     
     auth_method = "OIDC" if authorization else "X-CloudScheduler"
-    logger.info(f"[Cloud Task] update-cost authenticated via {auth_method}")
+    logger.info(f"[Cloud Task] 15-min-job authenticated via {auth_method}")
     
     try:
         async with mexc_client:
@@ -179,7 +179,7 @@ async def task_update_cost(
         
         return {
             "status": "success",
-            "task": "update-cost",
+            "task": "15-min-job",
             "data": {
                 "current_price": current_price
             },
