@@ -31,7 +31,7 @@ class AccountBalanceCacheMixin:
             logger.info("Stored MEXC account balance data")
             return True
         except Exception as exc:  # pragma: no cover - I/O wrapper
-            logger.error(f"Failed to store MEXC account balance: {exc}")
+            logger.error("Failed to store MEXC account balance: %s", exc)
             return False
 
     async def get_mexc_account_balance(self) -> Optional[Dict[str, Any]]:
@@ -45,7 +45,7 @@ class AccountBalanceCacheMixin:
                 return json.loads(data)
             return None
         except Exception as exc:  # pragma: no cover - I/O wrapper
-            logger.error(f"Failed to get MEXC account balance: {exc}")
+            logger.error("Failed to get MEXC account balance: %s", exc)
             return None
 
     async def set_cached_account_balance(self, balance_data: Dict[str, Any], ttl: int = 45) -> bool:
@@ -63,7 +63,7 @@ class AccountBalanceCacheMixin:
             await client.setex(key, ttl, json.dumps(payload))
             return True
         except Exception as exc:  # pragma: no cover - I/O wrapper
-            logger.error(f"Failed to cache account balance: {exc}")
+            logger.error("Failed to cache account balance: %s", exc)
             return False
 
     async def get_cached_account_balance(self) -> Optional[Dict[str, Any]]:
@@ -77,7 +77,7 @@ class AccountBalanceCacheMixin:
                 return json.loads(data)
             return None
         except Exception as exc:  # pragma: no cover - I/O wrapper
-            logger.error(f"Failed to get cached account balance: {exc}")
+            logger.error("Failed to get cached account balance: %s", exc)
             return None
 
 
