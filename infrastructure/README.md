@@ -17,10 +17,20 @@ infrastructure/
 │   │   ├─ __init__.py
 │   │   ├─ core.py               # 客户端实现
 │   │   └─ client.py             # 向后兼容导出
-│   └─ redis_client/             # Redis 客户端
+│   └─ redis_client/             # Redis 客户端（asyncio，分层 mixin）
 │       ├─ __init__.py
-│       ├─ core.py               # 客户端实现
-│       └─ client.py             # 向后兼容导出
+│       ├─ core.py               # 连接池 / 健康检查，汇总 mixin
+│       ├─ client.py             # 向后兼容导出
+│       ├─ balance_cache.py      # 账户余额 / 总资产缓存
+│       ├─ market_cache.py       # 行情缓存（ticker / orderbook / trades / klines）
+│       ├─ bot_status_repo.py    # 机器人状态存取
+│       ├─ position_repo.py      # 持仓快照
+│       ├─ position_layers_repo.py # 分层持仓
+│       ├─ price_repo.py         # 价格快照 & 历史
+│       ├─ trade_counter_repo.py # 交易计数 / 最近交易时间
+│       ├─ trade_history_repo.py # 交易历史
+│       ├─ cost_repo.py          # 成本 / PnL
+│       └─ mexc_raw_repo.py      # MEXC 原始响应留存
 │
 ├─ tasks/                        # Cloud Scheduler / FastAPI 任务
 │   ├─ __init__.py

@@ -1,9 +1,8 @@
 """Async Redis client for trading bot state."""
 import logging
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import redis.asyncio as redis
-from redis.connection import HiredisParser  # optional, available when hiredis is installed
 
 from infrastructure.config.config import config
 from infrastructure.external.redis_client.balance_cache import BalanceCacheMixin
@@ -16,6 +15,11 @@ from infrastructure.external.redis_client.trade_counter_repo import TradeCounter
 from infrastructure.external.redis_client.trade_history_repo import TradeHistoryRepoMixin
 from infrastructure.external.redis_client.cost_repo import CostRepoMixin
 from infrastructure.external.redis_client.mexc_raw_repo import MexcRawRepoMixin
+
+try:
+    from redis.connection import HiredisParser  # optional, available when hiredis is installed
+except ImportError:  # pragma: no cover - defensive fallback
+    HiredisParser = None  # type: ignore[misc]
 
 logger = logging.getLogger(__name__)
 
@@ -37,49 +41,52 @@ class RedisClient(
         self.pool: Optional[redis.ConnectionPool] = None
         self.connected = False
 
+    def _connection_kwargs(self) -> Dict[str, Any]:
+        kwargs: Dict[str, Any] = {
+            "max_connections": 20,
+            "decode_responses": config.REDIS_DECODE_RESPONSES,
+            "socket_connect_timeout": 5,
+            "socket_timeout": 5,
+            "health_check_interval": 30,
+        }
+        if HiredisParser:
+            kwargs["parser_class"] = HiredisParser
+            logger.debug("Using HiredisParser for RESP decoding")
+        else:
+            logger.info("Hiredis not available; falling back to default parser")
+        return kwargs
+
     async def connect(self) -> bool:
         try:
+            kwargs = self._connection_kwargs()
             if config.REDIS_URL:
-                self.pool = redis.ConnectionPool.from_url(
-                    config.REDIS_URL,
-                    max_connections=20,
-                    decode_responses=config.REDIS_DECODE_RESPONSES,
-                    socket_connect_timeout=5,
-                    socket_timeout=5,
-                    health_check_interval=30,
-                    parser_class=HiredisParser,
-                )
-                logger.info(f"Created Redis connection pool using REDIS_URL")
+                self.pool = redis.ConnectionPool.from_url(config.REDIS_URL, **kwargs)
+                logger.info("Created Redis connection pool using REDIS_URL")
             else:
                 self.pool = redis.ConnectionPool(
                     host=config.REDIS_HOST,
                     port=config.REDIS_PORT,
                     password=config.REDIS_PASSWORD,
                     db=config.REDIS_DB,
-                    max_connections=20,
-                    decode_responses=config.REDIS_DECODE_RESPONSES,
-                    socket_connect_timeout=5,
-                    socket_timeout=5,
-                    health_check_interval=30,
-                    parser_class=HiredisParser,
+                    **kwargs,
                 )
-                logger.info(f"Created Redis connection pool at {config.REDIS_HOST}:{config.REDIS_PORT}")
-            
+                logger.info("Created Redis connection pool at %s:%s", config.REDIS_HOST, config.REDIS_PORT)
+
             self.client = redis.Redis(connection_pool=self.pool)
             await self.client.ping()
             self.connected = True
             logger.info("Redis connection established successfully")
             return True
-        
+
         except redis.ConnectionError as e:
-            logger.error(f"Failed to connect to Redis: {e}")
+            logger.error("Failed to connect to Redis: %s", e)
             self.connected = False
             return False
         except Exception as e:
-            logger.error(f"Unexpected error connecting to Redis: {e}")
+            logger.error("Unexpected error connecting to Redis: %s", e)
             self.connected = False
             return False
-    
+
     async def health_check(self) -> bool:
         try:
             if self.client:
@@ -87,7 +94,7 @@ class RedisClient(
                 return True
             return False
         except Exception as e:
-            logger.error(f"Redis health check failed: {e}")
+            logger.error("Redis health check failed: %s", e)
             return False
 
 
