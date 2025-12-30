@@ -1,6 +1,10 @@
-from repositories.account import PositionRepository, CostRepository
-from repositories.market import PriceRepository
-from repositories.trade import TradeRepository
+"""Legacy repositories shim - redirects to src.app.infrastructure"""
+from src.app.infrastructure.persistence.redis.repos import (
+    PositionRepository,
+    CostRepository,
+    PriceRepository,
+    TradeRepository,
+)
 
 __all__ = [
     "PositionRepository",
@@ -8,3 +12,4 @@ __all__ = [
     "PriceRepository",
     "TradeRepository",
 ]
+
