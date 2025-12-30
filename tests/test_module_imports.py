@@ -41,10 +41,12 @@ def test_infrastructure_wrappers():
 
 
 def test_task_router_wrapper():
-    from infrastructure.tasks import mexc_tasks
+    from src.app.interfaces.tasks.router import router
 
-    assert hasattr(mexc_tasks, "router")
-    assert mexc_tasks.router.prefix == "/tasks"
+    paths = {route.path for route in router.routes}
+    assert "/tasks/01-min-job" in paths
+    assert "/tasks/05-min-job" in paths
+    assert "/tasks/15-min-job" in paths
 
 
 def test_utils_wrappers():

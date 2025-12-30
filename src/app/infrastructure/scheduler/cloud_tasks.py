@@ -1,7 +1,7 @@
 """
-Scheduler shim exposing the legacy cloud tasks router.
+Scheduler shim exposing the consolidated Cloud Tasks router.
 """
 
-from infrastructure.tasks.router import router
+from src.app.interfaces.tasks.router import router
 
 __all__ = ["router"]
