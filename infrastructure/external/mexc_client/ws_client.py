@@ -105,7 +105,8 @@ class MEXCWebSocketClient:
         close_timeout: int = 5,
     ) -> None:
         self.url = url
-        self.subscriptions: Set[str] = set(subscriptions or [])
+        self._pending_subscriptions: Set[str] = set(subscriptions or [])
+        self.subscriptions: Set[str] = set()
         self._binary_decoder = binary_decoder
         self._heartbeat = heartbeat
         self._close_timeout = close_timeout
@@ -118,8 +119,8 @@ class MEXCWebSocketClient:
             ping_interval=None,  # we send explicit PING frames expected by MEXC
             close_timeout=self._close_timeout,
         )
-        if self.subscriptions:
-            await self.subscribe(self.subscriptions)
+        if self._pending_subscriptions:
+            await self.subscribe(self._pending_subscriptions)
         if self._heartbeat:
             self._ping_task = asyncio.create_task(self._auto_ping())
         return self
