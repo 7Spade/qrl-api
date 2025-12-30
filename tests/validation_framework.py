@@ -7,6 +7,7 @@ import sys
 from pathlib import Path
 from typing import Dict
 
+# Local application imports
 from architecture_guard import check_architecture
 
 logger = logging.getLogger(__name__)
