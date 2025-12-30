@@ -1,1 +1,1 @@
-User request: 根據"ARCHITECTURE_TREE.md"實施漸進式遷移，確保功能不受影響並淘汰無用檔案；依 MCP 工作流程使用 Sequential Thinking 分析與 Software Planning Tool 規劃。
+User request: Perform structural migration per problem statement ensuring src/ matches ARCHITECTURE_TREE.md, remove old structure files outside src when fully migrated, maintain behavior/interfaces, keep files under 4000 chars, minimal changes, follow constraints and progress reporting.
