@@ -67,6 +67,28 @@ uvicorn main:app --host 0.0.0.0 --port 8080
 - Swagger UI: http://localhost:8080/docs
 - ReDoc: http://localhost:8080/redoc
 
+### 6. 開發常用指令
+
+```bash
+# 安裝執行與開發依賴
+make install-dev
+
+# 格式化（black）
+make fmt
+
+# 靜態檢查（ruff）
+make lint
+
+# 型別檢查（mypy）
+make type
+
+# 複雜度檢查（radon，閾值 B 以上警示）
+make complexity
+
+# 測試（pytest）
+make test
+```
+
 ## API 端點
 
 ### 核心端點
@@ -383,4 +405,3 @@ POST /account/sub-account/api-key
 - **SPOT API**: 無法從主帳戶直接查詢子帳戶餘額，需使用子帳戶的 API Key
 - **BROKER API**: 需要 MEXC Broker 帳戶權限
 - 詳細的 API 文檔請參考 MEXC v3 官方文檔
-
