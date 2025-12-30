@@ -10,7 +10,6 @@ from .connection import MexcConnection
 from .endpoints import (
     AccountEndpoints,
     MarketEndpoints,
-    OrderEndpoints,
     SubAccountEndpoints,
     TradingHelpersMixin,
     UserStreamMixin,

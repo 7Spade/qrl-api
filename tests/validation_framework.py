@@ -3,9 +3,8 @@ Unified Validation Framework
 Consolidates validation logic from validate_fixes.py and validate_cloud_task_fixes.py
 """
 import sys
-import os
 import logging
-from typing import Dict, List, Tuple
+from typing import Dict
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +43,7 @@ class ValidationFramework:
             for key in required:
                 value = getattr(config, key, None)
                 if not value:
-                    self._add_result(f"Config {key}", False, f"Missing or empty")
+                    self._add_result(f"Config {key}", False, "Missing or empty")
                     return False
 
             self._add_result("Configuration", True, "All required settings present")
@@ -139,10 +138,6 @@ class ValidationFramework:
         - Proper imports
         """
         try:
-            # Check domain layer has no external dependencies
-            import importlib
-            import ast
-
             checks = [
                 ("Domain layer isolation", self._check_domain_isolation),
                 ("Repository pattern", self._check_repository_pattern),

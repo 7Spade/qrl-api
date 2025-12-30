@@ -1,12 +1,16 @@
 """
 Account and balance helpers extracted from MEXC client core.
 """
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Any, Dict
 
 from infrastructure.utils.type_safety import safe_float
 
 
 QRL_USDT_SYMBOL = "QRLUSDT"
+
+
+if TYPE_CHECKING:
+    from .client import MEXCClient
 
 
 def build_balance_map(account_info: Dict[str, Any]) -> Dict[str, Dict[str, str]]:

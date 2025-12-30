@@ -3,7 +3,7 @@ Account trades route.
 """
 from datetime import datetime
 import logging
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 
 router = APIRouter(prefix="/account", tags=["Account"])
 logger = logging.getLogger(__name__)

@@ -3,7 +3,7 @@ Trading Service - Orchestrates trading workflow
 Coordinates domain logic, repositories, and external APIs
 """
 import logging
-from typing import Dict, Optional
+from typing import Dict
 from datetime import datetime
 
 from services.trading.balance_resolver import BalanceResolver
@@ -114,12 +114,13 @@ class TradingService:
             current_price = workflow_result.get("price")
             position_data = await self.position_repo.get_position()
             # Phase 5: Calculate quantities (domain logic)
+            usdt_balance = workflow_result.get("usdt_balance", 0)
+
             if signal == "BUY":
                 quantity_result = self.position_manager.calculate_buy_quantity(
                     usdt_balance=usdt_balance, price=current_price
                 )
-                quantity = quantity_result.get("quantity", 0)
-                usdt_amount = quantity_result.get("usdt_amount", 0)
+                quantity = quantity_result.get("qrl_quantity", 0)
 
             elif signal == "SELL":
                 total_qrl = (
@@ -132,7 +133,7 @@ class TradingService:
                 quantity_result = self.position_manager.calculate_sell_quantity(
                     total_qrl=total_qrl, core_qrl=core_qrl
                 )
-                quantity = quantity_result.get("quantity", 0)
+                quantity = quantity_result.get("qrl_to_sell", 0)
 
             if quantity <= 0:
                 return {
@@ -185,7 +186,7 @@ class TradingService:
 
             elif signal == "SELL":
                 # Calculate P&L
-                pnl_data = await self.cost_repo.update_after_sell(
+                await self.cost_repo.update_after_sell(
                     sell_quantity=quantity, sell_price=current_price
                 )
                 # Update position

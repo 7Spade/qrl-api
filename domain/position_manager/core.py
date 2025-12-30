@@ -1,7 +1,7 @@
 """
 Position management domain logic
 """
-from typing import Dict, Any
+from typing import Dict
 from infrastructure.config.config import config
 
 

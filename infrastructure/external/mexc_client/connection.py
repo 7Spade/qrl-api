@@ -7,7 +7,7 @@ from typing import Any, Dict, Optional
 
 import httpx
 
-from .exceptions import MexcAPIError, MexcRequestError
+from .exceptions import MexcRequestError
 from .session import build_async_client
 
 logger = logging.getLogger(__name__)

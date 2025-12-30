@@ -3,13 +3,10 @@ Market Service - Market data operations with caching
 Coordinates price repositories and MEXC API
 """
 import logging
-from typing import Dict, Optional, List
 from datetime import datetime
+from typing import Dict
 
 from .cache_policy import kline_ttl
-from .cache_strategy import CacheStrategy
-from .price_resolver import PriceResolver
-from .price_history_manager import PriceHistoryManager
 
 logger = logging.getLogger(__name__)
 

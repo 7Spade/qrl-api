@@ -62,7 +62,7 @@ class RedisClient(
                     health_check_interval=30,
                     **parser_kwargs,
                 )
-                logger.info(f"Created Redis connection pool using REDIS_URL")
+                logger.info("Created Redis connection pool using REDIS_URL")
             else:
                 self.pool = redis.ConnectionPool(
                     host=config.REDIS_HOST,

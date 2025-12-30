@@ -1,7 +1,8 @@
 """MEXC spot websocket client."""
 from __future__ import annotations
 
-import asyncio, json
+import asyncio
+import json
 from contextlib import suppress
 
 import websockets
