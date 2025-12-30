@@ -6,7 +6,7 @@
 
 ## Summary
 
-Initialized changes log to track progressive migration into `src/app` per `ARCHITECTURE_TREE.md`.
+Initialized changes log to track progressive migration into `src/app` per `ARCHITECTURE_TREE.md`. Migrated Cloud Task handlers into the application layer, rebuilt the account router in `interfaces/http` (retiring `api/account_routes.py`), and removed legacy `infrastructure/tasks` router files while keeping behavior unchanged.
 
 ## Changes
 
@@ -19,6 +19,8 @@ Initialized changes log to track progressive migration into `src/app` per `ARCHI
 - src/app/application/bot/{start.py,stop.py,status.py} - Bot control shims re-exporting TradingService.
 - src/app/domain/ports/{account_port.py,market_port.py,trade_port.py,position_port.py} - Domain port shims mapping legacy interfaces.
 - src/app/domain/ports/{cost_port.py,price_port.py} - Canonical ports for cost/price repositories.
+- src/app/application/account/sync_balance.py - Cloud Task handler for balance sync in the application layer.
+- src/app/application/market/{sync_price.py,sync_cost.py} - Cloud Task handlers for price and cost checks in the application layer.
 - src/app/infrastructure/exchange/mexc/_shared/{http_client.py,response_parser.py} - Shared HTTP helpers for MEXC layout.
 - src/app/infrastructure/exchange/mexc/http/{auth/headers.py,auth/sign_request.py,market/get_price.py,market/get_orderbook.py,account/get_balance.py,account/list_orders.py,trade/place_order.py,trade/cancel_order.py} - HTTP adapters delegating to legacy mexc_client and services.
 - src/app/infrastructure/exchange/mexc/ws/{connect.py,handlers.py} - WS adapter shims re-exporting legacy websocket helpers.
@@ -28,7 +30,7 @@ Initialized changes log to track progressive migration into `src/app` per `ARCHI
 - src/app/infrastructure/persistence/redis/keys/{account_keys.py,market_keys.py} - Key constants aligning with target layout.
 - src/app/infrastructure/persistence/redis/repos/{account_balance_repo.py,market_price_repo.py} - Repo shims re-exporting legacy cache mixins.
 - src/app/infrastructure/bot_runtime/{lifecycle.py,executor.py,risk_adapter.py} - Bot runtime shims exposing TradingBot.
-- src/app/infrastructure/scheduler/cloud_tasks.py - Scheduler shim re-exporting legacy tasks router.
+- src/app/infrastructure/scheduler/cloud_tasks.py - Scheduler shim now importing the consolidated interfaces tasks router.
 - src/app/shared/{clock.py,ids.py,typing.py,errors.py} - Shared utility shims and placeholders.
 - src/app/domain/models/{account.py,balance.py} - Minimal domain model placeholders.
 - src/app/infrastructure/config/{settings.py,env.py} - Config shims referencing legacy config.
@@ -40,32 +42,54 @@ Initialized changes log to track progressive migration into `src/app` per `ARCHI
 - src/app/application/account/get_balance.py - Points to migrated BalanceService.
 - src/app/infrastructure/exchange/mexc/http/account/get_balance.py - Points to migrated BalanceService.
 - domain/interfaces/{account.py,market.py,trade.py,position.py,cost.py,price.py} - Wrap to re-export canonical ports in src/app/domain/ports.
+- src/app/interfaces/tasks/mexc/{sync_account.py,sync_market.py,sync_trades.py} - Rewired to application-layer Cloud Task handlers.
+- src/app/infrastructure/scheduler/cloud_tasks.py - Imports the interfaces/tasks router instead of legacy infrastructure router.
+- tests/test_module_imports.py - Expects task routes to surface via interfaces router.
+- tests/test_tasks_router.py - Adds guards to ensure Cloud Tasks reject unauthenticated requests.
+- ARCHITECTURE_TREE.md - Progress snapshot updated for task migration and legacy cleanup.
+- src/app/interfaces/http/account.py - Reimplemented account router without api/account_routes shim; inlined balance endpoints.
+- tests/test_account_routes.py - Points to interfaces/http/account router.
+- docs/MEXC_API_BALANCE_FIX.md - Updated import path for account router.
 
 ### Removed
 
-- none
+- infrastructure/tasks/mexc_tasks_core.py - Legacy Cloud Task handlers replaced by application-layer modules.
+- infrastructure/tasks/mexc_tasks.py - Legacy wrapper removed.
+- infrastructure/tasks/router.py - Legacy task router removed.
+- infrastructure/tasks/__init__.py - Removed with the retired task package.
+- api/account_routes.py - Legacy account router aggregator removed.
 
 ## Release Summary
 
-**Total Files Affected**: 9
+**Total Files Affected**: 18 (this iteration)
 
 ### Files Created (3)
 
-- src/app/application/account/balance_service.py - Migrated BalanceService implementation.
-- src/app/domain/ports/{cost_port.py,price_port.py} - Added canonical cost/price ports.
+- src/app/application/account/sync_balance.py - Cloud Task handler in application layer.
+- src/app/application/market/{sync_price.py,sync_cost.py} - Cloud Task handlers for market price tasks.
 - .copilot-tracking/changes/20251230-migration-changes.md - Tracks migration progress and file movements.
 
-### Files Modified (6)
+### Files Modified (11)
 
+- src/app/interfaces/tasks/mexc/{sync_account.py,sync_market.py,sync_trades.py}
+- src/app/infrastructure/scheduler/cloud_tasks.py
+- tests/test_module_imports.py
+- tests/test_tasks_router.py
+- ARCHITECTURE_TREE.md
 - api/account/balance.py
-- services/account/balance_service_core.py
 - src/app/application/account/get_balance.py
-- src/app/infrastructure/exchange/mexc/http/account/get_balance.py
-- domain/interfaces/{account.py,market.py,trade.py,position.py,cost.py,price.py}
+- src/app/interfaces/http/account.py
+- tests/test_account_routes.py
+- docs/MEXC_API_BALANCE_FIX.md
+- .copilot-tracking/changes/20251230-migration-changes.md
 
-### Files Removed (0)
+### Files Removed (5)
 
-- none
+- infrastructure/tasks/mexc_tasks_core.py
+- infrastructure/tasks/mexc_tasks.py
+- infrastructure/tasks/router.py
+- infrastructure/tasks/__init__.py
+- api/account_routes.py
 
 ### Dependencies & Infrastructure
 

@@ -5,10 +5,10 @@ See `結構.md` (layered rules), `網頁結構.md` (interface layout), and `調�
 
 ## Progress snapshot
 - Stage 0 skeleton created under `src/app/*` with empty packages and `bootstrap.py` placeholders.
-- Interfaces: HTTP shim modules now expose legacy routers from `api/*` and `main.py` imports through these shims to keep behavior unchanged.
-- Cloud tasks: a shim at `interfaces/tasks/router.py` re-exports the legacy task router so `main.py` mounts tasks through the interfaces layer without changing behavior.
+- Interfaces: HTTP shim modules expose legacy routers from `api/*`; account routes now assembled directly in `interfaces/http/account.py` (balance logic inlined, orders/trades/sub-account routers included).
+- Cloud tasks: task handlers now live in `src/app/application/account` and `src/app/application/market`, and `interfaces/tasks` mounts them; removed the old `infrastructure/tasks/*` router files.
 - Cleanup: legacy `infrastructure/cloud_tasks.py` shim removed after the interfaces/tasks router took over mounting; removed unused `infrastructure/tasks/auth.py` placeholder.
-- Runtime logic still relies on legacy handlers; see `src/app/README.md` for legacy → target mapping.
+- Runtime logic still relies on legacy handlers for HTTP, while tasks now use the application-layer handlers; see `src/app/README.md` for legacy → target mapping.
 
 src/
 └── app/

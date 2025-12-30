@@ -190,7 +190,7 @@ done
 ### Import Testing
 ```python
 # Test module import
-from api.account_routes import router
+from src.app.interfaces.http.account import router
 print(f"Router loaded: {router.prefix}")
 
 # Test endpoint availability
@@ -219,4 +219,3 @@ The MEXC v3 API balance display issue has been completely resolved. All 28 synta
 **Status**: ✅ RESOLVED
 **Fix Verified**: 2024-12-28
 **Impact**: All API endpoints restored to full functionality
-
