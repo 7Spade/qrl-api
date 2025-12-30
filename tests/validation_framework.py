@@ -233,7 +233,7 @@ class ValidationFramework:
             if ok
             else "; ".join(violations)
         )
-        self._add_result("Architecture Guard (src/app)", ok, message)
+        self._add_result("Architecture guard (src/app)", ok, message)
         return ok
 
     def _check_repository_pattern(self) -> bool:

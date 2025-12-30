@@ -5,11 +5,9 @@ Checks only the target tree (`src/app`) to avoid breaking legacy runtime code.
 Rules are defined in ARCHITECTURE_RULES.md.
 """
 
-from __future__ import annotations
-
 import argparse
 from pathlib import Path
-from typing import Iterable, List, Tuple
+from typing import Iterable, List, Tuple, Union
 
 MAX_BYTES = 4000
 FORBIDDEN_FILENAMES = {"client.py", "core.py", "utils.py"}
@@ -20,7 +18,7 @@ def _iter_python_files(base_path: Path) -> Iterable[Path]:
     return base_path.rglob("*.py")
 
 
-def check_architecture(base_path: Path | str = "src/app") -> Tuple[bool, List[str]]:
+def check_architecture(base_path: Union[Path, str] = "src/app") -> Tuple[bool, List[str]]:
     """
     Validate the target tree against size and filename rules.
 
