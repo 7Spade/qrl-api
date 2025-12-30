@@ -1,7 +1,7 @@
 """
-Account balance fetch shim using the legacy BalanceService.
+Account balance fetch shim using the migrated BalanceService.
 """
-from services.account.balance_service_core import BalanceService
+from src.app.application.account.balance_service import BalanceService
 from infrastructure.external.mexc_client import mexc_client
 from infrastructure.external.redis_client import redis_client
 

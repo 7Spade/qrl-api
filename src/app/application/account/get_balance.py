@@ -1,10 +1,9 @@
 """
 Account balance use case shim.
 
-Exposes the legacy BalanceService from `services.account` so the new
-application layer can depend on it without changing behavior.
+Exposes the BalanceService implementation from the application layer.
 """
 
-from services.account.balance_service_core import BalanceService
+from src.app.application.account.balance_service import BalanceService
 
 __all__ = ["BalanceService"]

@@ -1,7 +1,24 @@
 """
-Position port shim exposing legacy interface definitions.
+Position port definition (canonical).
 """
+from abc import ABC, abstractmethod
+from typing import Any, Dict
 
-from domain.interfaces.position import IPositionRepository
+
+class IPositionRepository(ABC):
+    """Interface for position data storage"""
+
+    @abstractmethod
+    async def get_position(self) -> Dict[str, str]:
+        """Get current position data"""
+
+    @abstractmethod
+    async def set_position(self, position_data: Dict[str, Any]) -> bool:
+        """Update position data"""
+
+    @abstractmethod
+    async def get_position_layers(self) -> Dict[str, str]:
+        """Get position layer configuration"""
+
 
 __all__ = ["IPositionRepository"]

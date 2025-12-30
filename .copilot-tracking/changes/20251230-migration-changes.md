@@ -13,10 +13,12 @@ Initialized changes log to track progressive migration into `src/app` per `ARCHI
 ### Added
 
 - src/app/application/account/{get_balance.py,list_orders.py,list_trades.py,dto.py} - Shims exposing legacy account use cases and constants.
+- src/app/application/account/balance_service.py - Canonical BalanceService implementation in application layer (≤4000 bytes).
 - src/app/application/market/{get_price.py,get_orderbook.py,get_klines.py,dto.py} - Shims for market use cases and symbols.
 - src/app/application/trading/{execute_trade.py,validate_trade.py,update_position.py,manage_risk.py,workflow.py} - Trading service shims for application layer.
 - src/app/application/bot/{start.py,stop.py,status.py} - Bot control shims re-exporting TradingService.
 - src/app/domain/ports/{account_port.py,market_port.py,trade_port.py,position_port.py} - Domain port shims mapping legacy interfaces.
+- src/app/domain/ports/{cost_port.py,price_port.py} - Canonical ports for cost/price repositories.
 - src/app/infrastructure/exchange/mexc/_shared/{http_client.py,response_parser.py} - Shared HTTP helpers for MEXC layout.
 - src/app/infrastructure/exchange/mexc/http/{auth/headers.py,auth/sign_request.py,market/get_price.py,market/get_orderbook.py,account/get_balance.py,account/list_orders.py,trade/place_order.py,trade/cancel_order.py} - HTTP adapters delegating to legacy mexc_client and services.
 - src/app/infrastructure/exchange/mexc/ws/{connect.py,handlers.py} - WS adapter shims re-exporting legacy websocket helpers.
@@ -33,7 +35,11 @@ Initialized changes log to track progressive migration into `src/app` per `ARCHI
 
 ### Modified
 
-- none
+- api/account/balance.py - Imports BalanceService from migrated application layer.
+- services/account/balance_service_core.py - Wrapper re-exporting migrated BalanceService.
+- src/app/application/account/get_balance.py - Points to migrated BalanceService.
+- src/app/infrastructure/exchange/mexc/http/account/get_balance.py - Points to migrated BalanceService.
+- domain/interfaces/{account.py,market.py,trade.py,position.py,cost.py,price.py} - Wrap to re-export canonical ports in src/app/domain/ports.
 
 ### Removed
 
@@ -41,15 +47,21 @@ Initialized changes log to track progressive migration into `src/app` per `ARCHI
 
 ## Release Summary
 
-**Total Files Affected**: 1
+**Total Files Affected**: 9
 
-### Files Created (1)
+### Files Created (3)
 
+- src/app/application/account/balance_service.py - Migrated BalanceService implementation.
+- src/app/domain/ports/{cost_port.py,price_port.py} - Added canonical cost/price ports.
 - .copilot-tracking/changes/20251230-migration-changes.md - Tracks migration progress and file movements.
 
-### Files Modified (0)
+### Files Modified (6)
 
-- none
+- api/account/balance.py
+- services/account/balance_service_core.py
+- src/app/application/account/get_balance.py
+- src/app/infrastructure/exchange/mexc/http/account/get_balance.py
+- domain/interfaces/{account.py,market.py,trade.py,position.py,cost.py,price.py}
 
 ### Files Removed (0)
 
