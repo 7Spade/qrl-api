@@ -32,7 +32,7 @@ def check_architecture(base_path: Path | str = "src/app") -> Tuple[bool, List[st
     """
     base = Path(base_path)
     if not base.exists():
-        return False, [f"Base path {base} does not exist."]
+        return False, [f"Base path {base} does not exist"]
 
     violations: List[str] = []
 
