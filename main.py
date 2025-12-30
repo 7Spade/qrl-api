@@ -12,6 +12,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from infrastructure.config.config import config
 from infrastructure.external.mexc_client import mexc_client
@@ -83,6 +84,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Serve static assets for the dashboard (templates/static -> /static)
+app.mount("/static", StaticFiles(directory="templates/static"), name="static")
 
 
 # ===== Include Routers =====
