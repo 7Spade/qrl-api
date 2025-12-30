@@ -1,5 +1,5 @@
-redis_client/
-├─ redis/                         ← redis-py 主體套件
+infrastructure\external\
+├─ redis_client/                         ← redis-py 主體套件
 │  ├─ __init__.py                 ← 初始化
 │  ├─ asyncio/                    ← Async client
 │  │  ├─ __init__.py
