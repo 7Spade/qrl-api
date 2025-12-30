@@ -35,3 +35,4 @@ Notes
 - Proto definitions: https://github.com/mexcdevelop/websocket-proto
 - Deserialize with generated protobuf classes; ignore undocumented fields.
 - Keep logic minimal: create key → connect → subscribe → handle events → renew key periodically.
+- Minimal client helper: `infrastructure/external/mexc_ws_client.py` (`connect_user_stream`)
