@@ -1,8 +1,7 @@
-"""Core websocket client for MEXC spot v3."""
+"""MEXC spot websocket client."""
 from __future__ import annotations
 
-import asyncio
-import json
+import asyncio, json
 from contextlib import suppress
 
 import websockets
@@ -22,6 +21,7 @@ class MEXCWebSocketClient:
         heartbeat: float = 20,
         close_timeout: float = 5,
     ):
+        """heartbeat and close_timeout are expressed in seconds."""
         self.url = url
         self._pending = set(subscriptions or [])
         self.subscriptions = set()
