@@ -2,8 +2,9 @@
 Unified Validation Framework
 Consolidates validation logic from validate_fixes.py and validate_cloud_task_fixes.py
 """
-import sys
 import logging
+import sys
+from pathlib import Path
 from typing import Dict
 
 logger = logging.getLogger(__name__)
@@ -139,6 +140,7 @@ class ValidationFramework:
         """
         try:
             checks = [
+                ("Architecture guard (src/app)", self._check_architecture_guard),
                 ("Domain layer isolation", self._check_domain_isolation),
                 ("Repository pattern", self._check_repository_pattern),
                 ("Service layer", self._check_service_layer),
@@ -219,6 +221,20 @@ class ValidationFramework:
         """Check domain layer has no infrastructure dependencies"""
         # Implementation would check imports in domain/*.py files
         return True
+
+    def _check_architecture_guard(self) -> bool:
+        """Ensure src/app follows size and filename guardrails."""
+        from architecture_guard import check_architecture
+
+        base = Path(__file__).resolve().parent.parent / "src" / "app"
+        ok, violations = check_architecture(base)
+        message = (
+            "No size/filename violations in src/app"
+            if ok
+            else "; ".join(violations)
+        )
+        self._add_result("Architecture guard (src/app)", ok, message)
+        return ok
 
     def _check_repository_pattern(self) -> bool:
         """Check repository pattern is correctly implemented"""

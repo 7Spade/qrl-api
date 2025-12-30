@@ -1,12 +1,19 @@
 """
-Task interface shim that re-exports the legacy task router.
+Task interface aggregator aligned to `網頁結構.md`.
 
-This keeps current behavior untouched while aligning imports with the
-target `interfaces/tasks` layout described in the architecture docs.
+Wraps legacy handlers through per-task routers under `interfaces/tasks/mexc/*`
+so behavior stays unchanged while the layout matches the target structure.
 """
 
-from infrastructure.tasks.router import router as legacy_router
+from fastapi import APIRouter
 
-router = legacy_router
+from src.app.interfaces.tasks.mexc.sync_account import router as mexc_sync_account_router
+from src.app.interfaces.tasks.mexc.sync_market import router as mexc_sync_market_router
+from src.app.interfaces.tasks.mexc.sync_trades import router as mexc_sync_trades_router
+
+router = APIRouter()
+router.include_router(mexc_sync_account_router)
+router.include_router(mexc_sync_market_router)
+router.include_router(mexc_sync_trades_router)
 
 __all__ = ["router"]

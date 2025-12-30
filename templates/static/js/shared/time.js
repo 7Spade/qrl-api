@@ -11,5 +11,5 @@ export const formatNumber = (num, digits = 4) =>
 export const formatTime = (ts) => {
     if (!ts) return "--";
     const d = new Date(ts);
-    return Number.isNaN(d.getTime()) ? "--" : d.toLocaleString('zh-TW');
+    return Number.isNaN(d.getTime()) ? "--" : d.toLocaleString("zh-TW");
 };
