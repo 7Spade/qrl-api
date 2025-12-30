@@ -200,3 +200,30 @@
 │
 └─templates
         dashboard.html
+
+├─src
+│  └─app
+│     ├─interfaces
+│     │  ├─http
+│     │  └─tasks
+│     │     └─mexc
+│     ├─application
+│     │  ├─account
+│     │  ├─market
+│     │  ├─trading
+│     │  └─bot
+│     ├─domain
+│     │  ├─models
+│     │  ├─strategies
+│     │  ├─risk
+│     │  ├─position
+│     │  ├─ports
+│     │  └─events
+│     ├─infrastructure
+│     │  ├─exchange/mexc/http/{auth,market,account,trade,_shared}
+│     │  ├─exchange/mexc/{ws,adapters,_shared}
+│     │  ├─persistence/redis/{connection,codecs,keys,repos,locks}
+│     │  ├─bot_runtime
+│     │  ├─scheduler
+│     │  └─config
+│     └─shared
