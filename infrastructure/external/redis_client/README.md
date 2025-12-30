@@ -1,109 +1,62 @@
-## 1️⃣ 心智模型（清晰分層）
+## 1️⃣ 心智模型（精簡版）
 
-```
-[ Application Layer ]              ← 你的業務程式
-        │
-[ Redis Service Layer ]            ← 封裝 redis 操作（cache / repo / counter / history）
-        │
-[ redis-py Client Layer ]          ← sync/async client + connection pool
-        │
-[ Connection Layer ]               ← client → connection → socket IO
-        │
-[ Socket IO / RESP Parser Layer ]  ← Python parser fallback / hiredis C parser
-        │
-[ Redis Server ]                  ← 真正的 Redis
-```
+`Application` → `Redis Service (cache/repo/history)` → `redis-py client` →
+`Connection / Pool` → `Parser (hiredis/RESP fallback)` → `Redis Server`
 
 ---
 
-## 2️⃣ 調整後結構樹
+## 2️⃣ 目錄結構（對齊拆分）
 
 ```text
-infrastructure\external\
-├─ redis_client/                     ← Redis 封裝層
-│  ├─ __init__.py                   ← 對外導出
-│  ├─ asyncio/                      ← Async Redis client 封裝
-│  │  ├─ __init__.py
-│  │  ├─ client.py                  ← Async Client API
-│  │  ├─ connection.py              ← Async Connection
-│  │  └─ pool.py                    ← Async Connection Pool
-│  ├─ client.py                     ← Sync Client API
-│  ├─ connection.py                 ← Sync Connection
-│  ├─ pool.py                       ← Sync Connection Pool
-│  ├─ services/                     ← 業務邏輯層（Cache / Repo / Counter / History）
-│  │   ├─ __init__.py
-│  │   ├─ balance_cache.py
-│  │   ├─ market_cache.py
-│  │   ├─ position_repo.py
-│  │   ├─ position_layers_repo.py
-│  │   ├─ trade_history_repo.py
-│  │   ├─ trade_counter_repo.py
-│  │   ├─ cost_repo.py
-│  │   └─ mexc_raw_repo.py
-│  ├─ commands/                     ← Redis commands 封裝
-│  │   ├─ __init__.py
-│  │   └─ ...                       ← 可拆分每個 command 類別
-│  ├─ _parsers/                     ← ⭐ RESP 解析層
-│  │   ├─ __init__.py
-│  │   ├─ base.py                   ← Parser 基礎抽象類
-│  │   ├─ socket.py                 ← Socket / IO parser
-│  │   ├─ hiredis.py                ← 封裝 hiredis C parser
-│  │   ├─ resp2.py                  ← Python fallback RESP2 parser
-│  │   └─ resp3.py                  ← Python fallback RESP3 parser
-│  └─ exceptions.py                 ← Exception 定義
-│
-├─ hiredis/                          ← C 擴充套件（optional）
+infrastructure/external/redis_client/
+├─ asyncio/                # Async Redis client
 │  ├─ __init__.py
-│  └─ hiredis*.pyd / .so
+│  └─ client.py            # AsyncRedisClient + redis_client singleton
+├─ services/               # 業務層 mixins（<4000 chars/檔）
+│  ├─ balance_account_cache.py
+│  ├─ balance_price_cache.py
+│  ├─ balance_cache.py     # 聚合 mixin
+│  ├─ market_price_cache.py
+│  ├─ market_trades_cache.py
+│  ├─ market_cache.py      # 聚合 mixin
+│  ├─ bot_status_repo.py
+│  ├─ position_repo.py / position_layers_repo.py
+│  ├─ price_repo.py / cost_repo.py
+│  ├─ trade_history_repo.py / trade_counter_repo.py
+│  └─ mexc_raw_repo.py
+├─ _parsers/               # RESP parser 層（hiredis wrapper + fallback）
+│  ├─ __init__.py
+│  ├─ base.py / socket.py / hiredis.py / resp2.py / resp3.py
+├─ commands/               # 未來命令封裝 (placeholder)
+├─ connection.py / pool.py # sync 介面 placeholder
+├─ exceptions.py           # 自訂例外
+├─ client.py               # 導出 RedisClient/redis_client
+└─ core.py                 # 舊路徑相容 shim
 ```
 
 ---
 
-## 3️⃣ 調整邏輯與拆分理由
+## 3️⃣ 拆分理由（精簡）
 
-1. **services/**
-
-   * 將原本散落在 redis_client 下的 `balance_cache.py`、`position_repo.py` 等檔案統一放在 `services/`
-   * 方便與 redis-py client 層分離，專注於業務邏輯（cache、repo、counter、history）
-   * 每個檔案保持單一責任，避免過大 (>4000字元)
-
-2. **async / sync client 分層**
-
-   * 原本 client.py、core.py 等混在一起 → 明確區分 `asyncio/` 與 sync 層
-   * Async 層對應 `async def` API，sync 層對應普通方法
-
-3. **_parsers/**
-
-   * 將 parser 抽象層單獨拆出來，Python fallback 與 hiredis C parser 都在 `_parsers/`
-   * 符合心智模型中「Socket IO → RESP Parser → Redis Server」流程
-
-4. **commands/**
-
-   * 未來可拆每個命令成模組，如 `get.py`、`set.py`，避免單檔過大
-
-5. **exceptions.py**
-
-   * 單檔集中定義所有 Redis client 可能丟出的例外
+* services/ 集中業務 mixins，已將 balance/market 分拆以符合單檔 < 4000 字元
+* asyncio/ 與未來的 sync client 分層，保持對外介面 `RedisClient` 不變
+* _parsers/ 收斂 hiredis optional 依賴，未安裝時自動 fallback
+* commands/、connection.py、pool.py 先留 placeholder，方便後續擴充
 
 ---
 
-## 4️⃣ 遷移優先順序（Sequential Thinking）
+## 4️⃣ 遷移優先順序
 
-1. **先建立資料夾結構**：`services/`、`asyncio/`、`_parsers/`
-2. **拆分 client 層**：sync 與 async 分別移入 `client.py` / `asyncio/client.py`
-3. **拆分業務服務層**：`balance_cache.py`、`position_repo.py` 等依功能移入 `services/`
-4. **整合 core.py**：將共用方法、工具抽成 services 或 parser
-5. **檢查依賴**：確保 services 只依賴 client，不直接操作 socket 或 hiredis
-6. **逐檔測試**：每個拆分檔案保證功能正常
-7. **重構 _parsers**：如有必要，先保留 Python fallback，再逐步整合 hiredis
+1. 建立資料夾結構（services/、asyncio/、_parsers/、commands/）
+2. 把業務 mixins 移入 services/（必要時再細拆避免超過 4000 字元）
+3. 將 async client 放到 asyncio/client.py，core.py/client.py 保持匯出相容
+4. _parsers/ 先封裝 hiredis 可選依賴，後續可換 RESP parser
+5. 每步檢查 imports / __all__，確保既有代碼只需 `from redis_client import redis_client`
 
 ---
 
-## 5️⃣ 奧卡姆剃刀 / 極簡主義原則
+## 5️⃣ 極簡原則
 
-* 每個檔案單一責任
-* 避免在單檔中混合 sync/async、業務邏輯與底層 client
-* 所有檔案 < 4000 字元（必要時再拆 services 或 parser）
-* 最少依賴（只依賴 redis-py 或 hiredis，不額外封裝過度）
-
----
+* 單一責任、層次分明，業務邏輯不觸底層 socket
+* 每檔 < 4000 字元；超過就拆分成更細的 mixin/模組
+* optional 依賴安全 fallback（hiredis 缺少時仍可運作）
