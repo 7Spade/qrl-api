@@ -1,6 +1,7 @@
 # Deployable Architecture Tree
 
 This file presents a concrete, implementable project structure derived from `結構調整.md`. Use this as the canonical layout to migrate toward; each file should be small (one responsibility) and testable.
+See `結構.md` (layered rules), `網頁結構.md` (interface layout), and `調整結構.md` (migration steps) for concise guidance.
 
 src/
 └── app/
