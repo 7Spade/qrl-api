@@ -20,3 +20,5 @@ been moved yet to avoid breaking behavior.
   entrypoint for now.
 - Keep new files ≤ 4000 characters to avoid oversized modules; when a file grows
   toward the limit, split by responsibility (e.g., per use case or endpoint).
+- HTTP shims (`interfaces/http/*.py`) currently re-export legacy routers from `api/*`
+  so routing behavior remains unchanged while migrations proceed.

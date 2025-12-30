@@ -5,7 +5,8 @@ See `結構.md` (layered rules), `網頁結構.md` (interface layout), and `調�
 
 ## Progress snapshot
 - Stage 0 skeleton created under `src/app/*` with empty packages and `bootstrap.py` placeholders.
-- Runtime still uses legacy modules in the repository root; see `src/app/README.md` for legacy → target mapping.
+- Interfaces: HTTP shim modules now expose legacy routers from `api/*` and `main.py` imports through these shims to keep behavior unchanged.
+- Runtime logic still relies on legacy handlers; see `src/app/README.md` for legacy → target mapping.
 
 src/
 └── app/

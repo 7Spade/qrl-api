@@ -87,12 +87,12 @@ app.add_middleware(
 
 # ===== Include Routers =====
 
-# Import all route modules
-from api.status_routes import router as status_router
-from api.market_routes import router as market_router
-from api.account_routes import router as account_router
-from api.bot_routes import router as bot_router
-from api.sub_account_routes import router as sub_account_router
+# Import all route modules via new interface shims (legacy handlers preserved)
+from src.app.interfaces.http.status import router as status_router
+from src.app.interfaces.http.market import router as market_router
+from src.app.interfaces.http.account import router as account_router
+from src.app.interfaces.http.bot import router as bot_router
+from src.app.interfaces.http.sub_account import router as sub_account_router
 from infrastructure.cloud_tasks import router as cloud_tasks_router
 
 # Register all routers
