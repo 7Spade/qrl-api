@@ -12,7 +12,9 @@ async def phase_data_collection(bot) -> Optional[Dict[str, Any]]:
         price = float(ticker.get("lastPrice", 0))
         volume_24h = float(ticker.get("volume", 0))
         price_change_pct = float(ticker.get("priceChangePercent", 0))
-        bot._log(f"Price: {price}, Volume 24h: {volume_24h}, Change: {price_change_pct}%")
+        bot._log(
+            f"Price: {price}, Volume 24h: {volume_24h}, Change: {price_change_pct}%"
+        )
         await bot.redis.set_latest_price(price, volume_24h)
         await bot.redis.add_price_to_history(price)
         price_history = await bot.redis.get_price_history(limit=config.MA_LONG_PERIOD)
@@ -29,7 +31,10 @@ async def phase_data_collection(bot) -> Optional[Dict[str, Any]]:
                     elif asset == "USDT":
                         usdt_balance = float(balance.get("free", 0))
                 bot._log(f"Balance: {qrl_balance} QRL, {usdt_balance} USDT")
-                position_data = {"qrl_balance": str(qrl_balance), "usdt_balance": str(usdt_balance)}
+                position_data = {
+                    "qrl_balance": str(qrl_balance),
+                    "usdt_balance": str(usdt_balance),
+                }
                 await bot.redis.set_position(position_data)
 
                 cost_data = await bot.redis.get_cost_data()

@@ -9,7 +9,13 @@ class CostRepoMixin:
     def _redis_client(self):
         return getattr(self, "client", None)
 
-    async def set_cost_data(self, avg_cost: float, total_invested: float, unrealized_pnl: float = 0, realized_pnl: float = 0) -> bool:
+    async def set_cost_data(
+        self,
+        avg_cost: float,
+        total_invested: float,
+        unrealized_pnl: float = 0,
+        realized_pnl: float = 0,
+    ) -> bool:
         client = self._redis_client
         if not client:
             return False
@@ -19,13 +25,13 @@ class CostRepoMixin:
                 "avg_cost": str(avg_cost),
                 "total_invested": str(total_invested),
                 "unrealized_pnl": str(unrealized_pnl),
-                "realized_pnl": str(realized_pnl)
+                "realized_pnl": str(realized_pnl),
             }
             await client.hset(key, mapping=cost_data)
             return True
         except Exception:
             return False
-    
+
     async def get_cost_data(self) -> Optional[Dict[str, str]]:
         client = self._redis_client
         if not client:

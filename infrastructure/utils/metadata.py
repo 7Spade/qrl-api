@@ -14,4 +14,5 @@ def create_metadata(additional_data: Optional[Dict[str, Any]] = None) -> Dict[st
         metadata.update(additional_data)
     return metadata
 
+
 __all__ = ["create_metadata"]

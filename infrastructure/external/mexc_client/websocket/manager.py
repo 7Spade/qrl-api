@@ -11,7 +11,9 @@ async def websocket_manager(
     url: str = WS_BASE,
     **kwargs,
 ) -> AsyncIterator[MEXCWebSocketClient]:
-    async with MEXCWebSocketClient(url=url, subscriptions=list(subscriptions or []), **kwargs) as client:
+    async with MEXCWebSocketClient(
+        url=url, subscriptions=list(subscriptions or []), **kwargs
+    ) as client:
         yield client
 
 

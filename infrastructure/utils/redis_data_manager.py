@@ -55,7 +55,9 @@ class RedisDataManager:
             logger.error(f"{operation_name} failed for key {key}: {exc}")
             return default
 
-    async def set_hash_data(self, key: str, data: Dict[str, Any], operation_name: str = "Set hash") -> bool:
+    async def set_hash_data(
+        self, key: str, data: Dict[str, Any], operation_name: str = "Set hash"
+    ) -> bool:
         try:
             string_data = {k: str(v) for k, v in data.items()}
             await self.client.hset(key, mapping=string_data)
@@ -65,7 +67,9 @@ class RedisDataManager:
             logger.error(f"{operation_name} failed for key {key}: {exc}")
             return False
 
-    async def get_hash_data(self, key: str, operation_name: str = "Get hash") -> Dict[str, str]:
+    async def get_hash_data(
+        self, key: str, operation_name: str = "Get hash"
+    ) -> Dict[str, str]:
         try:
             return await self.client.hgetall(key)
         except Exception as exc:  # pragma: no cover - thin wrapper
@@ -119,5 +123,6 @@ class RedisDataManager:
         except Exception as exc:  # pragma: no cover - thin wrapper
             logger.error(f"{operation_name} failed for key {key}: {exc}")
             return []
+
 
 __all__ = ["RedisDataManager"]

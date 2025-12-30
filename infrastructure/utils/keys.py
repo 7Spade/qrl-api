@@ -58,4 +58,5 @@ def validate_symbol(symbol: str) -> str:
         raise ValueError(f"Invalid symbol: {symbol}")
     return normalized
 
+
 __all__ = ["RedisKeyBuilder", "validate_symbol"]

@@ -12,7 +12,10 @@ logger = logging.getLogger(__name__)
 
 
 def _has_credentials(mexc_client) -> bool:
-    return bool(getattr(mexc_client, "api_key", None) and getattr(mexc_client, "secret_key", None))
+    return bool(
+        getattr(mexc_client, "api_key", None)
+        and getattr(mexc_client, "secret_key", None)
+    )
 
 
 @router.get("/orders")
@@ -22,7 +25,9 @@ async def get_orders():
 
     symbol = QRL_USDT_SYMBOL
     if not _has_credentials(mexc_client):
-        raise HTTPException(status_code=503, detail="MEXC API credentials required for orders")
+        raise HTTPException(
+            status_code=503, detail="MEXC API credentials required for orders"
+        )
 
     try:
         async with mexc_client:

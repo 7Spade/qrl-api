@@ -19,14 +19,18 @@ async def task_sync_balance(
     authorization: str = Header(None),
 ):
     if not x_cloudscheduler and not authorization:
-        raise HTTPException(status_code=401, detail="Unauthorized - Cloud Scheduler only")
+        raise HTTPException(
+            status_code=401, detail="Unauthorized - Cloud Scheduler only"
+        )
 
     auth_method = "OIDC" if authorization else "X-CloudScheduler"
     logger.info(f"[Cloud Task] 01-min-job authenticated via {auth_method}")
 
     try:
         if not config.MEXC_API_KEY or not config.MEXC_SECRET_KEY:
-            logger.warning("[Cloud Task] API keys not configured, skipping balance sync")
+            logger.warning(
+                "[Cloud Task] API keys not configured, skipping balance sync"
+            )
             return {"status": "skipped", "reason": "API keys not configured"}
 
         async with mexc_client:
@@ -79,7 +83,9 @@ async def task_update_price(
     authorization: str = Header(None),
 ):
     if not x_cloudscheduler and not authorization:
-        raise HTTPException(status_code=401, detail="Unauthorized - Cloud Scheduler only")
+        raise HTTPException(
+            status_code=401, detail="Unauthorized - Cloud Scheduler only"
+        )
 
     auth_method = "OIDC" if authorization else "X-CloudScheduler"
     logger.info(f"[Cloud Task] 05-min-job authenticated via {auth_method}")
@@ -122,7 +128,9 @@ async def task_update_cost(
     authorization: str = Header(None),
 ):
     if not x_cloudscheduler and not authorization:
-        raise HTTPException(status_code=401, detail="Unauthorized - Cloud Scheduler only")
+        raise HTTPException(
+            status_code=401, detail="Unauthorized - Cloud Scheduler only"
+        )
 
     auth_method = "OIDC" if authorization else "X-CloudScheduler"
     logger.info(f"[Cloud Task] 15-min-job authenticated via {auth_method}")
@@ -132,7 +140,9 @@ async def task_update_cost(
             ticker = await mexc_client.get_ticker_price("QRLUSDT")
             current_price = float(ticker.get("price", 0))
 
-        logger.info(f"[Cloud Task] Price check (Direct API) - Current: ${current_price:.5f}")
+        logger.info(
+            f"[Cloud Task] Price check (Direct API) - Current: ${current_price:.5f}"
+        )
 
         return {
             "status": "success",

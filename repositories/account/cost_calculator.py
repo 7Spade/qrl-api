@@ -10,7 +10,9 @@ from infrastructure.utils.type_safety import safe_float
 logger = logging.getLogger(__name__)
 
 
-def calculate_unrealized_pnl(avg_cost: float, current_price: float, current_quantity: float) -> Dict[str, float]:
+def calculate_unrealized_pnl(
+    avg_cost: float, current_price: float, current_quantity: float
+) -> Dict[str, float]:
     current_value = current_price * current_quantity
     cost_basis = avg_cost * current_quantity
     unrealized_pnl = current_value - cost_basis
@@ -23,7 +25,9 @@ def calculate_unrealized_pnl(avg_cost: float, current_price: float, current_quan
     }
 
 
-def summarize_cost_data(cost_data: Dict[str, str], current_price: float, current_quantity: float) -> Dict[str, float]:
+def summarize_cost_data(
+    cost_data: Dict[str, str], current_price: float, current_quantity: float
+) -> Dict[str, float]:
     try:
         avg_cost = safe_float(cost_data.get("avg_cost"))
         total_invested = safe_float(cost_data.get("total_invested"))
@@ -51,7 +55,9 @@ def summarize_cost_data(cost_data: Dict[str, str], current_price: float, current
         }
 
 
-def update_after_buy_values(cost_data: Dict[str, str], buy_price: float, buy_amount_usdt: float) -> Dict[str, float]:
+def update_after_buy_values(
+    cost_data: Dict[str, str], buy_price: float, buy_amount_usdt: float
+) -> Dict[str, float]:
     old_total_invested = safe_float(cost_data.get("total_invested"))
     realized_pnl = safe_float(cost_data.get("realized_pnl"))
     new_total_invested = old_total_invested + buy_amount_usdt
@@ -62,15 +68,23 @@ def update_after_buy_values(cost_data: Dict[str, str], buy_price: float, buy_amo
     }
 
 
-def update_after_sell_values(cost_data: Dict[str, str], avg_cost: float, sell_quantity: float, sell_amount_usdt: float) -> Dict[str, float]:
+def update_after_sell_values(
+    cost_data: Dict[str, str],
+    avg_cost: float,
+    sell_quantity: float,
+    sell_amount_usdt: float,
+) -> Dict[str, float]:
     realized_pnl = safe_float(cost_data.get("realized_pnl"))
     cost_basis = avg_cost * sell_quantity
     sale_pnl = sell_amount_usdt - cost_basis
     return {
         "avg_cost": avg_cost,
         "realized_pnl": realized_pnl + sale_pnl,
-        "total_invested": max(0, safe_float(cost_data.get("total_invested")) - cost_basis),
+        "total_invested": max(
+            0, safe_float(cost_data.get("total_invested")) - cost_basis
+        ),
     }
+
 
 __all__ = [
     "calculate_unrealized_pnl",

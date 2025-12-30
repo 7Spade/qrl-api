@@ -1,5 +1,6 @@
 """Startup and validation phase."""
 
+
 async def phase_startup(bot) -> bool:
     bot._log("Phase 1: Startup & Validation")
     if not bot.redis.connected:

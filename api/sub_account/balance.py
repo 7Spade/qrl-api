@@ -30,7 +30,9 @@ async def get_sub_account_balance(
 
     try:
         mode = "BROKER" if config.is_broker_mode else "SPOT"
-        logger.info(f"Fetching balance for sub-account: {sub_account_identifier} using {mode} API")
+        logger.info(
+            f"Fetching balance for sub-account: {sub_account_identifier} using {mode} API"
+        )
         balance_data = await mexc_client.get_sub_account_balance(sub_account_identifier)
         return {
             "success": True,
@@ -50,7 +52,9 @@ async def get_sub_account_balance(
             },
         )
     except ValueError as e:
-        raise HTTPException(status_code=400, detail={"error": "Validation error", "message": str(e)})
+        raise HTTPException(
+            status_code=400, detail={"error": "Validation error", "message": str(e)}
+        )
     except Exception as e:
         logger.error(f"Failed to get sub-account balance: {e}")
         error_msg = str(e).lower()

@@ -8,7 +8,10 @@ from infrastructure.external.mexc_client import MEXCClient, mexc_client
 RedisClient = None
 redis_client = None
 try:
-    from infrastructure.external.redis_client import RedisClient as _RedisClient, redis_client as _redis_client
+    from infrastructure.external.redis_client import (
+        RedisClient as _RedisClient,
+        redis_client as _redis_client,
+    )
 
     RedisClient = _RedisClient
     redis_client = _redis_client

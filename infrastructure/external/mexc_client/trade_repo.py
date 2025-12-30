@@ -30,7 +30,9 @@ class TradeRepoMixin:
             params["orderId"] = order_id
         if orig_client_order_id:
             params["origClientOrderId"] = orig_client_order_id
-        return await self._request("DELETE", "/api/v3/order", params=params, signed=True)
+        return await self._request(
+            "DELETE", "/api/v3/order", params=params, signed=True
+        )
 
     async def get_order(self, symbol: str, order_id: Optional[int] = None, orig_client_order_id: Optional[str] = None) -> Dict[str, Any]:  # type: ignore[name-defined]
         params = {"symbol": symbol}
@@ -44,8 +46,12 @@ class TradeRepoMixin:
         params = {"timestamp": None}
         if symbol:
             params["symbol"] = symbol
-        return await self._request("GET", "/api/v3/openOrders", params=params, signed=True)
+        return await self._request(
+            "GET", "/api/v3/openOrders", params=params, signed=True
+        )
 
     async def get_all_orders(self, symbol: str, limit: int = 500) -> Dict[str, Any]:  # type: ignore[name-defined]
         params = {"symbol": symbol, "limit": limit}
-        return await self._request("GET", "/api/v3/allOrders", params=params, signed=True)
+        return await self._request(
+            "GET", "/api/v3/allOrders", params=params, signed=True
+        )

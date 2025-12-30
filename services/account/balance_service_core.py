@@ -22,7 +22,10 @@ class BalanceService:
     def _has_credentials(self) -> bool:
         if not hasattr(self.mexc, "api_key"):
             return True
-        return bool(getattr(self.mexc, "api_key", None) and getattr(self.mexc, "secret_key", None))
+        return bool(
+            getattr(self.mexc, "api_key", None)
+            and getattr(self.mexc, "secret_key", None)
+        )
 
     async def _cache_snapshot(self, snapshot: Dict[str, Any]) -> None:
         if not self.redis:
@@ -60,7 +63,9 @@ class BalanceService:
 
     async def get_account_balance(self) -> Dict[str, Any]:
         if not self._has_credentials():
-            cached = await self._cached_response(ValueError("MEXC API credentials required"))
+            cached = await self._cached_response(
+                ValueError("MEXC API credentials required")
+            )
             if cached:
                 return cached
             raise ValueError("MEXC API credentials required")

@@ -39,7 +39,9 @@ class TradingHelpersMixin(OrderEndpoints):
         if quantity is not None and quote_order_qty is not None:
             raise ValueError("Provide either quantity or quote_order_qty, not both")
         if quantity is None and quote_order_qty is None:
-            raise ValueError("Either quantity or quote_order_qty is required for market orders")
+            raise ValueError(
+                "Either quantity or quote_order_qty is required for market orders"
+            )
         return await self.create_order(
             symbol=symbol,
             side=side.upper(),
@@ -60,7 +62,9 @@ class TradingHelpersMixin(OrderEndpoints):
             params["startTime"] = start_time
         if end_time:
             params["endTime"] = end_time
-        return await self._request("GET", "/api/v3/myTrades", params=params, signed=True)
+        return await self._request(
+            "GET", "/api/v3/myTrades", params=params, signed=True
+        )
 
     async def transfer_between_sub_accounts(
         self,

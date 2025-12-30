@@ -47,7 +47,9 @@ class MEXCClient(
 
     def _require_credentials(self) -> None:
         if not self.settings.api_key or not self.settings.secret_key:
-            raise ValueError("API key and secret key required for authenticated requests")
+            raise ValueError(
+                "API key and secret key required for authenticated requests"
+            )
 
     def _generate_signature(self, params: Dict[str, Any]) -> str:
         if not self.settings.secret_key:

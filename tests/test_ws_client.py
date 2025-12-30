@@ -13,6 +13,7 @@ if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
 from infrastructure.external.mexc_client import ws_client
+
 ws_core = importlib.import_module("infrastructure.external.mexc_client.ws_core")
 
 

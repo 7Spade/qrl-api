@@ -10,7 +10,9 @@ class PositionLayersRepoMixin:
     def _redis_client(self):
         return getattr(self, "client", None)
 
-    async def set_position_layers(self, core_qrl: float, swing_qrl: float, active_qrl: float) -> bool:
+    async def set_position_layers(
+        self, core_qrl: float, swing_qrl: float, active_qrl: float
+    ) -> bool:
         client = self._redis_client
         if not client:
             return False

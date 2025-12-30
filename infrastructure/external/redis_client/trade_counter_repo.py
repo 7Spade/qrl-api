@@ -18,7 +18,9 @@ class TradeCounterRepoMixin:
             today = datetime.now().strftime("%Y-%m-%d")
             key = f"bot:{config.TRADING_SYMBOL}:trades:daily:{today}"
             count = await client.incr(key)
-            tomorrow = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=2)
+            tomorrow = datetime.now().replace(
+                hour=0, minute=0, second=0, microsecond=0
+            ) + timedelta(days=2)
             await client.expireat(key, int(tomorrow.timestamp()))
             return count
         except Exception:

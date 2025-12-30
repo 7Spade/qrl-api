@@ -64,7 +64,9 @@ class MexcConnection:
         for attempt in range(max_retries):
             try:
                 client = await self._ensure_client()
-                response = await client.request(normalized_method, url, **request_kwargs)
+                response = await client.request(
+                    normalized_method, url, **request_kwargs
+                )
                 response.raise_for_status()
                 return response.json()
             except httpx.HTTPStatusError as exc:

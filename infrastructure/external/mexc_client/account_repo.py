@@ -1,7 +1,10 @@
 """Account endpoints mixin."""
 from typing import Any, Dict, Optional
 
-from infrastructure.external.mexc_client.account import build_balance_map, fetch_balance_snapshot
+from infrastructure.external.mexc_client.account import (
+    build_balance_map,
+    fetch_balance_snapshot,
+)
 
 
 class AccountRepoMixin:
@@ -21,7 +24,9 @@ class AccountRepoMixin:
         account_info = await self.get_account_info()
         balances = build_balance_map(account_info)
         if asset:
-            return balances.get(asset, {"asset": asset, "free": "0", "locked": "0", "total": 0})
+            return balances.get(
+                asset, {"asset": asset, "free": "0", "locked": "0", "total": 0}
+            )
         return balances
 
     async def get_balance_snapshot(self) -> Dict[str, Any]:

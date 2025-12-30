@@ -11,7 +11,9 @@ class IMarketDataProvider(ABC):
         """Get 24-hour ticker data"""
 
     @abstractmethod
-    async def get_klines(self, symbol: str, interval: str, limit: int) -> List[Dict[str, Any]]:
+    async def get_klines(
+        self, symbol: str, interval: str, limit: int
+    ) -> List[Dict[str, Any]]:
         """Get candlestick data"""
 
     @abstractmethod

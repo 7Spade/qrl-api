@@ -23,5 +23,7 @@ class PriceResolver:
         price_history = await self.price_repo.get_price_history(limit=60)
         if not price_history or len(price_history) < 60:
             price_history = price_history or []
-            price_history = price_history + [{"price": current_price}] * (60 - len(price_history))
+            price_history = price_history + [{"price": current_price}] * (
+                60 - len(price_history)
+            )
         return price_history

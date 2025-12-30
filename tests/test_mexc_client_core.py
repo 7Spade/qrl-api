@@ -29,7 +29,9 @@ async def test_place_market_order_delegates_to_create_order(monkeypatch):
 
     monkeypatch.setattr(client, "create_order", fake_create_order)
 
-    result = await client.place_market_order(symbol="QRLUSDT", side="buy", quantity=1.23)
+    result = await client.place_market_order(
+        symbol="QRLUSDT", side="buy", quantity=1.23
+    )
 
     assert captured["symbol"] == "QRLUSDT"
     assert captured["side"] == "BUY"

@@ -11,7 +11,9 @@ class PriceRepoMixin:
     def _redis_client(self):
         return getattr(self, "client", None)
 
-    async def set_latest_price(self, price: float, volume: Optional[float] = None, symbol: str = None) -> bool:
+    async def set_latest_price(
+        self, price: float, volume: Optional[float] = None, symbol: str = None
+    ) -> bool:
         client = self._redis_client
         if not client:
             return False
@@ -28,7 +30,9 @@ class PriceRepoMixin:
         except Exception:
             return False
 
-    async def set_cached_price(self, price: float, volume: Optional[float] = None, symbol: str = None) -> bool:
+    async def set_cached_price(
+        self, price: float, volume: Optional[float] = None, symbol: str = None
+    ) -> bool:
         client = self._redis_client
         if not client:
             return False
@@ -71,7 +75,9 @@ class PriceRepoMixin:
         except Exception:
             return None
 
-    async def add_price_to_history(self, price: float, timestamp: Optional[int] = None, symbol: str = None) -> bool:
+    async def add_price_to_history(
+        self, price: float, timestamp: Optional[int] = None, symbol: str = None
+    ) -> bool:
         client = self._redis_client
         if not client:
             return False
@@ -86,14 +92,21 @@ class PriceRepoMixin:
         except Exception:
             return False
 
-    async def get_price_history(self, limit: int = 100, symbol: str = None) -> List[Dict[str, Any]]:
+    async def get_price_history(
+        self, limit: int = 100, symbol: str = None
+    ) -> List[Dict[str, Any]]:
         client = self._redis_client
         if not client:
             return []
         try:
             symbol = symbol or config.TRADING_SYMBOL
             key = f"bot:{symbol}:price:history"
-            prices_with_scores = await client.zrevrange(key, 0, limit - 1, withscores=True)
-            return [{"price": float(price), "timestamp": int(ts)} for price, ts in prices_with_scores]
+            prices_with_scores = await client.zrevrange(
+                key, 0, limit - 1, withscores=True
+            )
+            return [
+                {"price": float(price), "timestamp": int(ts)}
+                for price, ts in prices_with_scores
+            ]
         except Exception:
             return []
