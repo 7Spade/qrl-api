@@ -9,7 +9,9 @@ from typing import Any, Callable
 logger = logging.getLogger(__name__)
 
 
-def handle_redis_errors(default_return: Any = None, log_prefix: str = "Redis operation") -> Callable:
+def handle_redis_errors(
+    default_return: Any = None, log_prefix: str = "Redis operation"
+) -> Callable:
     """Decorator for consistent Redis error handling."""
 
     def decorator(func: Callable) -> Callable:
@@ -43,7 +45,9 @@ def handle_api_errors(log_prefix: str = "API operation") -> Callable:
     return decorator
 
 
-def log_execution(log_level: int = logging.INFO, log_args: bool = False, log_result: bool = False) -> Callable:
+def log_execution(
+    log_level: int = logging.INFO, log_args: bool = False, log_result: bool = False
+) -> Callable:
     """Decorator for logging function execution."""
 
     def decorator(func: Callable) -> Callable:
@@ -51,7 +55,10 @@ def log_execution(log_level: int = logging.INFO, log_args: bool = False, log_res
         async def wrapper(*args, **kwargs):
             func_name = func.__name__
             if log_args:
-                logger.log(log_level, f"Calling {func_name} with args={args[1:]}, kwargs={kwargs}")
+                logger.log(
+                    log_level,
+                    f"Calling {func_name} with args={args[1:]}, kwargs={kwargs}",
+                )
             else:
                 logger.log(log_level, f"Calling {func_name}")
 
@@ -65,5 +72,6 @@ def log_execution(log_level: int = logging.INFO, log_args: bool = False, log_res
         return wrapper
 
     return decorator
+
 
 __all__ = ["handle_redis_errors", "handle_api_errors", "log_execution"]

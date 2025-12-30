@@ -13,7 +13,9 @@ class MexcSettings:
     timeout: float
 
 
-def load_settings(api_key: Optional[str] = None, secret_key: Optional[str] = None) -> MexcSettings:
+def load_settings(
+    api_key: Optional[str] = None, secret_key: Optional[str] = None
+) -> MexcSettings:
     """Load settings while preserving whitespace stripping behaviour."""
     key = api_key or config.MEXC_API_KEY
     secret = secret_key or config.MEXC_SECRET_KEY

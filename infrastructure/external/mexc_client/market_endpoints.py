@@ -34,7 +34,9 @@ class MarketEndpointsMixin:
     async def get_orderbook(self, symbol: str, limit: int = 100) -> Dict[str, Any]:
         return await self.get_order_book(symbol, limit)
 
-    async def get_recent_trades(self, symbol: str, limit: int = 500) -> List[Dict[str, Any]]:
+    async def get_recent_trades(
+        self, symbol: str, limit: int = 500
+    ) -> List[Dict[str, Any]]:
         params = {"symbol": symbol, "limit": limit}
         return await self._request("GET", "/api/v3/trades", params=params)
 
@@ -73,5 +75,6 @@ class MarketEndpointsMixin:
     async def get_book_ticker(self, symbol: str) -> Dict[str, Any]:
         params = {"symbol": symbol}
         return await self._request("GET", "/api/v3/ticker/bookTicker", params=params)
+
 
 __all__ = ["MarketEndpointsMixin"]

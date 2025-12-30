@@ -11,5 +11,7 @@ class IAccountDataProvider(ABC):
         """Get account information"""
 
     @abstractmethod
-    async def create_order(self, symbol: str, side: str, order_type: str, **kwargs) -> Dict[str, Any]:
+    async def create_order(
+        self, symbol: str, side: str, order_type: str, **kwargs
+    ) -> Dict[str, Any]:
         """Create a trading order"""

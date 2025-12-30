@@ -1,4 +1,6 @@
 """Price history manager encapsulating history add/stats."""
+
+
 class PriceHistoryManager:
     def __init__(self, price_repo):
         self.price_repo = price_repo

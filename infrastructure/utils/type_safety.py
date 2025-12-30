@@ -19,4 +19,5 @@ def safe_int(value: Any, default: int = 0) -> int:
     except (ValueError, TypeError):
         return default
 
+
 __all__ = ["safe_float", "safe_int"]

@@ -16,7 +16,9 @@ class TradeHistoryRepoMixin:
             return False
         try:
             key = f"bot:{config.TRADING_SYMBOL}:trades:history"
-            await client.zadd(key, {json.dumps(trade_data): trade_data.get("timestamp", 0)})
+            await client.zadd(
+                key, {json.dumps(trade_data): trade_data.get("timestamp", 0)}
+            )
             await client.zremrangebyrank(key, 0, -501)
             await client.expire(key, 86400 * 30)
             return True
@@ -29,7 +31,9 @@ class TradeHistoryRepoMixin:
             return []
         try:
             key = f"bot:{config.TRADING_SYMBOL}:trades:history"
-            trades_with_scores = await client.zrevrange(key, 0, limit - 1, withscores=True)
+            trades_with_scores = await client.zrevrange(
+                key, 0, limit - 1, withscores=True
+            )
             history = []
             for trade_json, timestamp in trades_with_scores:
                 try:

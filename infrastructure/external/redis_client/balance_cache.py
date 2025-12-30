@@ -48,7 +48,9 @@ class BalanceCacheMixin:
             logger.error(f"Failed to get MEXC account balance: {exc}")
             return None
 
-    async def set_mexc_qrl_price(self, price: float, price_data: Optional[Dict[str, Any]] = None) -> bool:
+    async def set_mexc_qrl_price(
+        self, price: float, price_data: Optional[Dict[str, Any]] = None
+    ) -> bool:
         client = self._redis_client
         if not client:
             return False
@@ -83,7 +85,9 @@ class BalanceCacheMixin:
             logger.error(f"Failed to get QRL price: {exc}")
             return None
 
-    async def set_mexc_total_value(self, total_value_usdt: float, breakdown: Dict[str, Any]) -> bool:
+    async def set_mexc_total_value(
+        self, total_value_usdt: float, breakdown: Dict[str, Any]
+    ) -> bool:
         client = self._redis_client
         if not client:
             return False
@@ -117,7 +121,9 @@ class BalanceCacheMixin:
             logger.error(f"Failed to get total value: {exc}")
             return None
 
-    async def set_cached_account_balance(self, balance_data: Dict[str, Any], ttl: int = 45) -> bool:
+    async def set_cached_account_balance(
+        self, balance_data: Dict[str, Any], ttl: int = 45
+    ) -> bool:
         """Store short-lived balance snapshot for UI stability."""
         client = self._redis_client
         if not client:
@@ -148,5 +154,6 @@ class BalanceCacheMixin:
         except Exception as exc:  # pragma: no cover - I/O wrapper
             logger.error(f"Failed to get cached account balance: {exc}")
             return None
+
 
 __all__ = ["BalanceCacheMixin"]

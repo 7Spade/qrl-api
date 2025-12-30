@@ -1,5 +1,5 @@
 """Session builders for HTTP clients."""
-from typing import Dict, Optional
+from typing import Dict
 
 import httpx
 

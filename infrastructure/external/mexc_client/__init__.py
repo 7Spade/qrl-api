@@ -17,6 +17,7 @@ from .ws_channels import (
     trade_stream,
 )
 from .ws_client import connect_public_trades, connect_user_stream
+
 MEXCWebSocketClient = _WSClient
 
 __all__ = [

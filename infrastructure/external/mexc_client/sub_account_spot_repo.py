@@ -4,11 +4,15 @@ from typing import Any, Dict, Optional
 
 
 class SubAccountSpotRepoMixin:
-    async def get_sub_accounts_spot(self, sub_account_id: Optional[str] = None, page: int = 1, limit: int = 10) -> Dict[str, Any]:
+    async def get_sub_accounts_spot(
+        self, sub_account_id: Optional[str] = None, page: int = 1, limit: int = 10
+    ) -> Dict[str, Any]:
         params = {"page": page, "limit": limit, "timestamp": int(time.time() * 1000)}
         if sub_account_id:
             params["subAccountId"] = sub_account_id
-        return await self._request("GET", "/api/v3/sub-account/list", params=params, signed=True)
+        return await self._request(
+            "GET", "/api/v3/sub-account/list", params=params, signed=True
+        )
 
     async def sub_account_universal_transfer(
         self,
@@ -29,9 +33,17 @@ class SubAccountSpotRepoMixin:
             params["toAccount"] = to_account
         if client_tran_id:
             params["clientTranId"] = client_tran_id
-        return await self._request("POST", "/api/v3/sub-account/universalTransfer", params=params, signed=True)
+        return await self._request(
+            "POST", "/api/v3/sub-account/universalTransfer", params=params, signed=True
+        )
 
-    async def create_sub_account_api_key(self, sub_account_id: str, permissions: str, ip_restriction: Optional[str] = None, note: Optional[str] = None) -> Dict[str, Any]:
+    async def create_sub_account_api_key(
+        self,
+        sub_account_id: str,
+        permissions: str,
+        ip_restriction: Optional[str] = None,
+        note: Optional[str] = None,
+    ) -> Dict[str, Any]:
         params = {
             "subAccountId": sub_account_id,
             "permissions": permissions,
@@ -41,12 +53,18 @@ class SubAccountSpotRepoMixin:
             params["ipRestriction"] = ip_restriction
         if note:
             params["note"] = note
-        return await self._request("POST", "/api/v3/sub-account/apiKey", params=params, signed=True)
+        return await self._request(
+            "POST", "/api/v3/sub-account/apiKey", params=params, signed=True
+        )
 
-    async def delete_sub_account_api_key(self, sub_account_id: str, api_key: str) -> Dict[str, Any]:
+    async def delete_sub_account_api_key(
+        self, sub_account_id: str, api_key: str
+    ) -> Dict[str, Any]:
         params = {
             "subAccountId": sub_account_id,
             "apiKey": api_key,
             "timestamp": int(time.time() * 1000),
         }
-        return await self._request("DELETE", "/api/v3/sub-account/apiKey", params=params, signed=True)
+        return await self._request(
+            "DELETE", "/api/v3/sub-account/apiKey", params=params, signed=True
+        )

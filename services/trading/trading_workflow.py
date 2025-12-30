@@ -117,11 +117,22 @@ class TradingWorkflow:
             "timestamp": datetime.now().isoformat(),
         }
 
-    async def finalize_order(self, signal: str, quantity: float, order: Dict, current_price: float, position_data: Dict):
+    async def finalize_order(
+        self,
+        signal: str,
+        quantity: float,
+        order: Dict,
+        current_price: float,
+        position_data: Dict,
+    ):
         if signal == "BUY":
-            await self.position_updater.update_after_buy(position_data, quantity, current_price)
+            await self.position_updater.update_after_buy(
+                position_data, quantity, current_price
+            )
         else:
-            await self.position_updater.update_after_sell(position_data, quantity, current_price)
+            await self.position_updater.update_after_sell(
+                position_data, quantity, current_price
+            )
 
         await self.trade_repo.increment_daily_trades()
         await self.trade_repo.set_last_trade_time(datetime.now().timestamp())

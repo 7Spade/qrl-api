@@ -11,7 +11,9 @@ class BotStatusRepoMixin:
     def _redis_client(self):
         return getattr(self, "client", None)
 
-    async def set_bot_status(self, status: str, metadata: Optional[Dict] = None) -> bool:
+    async def set_bot_status(
+        self, status: str, metadata: Optional[Dict] = None
+    ) -> bool:
         client = self._redis_client
         if not client:
             return False
@@ -38,4 +40,8 @@ class BotStatusRepoMixin:
                 return json.loads(data)
             return {"status": "unknown", "timestamp": None, "metadata": {}}
         except Exception as exc:  # pragma: no cover - defensive
-            return {"status": "error", "timestamp": None, "metadata": {"error": str(exc)}}
+            return {
+                "status": "error",
+                "timestamp": None,
+                "metadata": {"error": str(exc)},
+            }

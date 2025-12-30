@@ -37,7 +37,9 @@ class CostRepository:
     async def get_cost_data(self) -> Optional[Dict[str, str]]:
         return await self.redis.get_cost_data()
 
-    async def calculate_pnl(self, current_price: float, current_quantity: float) -> Dict[str, float]:
+    async def calculate_pnl(
+        self, current_price: float, current_quantity: float
+    ) -> Dict[str, float]:
         cost_data = await self.get_cost_data()
         if not cost_data:
             return {

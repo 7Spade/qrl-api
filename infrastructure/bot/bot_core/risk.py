@@ -2,7 +2,9 @@
 from typing import Dict
 
 
-async def phase_risk_control(bot, signal: str, market_data: Dict[str, float]) -> Dict[str, str]:
+async def phase_risk_control(
+    bot, signal: str, market_data: Dict[str, float]
+) -> Dict[str, str]:
     bot._log("Phase 4: Risk Control")
     if signal == "HOLD":
         return {"allowed": False, "reason": "No trading signal"}

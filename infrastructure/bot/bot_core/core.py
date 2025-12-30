@@ -30,7 +30,13 @@ class TradingBot:
     async def execute_cycle(self) -> Dict[str, Any]:
         self._log(f"Starting trading cycle for {self.symbol} (dry_run={self.dry_run})")
         start_time = time.time()
-        result = {"success": False, "action": None, "phases": {}, "message": "", "execution_log": []}
+        result = {
+            "success": False,
+            "action": None,
+            "phases": {},
+            "message": "",
+            "execution_log": [],
+        }
 
         try:
             if not await phase_startup(self):
@@ -62,7 +68,9 @@ class TradingBot:
                 return result
 
             if signal in ["BUY", "SELL"]:
-                execution_result = await phase_execution(self, signal, market_data, risk_check)
+                execution_result = await phase_execution(
+                    self, signal, market_data, risk_check
+                )
                 result["phases"]["execution"] = execution_result
                 result["action"] = signal
                 result["success"] = execution_result.get("success", False)

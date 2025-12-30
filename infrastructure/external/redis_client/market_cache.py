@@ -28,7 +28,7 @@ class MarketCacheMixin:
                 "symbol": symbol,
                 "data": ticker_data,
                 "timestamp": datetime.now().isoformat(),
-                "cached_at": int(datetime.now().timestamp() * 1000)
+                "cached_at": int(datetime.now().timestamp() * 1000),
             }
             await client.setex(key, config.CACHE_TTL_TICKER, json.dumps(data))
             logger.debug(f"Cached ticker data for {symbol}")
@@ -62,7 +62,7 @@ class MarketCacheMixin:
                 "symbol": symbol,
                 "data": orderbook_data,
                 "timestamp": datetime.now().isoformat(),
-                "cached_at": int(datetime.now().timestamp() * 1000)
+                "cached_at": int(datetime.now().timestamp() * 1000),
             }
             await client.setex(key, config.CACHE_TTL_ORDER_BOOK, json.dumps(data))
             logger.debug(f"Cached order book for {symbol}")
@@ -86,7 +86,9 @@ class MarketCacheMixin:
             logger.error(f"Failed to get order book for {symbol}: {exc}")
             return None
 
-    async def set_recent_trades(self, symbol: str, trades_data: List[Dict[str, Any]]) -> bool:
+    async def set_recent_trades(
+        self, symbol: str, trades_data: List[Dict[str, Any]]
+    ) -> bool:
         client = self._redis_client
         if not client:
             return False
@@ -96,7 +98,7 @@ class MarketCacheMixin:
                 "symbol": symbol,
                 "data": trades_data,
                 "timestamp": datetime.now().isoformat(),
-                "cached_at": int(datetime.now().timestamp() * 1000)
+                "cached_at": int(datetime.now().timestamp() * 1000),
             }
             await client.setex(key, config.CACHE_TTL_TRADES, json.dumps(data))
             logger.debug(f"Cached recent trades for {symbol}")
@@ -120,7 +122,9 @@ class MarketCacheMixin:
             logger.error(f"Failed to get recent trades for {symbol}: {exc}")
             return None
 
-    async def set_klines(self, symbol: str, interval: str, klines_data: List[List[Any]], ttl: int) -> bool:
+    async def set_klines(
+        self, symbol: str, interval: str, klines_data: List[List[Any]], ttl: int
+    ) -> bool:
         client = self._redis_client
         if not client:
             return False
@@ -131,7 +135,7 @@ class MarketCacheMixin:
                 "interval": interval,
                 "data": klines_data,
                 "timestamp": datetime.now().isoformat(),
-                "cached_at": int(datetime.now().timestamp() * 1000)
+                "cached_at": int(datetime.now().timestamp() * 1000),
             }
             await client.setex(key, ttl, json.dumps(data))
             logger.debug(f"Cached klines for {symbol} {interval}")
@@ -154,5 +158,6 @@ class MarketCacheMixin:
         except Exception as exc:  # pragma: no cover - I/O wrapper
             logger.error(f"Failed to get klines for {symbol}: {exc}")
             return None
+
 
 __all__ = ["MarketCacheMixin"]

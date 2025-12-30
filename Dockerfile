@@ -24,6 +24,7 @@ COPY models/ ./models/
 COPY services/ ./services/
 COPY repositories/ ./repositories/
 COPY domain/ ./domain/
+COPY src/ ./src/
 COPY templates/ ./templates/
 
 # Create non-root user

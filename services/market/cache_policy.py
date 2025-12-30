@@ -17,4 +17,5 @@ def kline_ttl(interval: str) -> int:
     """Return TTL in seconds for given kline interval."""
     return _KLINE_TTL.get(interval, 60)
 
+
 __all__ = ["kline_ttl"]

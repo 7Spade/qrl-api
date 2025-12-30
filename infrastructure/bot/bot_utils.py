@@ -33,7 +33,9 @@ def derive_ma_pair(
     return short_ma, long_ma
 
 
-def compute_cost_metrics(price: float, qrl_balance: float, avg_cost: Optional[float]) -> dict:
+def compute_cost_metrics(
+    price: float, qrl_balance: float, avg_cost: Optional[float]
+) -> dict:
     """Derive cost metrics with safe defaults for unrealized PnL calculation."""
     effective_avg_cost = safe_float(avg_cost, price if price is not None else 0.0)
     if effective_avg_cost <= 0:
