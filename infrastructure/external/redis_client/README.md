@@ -53,3 +53,22 @@ Socket IO (async / sync)
 RESP Parser 抽象層
       ├─ Python parser（fallback）
       └─ hiredis parser
+
+本專案 redis_client 套件結構（單一職責 mixin）
+
+infrastructure/external/redis_client/
+├─ __init__.py                # 導出 RedisClient / redis_client 單例
+├─ core.py                    # 連線池、健康檢查、集中匯入各 mixin，優先使用 HiredisParser
+├─ client.py                  # 向後相容導出
+├─ balance_cache.py           # 餘額 / 總資產快取
+├─ market_cache.py            # 行情快取（ticker / orderbook / trades / klines）
+├─ bot_status_repo.py         # Bot 狀態
+├─ position_repo.py           # 持倉快照
+├─ position_layers_repo.py    # 分層持倉
+├─ price_repo.py              # 價格快照與歷史
+├─ trade_counter_repo.py      # 交易計數 / 最近交易時間
+├─ trade_history_repo.py      # 交易歷史
+├─ cost_repo.py               # 成本 / PnL
+└─ mexc_raw_repo.py           # MEXC 原始回應留存
+
+Parser 策略：若環境安裝 hiredis 則 core.py 透過 parser_class=HiredisParser 啟用 C 解析器，否則回退內建 Python 解析器。
