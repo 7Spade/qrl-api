@@ -7,8 +7,6 @@ import sys
 from pathlib import Path
 from typing import Dict
 
-from architecture_guard import check_architecture
-
 logger = logging.getLogger(__name__)
 
 
@@ -226,6 +224,8 @@ class ValidationFramework:
 
     def _check_architecture_guard(self) -> bool:
         """Ensure src/app follows size and filename guardrails."""
+        from architecture_guard import check_architecture
+
         base = Path(__file__).resolve().parent.parent / "src" / "app"
         ok, violations = check_architecture(base)
         message = (

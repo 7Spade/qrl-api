@@ -7,7 +7,7 @@ Rules are defined in ARCHITECTURE_RULES.md.
 
 import argparse
 from pathlib import Path
-from typing import Iterable, List, Tuple, Union
+from typing import Iterable, List, Tuple
 
 MAX_BYTES = 4000
 FORBIDDEN_FILENAMES = {"client.py", "core.py", "utils.py"}
@@ -18,7 +18,7 @@ def _iter_python_files(base_path: Path) -> Iterable[Path]:
     return base_path.rglob("*.py")
 
 
-def check_architecture(base_path: Union[Path, str] = "src/app") -> Tuple[bool, List[str]]:
+def check_architecture(base_path: Path = Path("src/app")) -> Tuple[bool, List[str]]:
     """
     Validate the target tree against size and filename rules.
 
@@ -58,7 +58,8 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    ok, violations = check_architecture(args.base)
+    base = Path(args.base)
+    ok, violations = check_architecture(base)
     if ok:
         print(f"[OK] No architecture violations under {args.base}")
         return 0
