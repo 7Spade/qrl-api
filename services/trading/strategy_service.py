@@ -1,19 +1,5 @@
-"""
-StrategyService
----------------
-Placeholder service for encapsulating trading strategy orchestration.
-Populate with MA crossover, cost checks, and other signal logic.
-"""
-from typing import Any
+"""Legacy shim - redirects to src.app.application.trading"""
+from src.app.application.trading._strategy_service import StrategyService
 
+__all__ = ["StrategyService"]
 
-class StrategyService:
-    """Stub for trading strategy coordination."""
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        self.args = args
-        self.kwargs = kwargs
-
-    async def generate_signal(self, *args: Any, **kwargs: Any) -> str:
-        """Return a default HOLD signal until implemented."""
-        return "HOLD"
