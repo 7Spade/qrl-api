@@ -6,6 +6,7 @@ See `結構.md` (layered rules), `網頁結構.md` (interface layout), and `調�
 ## Progress snapshot
 - Stage 0 skeleton created under `src/app/*` with empty packages and `bootstrap.py` placeholders.
 - Interfaces: HTTP shim modules now expose legacy routers from `api/*` and `main.py` imports through these shims to keep behavior unchanged.
+- Cloud tasks: a shim at `interfaces/tasks/router.py` re-exports the legacy task router so `main.py` mounts tasks through the interfaces layer without changing behavior.
 - Runtime logic still relies on legacy handlers; see `src/app/README.md` for legacy → target mapping.
 
 src/
