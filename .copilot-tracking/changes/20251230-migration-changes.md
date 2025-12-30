@@ -6,7 +6,7 @@
 
 ## Summary
 
-Initialized changes log to track progressive migration into `src/app` per `ARCHITECTURE_TREE.md`. Migrated Cloud Task handlers into the application layer, rebuilt the account router in `interfaces/http` (retiring `api/account_routes.py`), and removed legacy `infrastructure/tasks` router files while keeping behavior unchanged.
+Initialized changes log to track progressive migration into `src/app` per `ARCHITECTURE_TREE.md`. Migrated Cloud Task handlers into the application layer, rebuilt the account router in `interfaces/http` (retiring `api/account_routes.py`), and removed legacy `infrastructure/tasks` router files while keeping behavior unchanged. Extended the domain layer with lightweight models, strategy shims, and events so `src/app/domain` now mirrors the target tree without altering runtime behavior.
 
 ## Changes
 
@@ -34,6 +34,11 @@ Initialized changes log to track progressive migration into `src/app` per `ARCHI
 - src/app/shared/{clock.py,ids.py,typing.py,errors.py} - Shared utility shims and placeholders.
 - src/app/domain/models/{account.py,balance.py} - Minimal domain model placeholders.
 - src/app/infrastructure/config/{settings.py,env.py} - Config shims referencing legacy config.
+- src/app/domain/models/{order.py,price.py,trade.py,position.py} - Domain value objects added to complete the target models tree.
+- src/app/domain/strategies/{base.py,example_strategy.py} - Strategy protocol and shim reusing legacy trading strategy logic.
+- src/app/domain/risk/stop_loss.py - Stop-loss guard placeholder for risk layout.
+- src/app/domain/position/updater.py - Helper to evolve position state using the calculator logic.
+- src/app/domain/events/trading_events.py - Event dataclasses for trading-related notifications.
 
 ### Modified
 
@@ -50,6 +55,11 @@ Initialized changes log to track progressive migration into `src/app` per `ARCHI
 - src/app/interfaces/http/account.py - Reimplemented account router without api/account_routes shim; inlined balance endpoints.
 - tests/test_account_routes.py - Points to interfaces/http/account router.
 - docs/MEXC_API_BALANCE_FIX.md - Updated import path for account router.
+- src/app/domain/strategies/__init__.py - Exposes strategy protocol and example shim.
+- src/app/domain/risk/__init__.py - Exports stop-loss guard alongside RiskManager.
+- src/app/domain/position/__init__.py - Re-exports PositionUpdater helper.
+- src/app/domain/models/__init__.py - Aggregates the expanded model set.
+- src/app/domain/events/__init__.py - Exposes trading event dataclasses.
 
 ### Removed
 
