@@ -5,7 +5,7 @@ from datetime import datetime
 import logging
 from fastapi import APIRouter, HTTPException
 
-from services.account import BalanceService
+from src.app.application.account.balance_service import BalanceService
 
 router = APIRouter(prefix="/account", tags=["Account"])
 logger = logging.getLogger(__name__)
