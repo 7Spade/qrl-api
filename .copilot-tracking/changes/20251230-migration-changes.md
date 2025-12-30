@@ -6,7 +6,7 @@
 
 ## Summary
 
-Initialized changes log to track progressive migration into `src/app` per `ARCHITECTURE_TREE.md`. Migrated Cloud Task handlers into the application layer and removed legacy `infrastructure/tasks` router files while keeping behavior unchanged.
+Initialized changes log to track progressive migration into `src/app` per `ARCHITECTURE_TREE.md`. Migrated Cloud Task handlers into the application layer, rebuilt the account router in `interfaces/http` (retiring `api/account_routes.py`), and removed legacy `infrastructure/tasks` router files while keeping behavior unchanged.
 
 ## Changes
 
@@ -47,6 +47,9 @@ Initialized changes log to track progressive migration into `src/app` per `ARCHI
 - tests/test_module_imports.py - Expects task routes to surface via interfaces router.
 - tests/test_tasks_router.py - Adds guards to ensure Cloud Tasks reject unauthenticated requests.
 - ARCHITECTURE_TREE.md - Progress snapshot updated for task migration and legacy cleanup.
+- src/app/interfaces/http/account.py - Reimplemented account router without api/account_routes shim; inlined balance endpoints.
+- tests/test_account_routes.py - Points to interfaces/http/account router.
+- docs/MEXC_API_BALANCE_FIX.md - Updated import path for account router.
 
 ### Removed
 
@@ -54,10 +57,11 @@ Initialized changes log to track progressive migration into `src/app` per `ARCHI
 - infrastructure/tasks/mexc_tasks.py - Legacy wrapper removed.
 - infrastructure/tasks/router.py - Legacy task router removed.
 - infrastructure/tasks/__init__.py - Removed with the retired task package.
+- api/account_routes.py - Legacy account router aggregator removed.
 
 ## Release Summary
 
-**Total Files Affected**: 14 (this iteration)
+**Total Files Affected**: 18 (this iteration)
 
 ### Files Created (3)
 
@@ -65,7 +69,7 @@ Initialized changes log to track progressive migration into `src/app` per `ARCHI
 - src/app/application/market/{sync_price.py,sync_cost.py} - Cloud Task handlers for market price tasks.
 - .copilot-tracking/changes/20251230-migration-changes.md - Tracks migration progress and file movements.
 
-### Files Modified (7)
+### Files Modified (11)
 
 - src/app/interfaces/tasks/mexc/{sync_account.py,sync_market.py,sync_trades.py}
 - src/app/infrastructure/scheduler/cloud_tasks.py
@@ -74,13 +78,18 @@ Initialized changes log to track progressive migration into `src/app` per `ARCHI
 - ARCHITECTURE_TREE.md
 - api/account/balance.py
 - src/app/application/account/get_balance.py
+- src/app/interfaces/http/account.py
+- tests/test_account_routes.py
+- docs/MEXC_API_BALANCE_FIX.md
+- .copilot-tracking/changes/20251230-migration-changes.md
 
-### Files Removed (4)
+### Files Removed (5)
 
 - infrastructure/tasks/mexc_tasks_core.py
 - infrastructure/tasks/mexc_tasks.py
 - infrastructure/tasks/router.py
 - infrastructure/tasks/__init__.py
+- api/account_routes.py
 
 ### Dependencies & Infrastructure
 
