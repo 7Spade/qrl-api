@@ -18,4 +18,5 @@ been moved yet to avoid breaking behavior.
 - All folders currently contain empty `__init__.py` files as placeholders.
 - `bootstrap.py` will later assemble the application; `main.py` remains the active
   entrypoint for now.
-- Keep new files ≤ 4000 characters; split early if growth is expected.
+- Keep new files ≤ 4000 characters to avoid oversized modules; when a file grows
+  toward the limit, split by responsibility (e.g., per use case or endpoint).
