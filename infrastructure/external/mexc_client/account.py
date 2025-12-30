@@ -21,6 +21,9 @@ def build_balance_map(account_info: Dict[str, Any]) -> Dict[str, Dict[str, str]]
             "total": safe_float(balance.get("free", 0))
             + safe_float(balance.get("locked", 0)),
         }
+    # Ensure keys exist even if exchange omits zero-balance assets
+    balances.setdefault("QRL", {"free": "0", "locked": "0", "total": 0})
+    balances.setdefault("USDT", {"free": "0", "locked": "0", "total": 0})
     return balances
 
 

@@ -52,9 +52,9 @@ class BalanceService:
 
     @staticmethod
     def _assert_required_fields(snapshot: Dict[str, Any]) -> None:
-        balances = snapshot.get("balances", {})
-        if "QRL" not in balances or "USDT" not in balances:
-            raise ValueError("Missing QRL/USDT balances")
+        balances = snapshot.setdefault("balances", {})
+        balances.setdefault("QRL", {"free": "0", "locked": "0", "total": 0})
+        balances.setdefault("USDT", {"free": "0", "locked": "0", "total": 0})
         if snapshot.get("prices", {}).get(QRL_USDT_SYMBOL) is None:
             raise ValueError("Missing QRL/USDT price")
 
