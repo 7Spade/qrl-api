@@ -1,11 +1,3 @@
-import { startAutoRefresh } from "../../refresh.js";
+import setupDashboard from "./handlers.js";
 
-export function initDashboard() {
-    const refreshBtn = document.getElementById("refresh-btn");
-    if (refreshBtn) {
-        refreshBtn.addEventListener("click", startAutoRefresh);
-    }
-    startAutoRefresh();
-}
-
-export default initDashboard;
+setupDashboard();
