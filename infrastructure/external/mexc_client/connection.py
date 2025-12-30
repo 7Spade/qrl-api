@@ -39,6 +39,14 @@ class MexcConnection:
             self._client = build_async_client(self.headers, self.timeout)
         return self._client
 
+    def _use_query_params(self, method: str, endpoint: str) -> bool:
+        normalized = method.upper()
+        if normalized in {"GET", "DELETE"}:
+            return True
+        if normalized == "PUT" and "userDataStream" in endpoint:
+            return True
+        return False
+
     async def request(
         self,
         method: str,
@@ -50,9 +58,7 @@ class MexcConnection:
         payload = params or {}
         last_error: Optional[Exception] = None
         normalized_method = method.upper()
-        use_query = normalized_method in {"GET", "DELETE"} or (
-            normalized_method == "PUT" and "userDataStream" in endpoint
-        )
+        use_query = self._use_query_params(normalized_method, endpoint)
         request_kwargs = {"params": payload} if use_query else {"json": payload}
 
         for attempt in range(max_retries):

@@ -18,10 +18,9 @@ class MEXCWebSocketClient:
         url=WS_BASE,
         subscriptions=None,
         binary_decoder=None,
-        heartbeat: float = 20,
-        close_timeout: float = 5,
+        heartbeat: float = 20.0,  # seconds
+        close_timeout: float = 5.0,  # seconds
     ):
-        """heartbeat and close_timeout are expressed in seconds."""
         self.url = url
         self._pending = set(subscriptions or [])
         self.subscriptions = set()

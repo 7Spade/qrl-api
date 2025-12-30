@@ -36,6 +36,8 @@ class TradingHelpersMixin(OrderEndpoints):
         quantity: Optional[float] = None,
         quote_order_qty: Optional[float] = None,
     ) -> Dict[str, Any]:
+        if quantity is not None and quote_order_qty is not None:
+            raise ValueError("Provide either quantity or quote_order_qty, not both")
         if quantity is None and quote_order_qty is None:
             raise ValueError("Either quantity or quote_order_qty is required for market orders")
         return await self.create_order(
