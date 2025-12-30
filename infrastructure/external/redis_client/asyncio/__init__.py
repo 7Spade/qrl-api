@@ -1,8 +1,4 @@
-"""
-Redis client package
---------------------
-Provides the async RedisClient and shared redis_client instance.
-"""
+"""Async Redis client wrapper."""
 from .client import AsyncRedisClient, RedisClient, redis_client
 
 __all__ = ["AsyncRedisClient", "RedisClient", "redis_client"]
