@@ -1,5 +1,5 @@
 """
-Symmetric (50/50) rebalance planner.
+Symmetric rebalance planner (equal QRL/USDT value target).
 
 Rules:
 - Target portfolio value split: QRL value 50%, USDT 50% (symmetric).

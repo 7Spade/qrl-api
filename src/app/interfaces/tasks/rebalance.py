@@ -1,5 +1,5 @@
 """
-Cloud Scheduler entrypoint for 50/50 rebalance planning.
+Cloud Scheduler entrypoint for symmetric (equal-value) rebalance planning.
 """
 from typing import Optional
 
