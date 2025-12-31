@@ -8,9 +8,11 @@ from contextlib import suppress
 from typing import Any, AsyncIterator, Iterable, Optional
 
 from src.app.infrastructure.external.mexc import MEXCClient
-from src.app.infrastructure.external.mexc.ws_channels import (
-    BinaryDecoder,
+from src.app.infrastructure.external.mexc.websocket.data_streams import (
     DEFAULT_USER_STREAM_CHANNELS,
+)
+from src.app.infrastructure.external.mexc.websocket.market_streams import (
+    BinaryDecoder,
     book_ticker_batch_stream,
     book_ticker_stream,
     build_protobuf_decoder,
@@ -85,6 +87,7 @@ async def connect_user_stream(
 
 
 __all__ = [
+    "BinaryDecoder",
     "MEXCWebSocketClient",
     "connect_public_trades",
     "connect_user_stream",
