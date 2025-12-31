@@ -26,6 +26,9 @@ from src.app.infrastructure.persistence.redis.repos.trade_history import (
 )
 from src.app.infrastructure.persistence.redis.repos.cost import CostRepoMixin
 from src.app.infrastructure.persistence.redis.repos.mexc_raw import MexcRawRepoMixin
+from src.app.infrastructure.persistence.redis.repos.rebalance import (
+    RebalanceRepoMixin,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +44,7 @@ class RedisClient(
     TradeHistoryRepoMixin,
     CostRepoMixin,
     MexcRawRepoMixin,
+    RebalanceRepoMixin,
 ):
     def __init__(self):
         self.client: Optional[redis.Redis] = None
