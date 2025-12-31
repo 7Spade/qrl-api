@@ -38,19 +38,25 @@ async def lifespan(app: FastAPI):
     logger.info(f"Listening on port: {config.PORT}")
     logger.info(f"Host: {config.HOST}")
     
-    # Test MEXC API (non-blocking)
-    try:
-        logger.info("Testing MEXC API connection...")
-        import asyncio
-        await asyncio.wait_for(mexc_client.ping(), timeout=5.0)
-        logger.info("MEXC API connection successful")
-    except asyncio.TimeoutError:
-        logger.warning("MEXC API connection timeout - continuing anyway")
-    except Exception as e:
-        logger.warning(f"MEXC API connection test failed: {e} - continuing anyway")
-    
+    # CRITICAL: Minimal startup - don't block on external API checks
+    # Cloud Run requires fast startup to listen on PORT within timeout
     logger.info("QRL Trading API started successfully (Cloud Run - Direct API mode, No Redis)")
     logger.info(f"Server is ready to accept requests on port {config.PORT}")
+    
+    # Test MEXC API in background (non-blocking, fire-and-forget)
+    import asyncio
+    async def test_mexc_api():
+        try:
+            logger.info("Testing MEXC API connection...")
+            await asyncio.wait_for(mexc_client.ping(), timeout=3.0)
+            logger.info("MEXC API connection successful")
+        except asyncio.TimeoutError:
+            logger.warning("MEXC API connection timeout - continuing anyway")
+        except Exception as e:
+            logger.warning(f"MEXC API connection test failed: {e} - continuing anyway")
+    
+    # Schedule background task without awaiting
+    asyncio.create_task(test_mexc_api())
     
     yield
     
