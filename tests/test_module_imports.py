@@ -58,9 +58,9 @@ def test_utils_wrappers():
 
 
 def test_repository_and_service_wrappers():
-    from repositories.account import CostRepository, PositionRepository
-    from repositories.market import PriceRepository
-    from repositories.trade import TradeRepository
+    from src.app.infrastructure.persistence.repos.account import CostRepository, PositionRepository
+    from src.app.infrastructure.persistence.repos.market import PriceRepository
+    from src.app.infrastructure.persistence.repos.trade import TradeRepository
     from services.market import MarketService
     from services.trading import TradingService
 
