@@ -1,33 +1,31 @@
-"""Async Redis client for trading bot state."""
+"""Async Redis client for trading bot state - migrated from infrastructure/external/redis_client/core.py"""
 import logging
 from typing import Optional
 
 import redis.asyncio as redis
 
 try:
-    from redis.connection import (
-        HiredisParser,
-    )  # optional, available when hiredis is installed
-except ImportError:  # hiredis 2.x removed parser, fall back to default
+    from redis.connection import HiredisParser
+except ImportError:
     HiredisParser = None
 
 from src.app.infrastructure.config import config
-from infrastructure.external.redis_client.balance_cache import BalanceCacheMixin
-from infrastructure.external.redis_client.market_cache import MarketCacheMixin
-from infrastructure.external.redis_client.bot_status_repo import BotStatusRepoMixin
-from infrastructure.external.redis_client.position_repo import PositionRepoMixin
-from infrastructure.external.redis_client.position_layers_repo import (
+from src.app.infrastructure.persistence.redis.cache.balance import BalanceCacheMixin
+from src.app.infrastructure.persistence.redis.cache.market import MarketCacheMixin
+from src.app.infrastructure.persistence.redis.repos.bot_status import BotStatusRepoMixin
+from src.app.infrastructure.persistence.redis.repos.position import PositionRepoMixin
+from src.app.infrastructure.persistence.redis.repos.position_layers import (
     PositionLayersRepoMixin,
 )
-from infrastructure.external.redis_client.price_repo import PriceRepoMixin
-from infrastructure.external.redis_client.trade_counter_repo import (
+from src.app.infrastructure.persistence.redis.repos.price import PriceRepoMixin
+from src.app.infrastructure.persistence.redis.repos.trade_counter import (
     TradeCounterRepoMixin,
 )
-from infrastructure.external.redis_client.trade_history_repo import (
+from src.app.infrastructure.persistence.redis.repos.trade_history import (
     TradeHistoryRepoMixin,
 )
-from infrastructure.external.redis_client.cost_repo import CostRepoMixin
-from infrastructure.external.redis_client.mexc_raw_repo import MexcRawRepoMixin
+from src.app.infrastructure.persistence.redis.repos.cost import CostRepoMixin
+from src.app.infrastructure.persistence.redis.repos.mexc_raw import MexcRawRepoMixin
 
 logger = logging.getLogger(__name__)
 
@@ -106,5 +104,6 @@ class RedisClient(
             return False
 
 
-# Singleton instance
 redis_client = RedisClient()
+
+__all__ = ["RedisClient", "redis_client"]

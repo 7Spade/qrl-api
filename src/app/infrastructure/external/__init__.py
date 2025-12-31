@@ -6,6 +6,6 @@ depending on root-level infrastructure directly.
 """
 from infrastructure.external.mexc_client import mexc_client, MEXCClient
 from infrastructure.external.mexc_client.account import QRL_USDT_SYMBOL
-from infrastructure.external.redis_client import redis_client
+from src.app.infrastructure.persistence.redis import redis_client, RedisClient
 
-__all__ = ["mexc_client", "MEXCClient", "redis_client", "QRL_USDT_SYMBOL"]
+__all__ = ["mexc_client", "MEXCClient", "redis_client", "RedisClient", "QRL_USDT_SYMBOL"]
