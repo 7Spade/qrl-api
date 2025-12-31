@@ -26,7 +26,7 @@ async def get_orderbook(symbol: str, mexc_client, limit: int = 20) -> Dict[str, 
     logger.info(f"Fetching orderbook for {symbol} from MEXC API (limit={limit})")
     
     async with mexc_client:
-        depth_data = await mexc_client.get_depth(symbol, limit=limit)
+        depth_data = await mexc_client.get_orderbook(symbol, limit=limit)
         
         return {
             "success": True,
