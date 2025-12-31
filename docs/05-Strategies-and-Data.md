@@ -24,6 +24,24 @@
 2. 單日交易次數與單筆占比受限（避免手續費吞噬）。  
 3. 極端行情：暴漲保留核心、暴跌分批買入、流動性不足則暫停交易。  
 
+### 策略跑起來的最短路徑
+- 依賴：設定 `.env`（MEXC_API_KEY、MEXC_SECRET_KEY、REDIS_URL），啟動 Redis（本地或 Redis Cloud）。  
+- 啟動 API：`uvicorn main:app --host 0.0.0.0 --port 8080`，確認 `/health` 為 200。  
+- 開啟機器人：  
+  ```bash
+  curl -X POST http://localhost:8080/control \
+    -H "Content-Type: application/json" \
+    -d '{"action": "start"}'
+  ```  
+- 執行策略（可先 dry run）：  
+  ```bash
+  curl -X POST http://localhost:8080/execute \
+    -H "Content-Type: application/json" \
+    -d '{"pair":"QRL/USDT","strategy":"ma-crossover","dry_run":true}'
+  ```  
+- 觀察狀態：`GET /status` 應包含 `position_layers`、`avg_cost`，並可透過 Redis `HGETALL bot:QRLUSDT:position` 驗證。  
+- Context7/CCXT 交易順序建議：先載入市場、讀取行情（`fetch_ticker`），再送單（`create_order`）；對應本專案，先確保 `/market/price/{symbol}` 快取完成再觸發 `/execute`，避免使用到舊報價。  
+
 ### 實務檢查
 ```bash
 redis-cli HGETALL bot:QRLUSDT:position          # 應包含 qrl_balance/usdt_balance/avg_cost
