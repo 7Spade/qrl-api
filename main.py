@@ -85,8 +85,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Serve static assets for the dashboard (templates/static -> /static)
-app.mount("/static", StaticFiles(directory="templates/static"), name="static")
+# Serve static assets for the dashboard (src/app/interfaces/templates/static -> /static)
+app.mount("/static", StaticFiles(directory="src/app/interfaces/templates/static"), name="static")
 
 
 # ===== Include Routers =====

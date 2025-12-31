@@ -11,7 +11,7 @@ from pydantic import BaseModel
 
 router = APIRouter(tags=["Status"])
 logger = logging.getLogger(__name__)
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="src/app/interfaces/templates")
 
 
 class HealthResponse(BaseModel):
