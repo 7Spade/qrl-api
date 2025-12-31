@@ -18,7 +18,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code and templates
 COPY *.py ./
-COPY api/ ./api/
 COPY infrastructure/ ./infrastructure/
 COPY services/ ./services/
 COPY repositories/ ./repositories/
