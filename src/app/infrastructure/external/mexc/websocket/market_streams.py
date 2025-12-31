@@ -8,6 +8,8 @@ from typing import Any, Callable, Type
 from google.protobuf.json_format import MessageToDict
 from google.protobuf.message import Message
 
+from src.app.infrastructure.external.mexc.proto import PushDataV3ApiWrapper
+
 BinaryDecoder = Callable[[bytes], Any]
 
 _TRADE_INTERVALS = {"100ms", "10ms"}
@@ -77,9 +79,15 @@ def mini_tickers_stream(timezone: str = "UTC+0") -> str:
     return f"spot@public.mini.ticker.v3.api.pb@{timezone}"
 
 
+def push_data_decoder() -> BinaryDecoder:
+    """Decoder for the top-level PushDataV3ApiWrapper envelope."""
+    return build_protobuf_decoder(PushDataV3ApiWrapper)
+
+
 __all__ = [
     "BinaryDecoder",
     "build_protobuf_decoder",
+    "PushDataV3ApiWrapper",
     "trade_stream",
     "kline_stream",
     "diff_depth_stream",
@@ -87,4 +95,5 @@ __all__ = [
     "book_ticker_stream",
     "book_ticker_batch_stream",
     "mini_tickers_stream",
+    "push_data_decoder",
 ]

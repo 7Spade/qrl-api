@@ -130,3 +130,32 @@ def test_user_data_stream_builders():
     ]
     # Legacy import path continues to work
     assert ws_channels.account_update_stream() == "spot@private.account.v3.api.pb"
+
+
+def test_push_data_decoder_roundtrip():
+    from src.app.infrastructure.external.mexc.proto import (
+        PublicAggreDealsV3Api,
+        PushDataV3ApiWrapper,
+    )
+
+    decoder = ws_client.push_data_decoder()
+    wrapper = PushDataV3ApiWrapper()
+    wrapper.channel = "spot@public.aggre.deals.v3.api.pb@100ms@BTCUSDT"
+    wrapper.symbol = "BTCUSDT"
+    wrapper.sendTime = 1234567890
+
+    deals_body = PublicAggreDealsV3Api()
+    deal = deals_body.deals.add()
+    deal.price = "93220.00"
+    deal.quantity = "0.04438243"
+    deal.tradeType = 2
+    deal.time = 1736409765051
+    deals_body.eventType = "spot@public.aggre.deals.v3.api.pb@100ms"
+
+    wrapper.publicAggreDeals.CopyFrom(deals_body)
+
+    decoded = decoder(wrapper.SerializeToString())
+    assert decoded["channel"] == wrapper.channel
+    assert decoded["symbol"] == "BTCUSDT"
+    assert decoded["sendTime"] == "1234567890"
+    assert decoded["publicAggreDeals"]["deals"][0]["price"] == "93220.00"

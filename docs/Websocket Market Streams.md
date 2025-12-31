@@ -17,8 +17,8 @@ Please process the data according to the parameters returned in the documentatio
 
 ## 實現方式與計畫 (Implementation plan)
 
-1) 後端處理
-- 以 websockets 連 MEXC `*.api.pb` channel，使用 `protobuf==4.25.1` 解析 proto，轉為標準 JSON。
+- 以 websockets 連 MEXC `*.api.pb` channel，使用 `protobuf==6.33.2` 解析 proto，轉為標準 JSON。
+- 已內建官方 websocket proto（`src/app/infrastructure/external/mexc/proto`），搭配 `push_data_decoder()` 可直接把 `PushDataV3ApiWrapper` 解碼為 JSON。
 - 依資料型態拆不同推播：交易/klines -> K 線 & 成交量；depth -> order book; ticker/miniTicker -> 指標卡片。
 - 透過內部 WS/SSE/Redis pub-sub 將 JSON 轉送到前端，並保留心跳/重連邏輯。
 
