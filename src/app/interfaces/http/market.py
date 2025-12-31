@@ -60,11 +60,11 @@ async def klines_endpoint(
     end_time: Optional[int] = None,
 ):
     """Get candlestick (kline) data."""
-    try:
-        normalized_symbol = _normalize_symbol(symbol)
-        if normalized_symbol != ALLOWED_KLINE_SYMBOL:
-            raise HTTPException(status_code=404, detail="Only QRLUSDT klines are supported")
+    normalized_symbol = _normalize_symbol(symbol)
+    if normalized_symbol != ALLOWED_KLINE_SYMBOL:
+        raise HTTPException(status_code=404, detail="Only QRLUSDT klines are supported")
 
+    try:
         mexc_client = _get_mexc_client()
         result = await get_klines(
             symbol=normalized_symbol,
@@ -75,8 +75,6 @@ async def klines_endpoint(
             end_time=end_time,
         )
         return result
-    except HTTPException:
-        raise
     except Exception as e:
         logger.error(f"Failed to get klines for {symbol}: {e}")
         raise HTTPException(status_code=500, detail=str(e))
