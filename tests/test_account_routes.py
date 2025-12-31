@@ -7,11 +7,11 @@ from fastapi import HTTPException
 # Ensure project root is on sys.path for module imports
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
-from api import account_routes
+from src.app.interfaces.http import account as account_routes
 import importlib
-from infrastructure.external.mexc_client.account import fetch_balance_snapshot
+from src.app.infrastructure.external.mexc.account import fetch_balance_snapshot
 
-mexc_module = importlib.import_module("infrastructure.external.mexc_client")
+mexc_module = importlib.import_module("src.app.infrastructure.external.mexc")
 
 
 class DummyMexcClient:

@@ -7,8 +7,8 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from infrastructure.external.mexc_client.core import MEXCClient
-from infrastructure.external.mexc_client.signer import generate_signature
+from src.app.infrastructure.external.mexc.core import MEXCClient  # noqa: E402
+from src.app.infrastructure.external.mexc.signer import generate_signature  # noqa: E402
 
 
 def test_generate_signature_matches_helper():
@@ -29,7 +29,9 @@ async def test_place_market_order_delegates_to_create_order(monkeypatch):
 
     monkeypatch.setattr(client, "create_order", fake_create_order)
 
-    result = await client.place_market_order(symbol="QRLUSDT", side="buy", quantity=1.23)
+    result = await client.place_market_order(
+        symbol="QRLUSDT", side="buy", quantity=1.23
+    )
 
     assert captured["symbol"] == "QRLUSDT"
     assert captured["side"] == "BUY"

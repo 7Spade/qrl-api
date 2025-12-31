@@ -4,8 +4,8 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
-from infrastructure.external.mexc_client.account import build_balance_map
-from services.account import BalanceService
+from src.app.infrastructure.external.mexc.account import build_balance_map
+from src.app.application.trading.services import BalanceService
 
 
 class FakeMexcClient:

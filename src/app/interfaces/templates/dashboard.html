@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QRL Trading Monitor (Read-Only)</title>
+    <style>
+        :root {
+            color-scheme: light dark;
+            --bg: #0f172a;
+            --card: #111827;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --accent: #6366f1;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --border: rgba(255, 255, 255, 0.08);
+        }
+        body { margin: 0; font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+        .layout { max-width: 1150px; margin: 0 auto; padding: 32px 20px 48px; display: flex; flex-direction: column; gap: 16px; }
+        header { display: flex; flex-direction: column; gap: 6px; }
+        h1 { margin: 0; font-size: 26px; }
+        .subtitle { color: var(--muted); font-size: 14px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+        .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+        .card h2 { margin: 0; font-size: 16px; color: var(--muted); letter-spacing: 0.3px; }
+        .value { font-size: 30px; font-weight: 700; }
+        .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .pill { padding: 4px 10px; border-radius: 20px; font-size: 12px; background: rgba(255, 255, 255, 0.06); color: var(--muted); }
+        .section-title { margin: 18px 0 6px; font-size: 16px; color: var(--muted); letter-spacing: 0.2px; }
+        ul { margin: 0; padding-left: 18px; color: var(--muted); }
+        a { color: var(--accent); }
+        .status { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 12px; background: rgba(255, 255, 255, 0.05); color: var(--muted); font-size: 13px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18); }
+        .error { color: var(--danger); }
+        .hint { color: var(--muted); font-size: 13px; }
+        button { align-self: flex-start; background: var(--accent); color: #fff; border: none; border-radius: 10px; padding: 10px 14px; font-weight: 600; cursor: pointer; }
+        button:active { opacity: 0.85; }
+        table { width: 100%; border-collapse: collapse; color: var(--text); }
+        th, td { padding: 10px 8px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14px; }
+        th { color: var(--muted); font-weight: 600; background: rgba(255, 255, 255, 0.02); }
+        .table-card { overflow: hidden; }
+        .tag { padding: 3px 8px; border-radius: 8px; font-size: 12px; background: rgba(255, 255, 255, 0.06); }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <header>
+            <div class="status" aria-live="polite">
+                <span class="dot" aria-hidden="true"></span>
+                <span>只讀儀表板 · 無交易操作</span>
+            </div>
+            <h1>QRL/USDT Monitoring</h1>
+        </header>
+
+        <div class="grid" aria-live="polite">
+            <div class="card">
+                <h2>QRL 餘額 (現貨)</h2>
+                <div class="value" id="qrl-total">--</div>
+                <div class="row hint"><span>價值 (USDT)</span><span id="qrl-value">--</span></div>
+                <div class="row hint"><span>可用</span><span id="qrl-free">--</span></div>
+            </div>
+            <div class="card">
+                <h2>USDT 餘額 (現貨)</h2>
+                <div class="value" id="usdt-total">--</div>
+                <div class="row hint"><span>可用</span><span id="usdt-free">--</span></div>
+            </div>
+            <div class="card">
+                <h2>QRL/USDT 價格</h2>
+                <div class="value" id="price">--</div>
+                <div class="row"><span class="hint">24h 變化</span><span id="change" class="pill">--</span></div>
+                <div class="hint" id="updated">--</div>
+            </div>
+            <div class="card">
+                <h2>最佳買賣價</h2>
+                <div class="row"><span class="hint">買一</span><span id="best-bid">--</span></div>
+                <div class="row"><span class="hint">賣一</span><span id="best-ask">--</span></div>
+            </div>
+        </div>
+
+        <div class="row" style="gap:12px; flex-wrap: wrap;">
+            <button id="refresh-btn" type="button">重新整理</button>
+            <span class="hint">每 30 秒自動更新一次；資料來源：MEXC v3 REST 與 WS (公有/私有)。</span>
+            <span class="pill" id="ws-status">WS: 未連線</span>
+        </div>
+
+        <div class="card table-card" aria-live="polite">
+            <h2>交易規則 (Exchange Info)</h2>
+            <table aria-label="Exchange info">
+                <thead><tr><th>Symbol</th><th>Status</th><th>最小下單量</th><th>最小金額</th></tr></thead>
+                <tbody id="info-body"><tr><td colspan="4" class="hint">載入中...</td></tr></tbody>
+            </table>
+        </div>
+
+        <div class="card table-card" aria-live="polite">
+            <h2>委託簿前 5 檔</h2>
+            <table aria-label="Order book">
+                <thead><tr><th>檔</th><th>買價</th><th>買量</th><th>賣價</th><th>賣量</th></tr></thead>
+                <tbody id="depth-body"><tr><td colspan="5" class="hint">載入中...</td></tr></tbody>
+            </table>
+        </div>
+
+        <div class="card table-card" aria-live="polite">
+            <h2>Aggregate Trades (只讀)</h2>
+            <table aria-label="Agg trades">
+                <thead><tr><th>時間</th><th>方向</th><th>價格</th><th>數量</th></tr></thead>
+                <tbody id="agg-body"><tr><td colspan="4" class="hint">載入中...</td></tr></tbody>
+            </table>
+        </div>
+
+        <div class="card table-card" aria-live="polite">
+            <h2>Kline 最近 5 根</h2>
+            <table aria-label="Klines">
+                <thead><tr><th>時間</th><th>開</th><th>高</th><th>低</th><th>收</th></tr></thead>
+                <tbody id="kline-body"><tr><td colspan="5" class="hint">載入中...</td></tr></tbody>
+            </table>
+        </div>
+
+        <div class="card table-card" aria-live="polite">
+            <h2>我的訂單 (只讀)</h2>
+            <table aria-label="Open orders">
+                <thead><tr><th>時間</th><th>方向</th><th>價格</th><th>數量</th><th>已成交</th><th>狀態</th></tr></thead>
+                <tbody id="orders-body"><tr><td colspan="6" class="hint">載入中...</td></tr></tbody>
+            </table>
+        </div>
+
+        <div class="card table-card" aria-live="polite">
+            <h2>我的成交 (只讀)</h2>
+            <table aria-label="Trades">
+                <thead><tr><th>時間</th><th>方向</th><th>價格</th><th>數量</th><th>金額</th><th>手續費</th></tr></thead>
+                <tbody id="trades-body"><tr><td colspan="6" class="hint">載入中...</td></tr></tbody>
+            </table>
+        </div>
+
+        <div>
+            <div class="section-title">MEXC v3 參考</div>
+            <ul>
+                <li><a href="https://www.mexc.com/api-docs/spot-v3/market-data-endpoints" target="_blank" rel="noopener noreferrer">Market Data Endpoints</a></li>
+                <li><a href="https://www.mexc.com/api-docs/spot-v3/spot-account-trade" target="_blank" rel="noopener noreferrer">Spot Account &amp; Trade</a></li>
+                <li><a href="https://www.mexc.com/api-docs/spot-v3/subaccount-endpoints" target="_blank" rel="noopener noreferrer">Sub-Account Endpoints</a></li>
+                <li><a href="https://github.com/mexcdevelop/mexc-api-sdk" target="_blank" rel="noopener noreferrer">Official SDK</a></li>
+            </ul>
+            <p class="hint">僅供監控展示，不會在瀏覽器執行下單、轉帳或任何具副作用的操作。</p>
+        </div>
+    </div>
+
+    <script type="module" src="/static/js/pages/dashboard/init.js"></script>
+</body>
+</html>
