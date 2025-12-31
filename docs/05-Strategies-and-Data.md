@@ -40,7 +40,7 @@
     -d '{"pair":"QRL/USDT","strategy":"ma-crossover","dry_run":true}'
   ```  
 - 觀察狀態：`GET /status` 應包含 `position_layers`、`avg_cost`，並可透過 Redis `HGETALL bot:QRLUSDT:position` 驗證。  
-- Context7/CCXT 交易順序建議：先載入市場、讀取行情（`fetch_ticker`），再送單（`create_order`）；對應本專案，先確保 `/market/price/{symbol}` 快取完成再觸發 `/execute`，避免使用到舊報價。  
+- Context7 調研（僅文檔參考，專案未使用 ccxt）：先更新行情再下單。對應本專案，先確保 `/market/price/{symbol}` 已快取最新報價，再觸發 `/execute`，避免用到舊價格。  
 
 ### 實務檢查
 ```bash
