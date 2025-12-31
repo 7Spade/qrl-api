@@ -2,6 +2,7 @@
 Market HTTP routes - provides endpoints for market data.
 """
 import logging
+from datetime import datetime
 from fastapi import APIRouter, HTTPException
 from typing import Optional
 
@@ -68,18 +69,115 @@ async def klines_endpoint(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# Legacy routes still mounted for compatibility
-from api.market.ticker import router as ticker_router
-from api.market.exchange_info import router as exchange_info_router
-from api.market.book_ticker import router as book_ticker_router
-from api.market.trades import router as trades_router
-from api.market.agg_trades import router as agg_trades_router
+@router.get("/ticker/{symbol}")
+async def ticker_endpoint(symbol: str):
+    """Get 24-hour ticker data for a symbol."""
+    mexc_client = _get_mexc_client()
+    try:
+        logger.info(f"Fetching ticker for {symbol} from MEXC API")
+        async with mexc_client:
+            ticker = await mexc_client.get_ticker_24hr(symbol)
+            return {
+                "success": True,
+                "source": "api",
+                "symbol": symbol,
+                "data": ticker,
+                "timestamp": datetime.now().isoformat(),
+            }
+    except Exception as e:
+        logger.error(f"Failed to get ticker for {symbol}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-# Include legacy routers for endpoints not yet migrated
-router.include_router(ticker_router)
-router.include_router(exchange_info_router)
-router.include_router(book_ticker_router)
-router.include_router(trades_router)
-router.include_router(agg_trades_router)
+
+@router.get("/exchange-info")
+async def exchange_info_endpoint(symbol: Optional[str] = None):
+    """Get exchange info / symbol trading rules."""
+    mexc_client = _get_mexc_client()
+    try:
+        async with mexc_client:
+            info = await mexc_client.get_exchange_info(symbol)
+            return {
+                "success": True,
+                "source": "api",
+                "symbol": symbol,
+                "data": info,
+                "timestamp": datetime.now().isoformat(),
+            }
+    except Exception as e:
+        logger.error(f"Failed to get exchange info for {symbol}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/book-ticker/{symbol}")
+async def book_ticker_endpoint(symbol: str):
+    """Best bid/ask for a symbol."""
+    mexc_client = _get_mexc_client()
+    try:
+        async with mexc_client:
+            book = await mexc_client.get_book_ticker(symbol)
+            return {
+                "success": True,
+                "source": "api",
+                "symbol": symbol,
+                "data": book,
+                "timestamp": datetime.now().isoformat(),
+            }
+    except Exception as e:
+        logger.error(f"Failed to get book ticker for {symbol}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/trades/{symbol}")
+async def trades_endpoint(symbol: str, limit: int = 200):
+    """Get recent trades for a symbol."""
+    mexc_client = _get_mexc_client()
+    try:
+        logger.info(f"Fetching recent trades for {symbol} from MEXC API")
+        async with mexc_client:
+            trades = await mexc_client.get_recent_trades(symbol, limit)
+            return {
+                "success": True,
+                "source": "api",
+                "symbol": symbol,
+                "data": trades,
+                "count": len(trades),
+                "timestamp": datetime.now().isoformat(),
+            }
+    except Exception as e:
+        logger.error(f"Failed to get recent trades for {symbol}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/agg-trades/{symbol}")
+async def agg_trades_endpoint(
+    symbol: str,
+    limit: int = 200,
+    from_id: Optional[int] = None,
+    start_time: Optional[int] = None,
+    end_time: Optional[int] = None,
+):
+    """Get compressed aggregate trades list."""
+    mexc_client = _get_mexc_client()
+    try:
+        async with mexc_client:
+            trades = await mexc_client.get_aggregate_trades(
+                symbol=symbol,
+                limit=limit,
+                from_id=from_id,
+                start_time=start_time,
+                end_time=end_time,
+            )
+            return {
+                "success": True,
+                "source": "api",
+                "symbol": symbol,
+                "data": trades,
+                "count": len(trades),
+                "timestamp": datetime.now().isoformat(),
+            }
+    except Exception as e:
+        logger.error(f"Failed to get aggregate trades for {symbol}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 __all__ = ["router"]

@@ -91,9 +91,39 @@ async def trades_endpoint(symbol: str = "QRLUSDT", limit: int = 50):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# Include remaining legacy sub-account router
-from api.account.sub_accounts import router as sub_accounts_router
+@router.get("/sub-accounts")
+async def get_configured_sub_account():
+    """Get configured sub-account balance (alias for convenience)."""
+    mexc_client = _get_mexc_client()
+    from infrastructure.config.config import config
 
-router.include_router(sub_accounts_router)
+    try:
+        if not config.MEXC_API_KEY or not config.MEXC_SECRET_KEY:
+            raise HTTPException(status_code=401, detail="API keys not configured")
+
+        sub_account_id = config.active_sub_account_identifier
+        if not sub_account_id:
+            raise HTTPException(
+                status_code=400,
+                detail="Sub-account not configured - set SUB_ACCOUNT_ID or SUB_ACCOUNT_NAME",
+            )
+
+        async with mexc_client:
+            mode = "BROKER" if config.is_broker_mode else "SPOT"
+            balance_data = await mexc_client.get_sub_account_balance(sub_account_id)
+            logger.info(f"Retrieved sub-account balance for {sub_account_id}")
+            return {
+                "success": True,
+                "mode": mode,
+                "sub_account_id": sub_account_id,
+                "balance": balance_data,
+                "timestamp": datetime.now().isoformat(),
+            }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get sub-account balance: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 __all__ = ["router"]
