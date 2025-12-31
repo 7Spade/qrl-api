@@ -7,7 +7,7 @@ If there is no valid subscription on the websocket, the server will actively dis
 One ws connection supports a maximum of 30 subscriptions.
 Please process the data according to the parameters returned in the documentation. Parameters not returned in the documentation will be optimized soon, so please do not use them.
 
-## Web 視覺化套件建議
+## Web visualization packages (Web 視覺化套件建議)
 
 - **輕量蠟燭圖／走勢圖**：`lightweight-charts`（TradingView 官方 npm 套件）能以極小體積呈現 K 線、交易量與即時游標提示，適合 streaming 的 kline、trade streams。
 - **通用統計圖表**：`chart.js` 搭配 `chartjs-chart-financial`（蠟燭／OHLC 插件）與 `chartjs-adapter-luxon`（時間軸解析）可快速繪製 K 線、成交量柱狀圖與 VWAP/MA 疊加。
