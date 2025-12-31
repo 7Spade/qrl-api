@@ -2,7 +2,7 @@
 Websocket connection shims for MEXC streams.
 """
 
-from infrastructure.external.mexc_client import (
+from src.app.infrastructure.external.mexc import (
     connect_public_trades,
     connect_user_stream,
     websocket_manager,

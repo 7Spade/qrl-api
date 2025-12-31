@@ -5,9 +5,9 @@ import logging
 from datetime import datetime
 from typing import Dict
 
-from services.trading.balance_resolver import BalanceResolver
-from services.trading.price_resolver import PriceResolver
-from services.trading.position_updater import PositionUpdater
+from src.app.application.trading.services.trading.balance_resolver import BalanceResolver
+from src.app.application.trading.services.trading.price_resolver import PriceResolver
+from src.app.application.trading.services.trading.position_updater import PositionUpdater
 
 logger = logging.getLogger(__name__)
 

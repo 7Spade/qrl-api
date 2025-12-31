@@ -6,10 +6,10 @@ import logging
 from typing import Dict
 from datetime import datetime
 
-from services.trading.balance_resolver import BalanceResolver
-from services.trading.price_resolver import PriceResolver
-from services.trading.position_updater import PositionUpdater
-from services.trading.trading_workflow import TradingWorkflow
+from src.app.application.trading.services.trading.balance_resolver import BalanceResolver
+from src.app.application.trading.services.trading.price_resolver import PriceResolver
+from src.app.application.trading.services.trading.position_updater import PositionUpdater
+from src.app.application.trading.services.trading.trading_workflow import TradingWorkflow
 
 logger = logging.getLogger(__name__)
 

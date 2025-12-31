@@ -2,7 +2,7 @@
 Websocket handler shims exposing legacy channel builders and decoders.
 """
 
-from infrastructure.external.mexc_client.ws_channels import (
+from src.app.infrastructure.external.mexc.ws_channels import (
     BinaryDecoder,
     book_ticker_batch_stream,
     book_ticker_stream,

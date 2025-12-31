@@ -3,7 +3,7 @@ Cancel order shim leveraging the legacy mexc_client implementation.
 """
 from typing import Any, Dict, Optional
 
-from infrastructure.external import mexc_client
+from src.app.infrastructure.external import mexc_client
 
 
 async def cancel_order(

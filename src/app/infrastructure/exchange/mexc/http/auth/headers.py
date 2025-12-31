@@ -3,7 +3,7 @@ Header builder shim for authenticated MEXC requests.
 """
 from typing import Dict
 
-from infrastructure.external.mexc_client.config import load_settings
+from src.app.infrastructure.external.mexc.config import load_settings
 
 
 def build_headers() -> Dict[str, str]:
