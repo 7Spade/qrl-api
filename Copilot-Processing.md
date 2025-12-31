@@ -1,1 +1,1 @@
-User request:整理 docs architecture files naming consistent, dedupe content, classify, remove conflicts/outdated.
+User request: review docs/Websocket Market Streams.md and docs/Websocket User Data Streams.md, use Context7 resolve-library-id and get-library-docs for relevant libraries, apply Sequential-Thinking analysis, and use Software-Planning-Tool to create an implementation plan.
