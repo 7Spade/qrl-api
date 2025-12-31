@@ -61,7 +61,7 @@ async def control_bot(request: ControlRequest):
 @router.post("/execute", response_model=ExecuteResponse)
 async def execute_trading(request: ExecuteRequest, background_tasks: BackgroundTasks):
     """Execute trading operation manually."""
-    from infrastructure.bot import TradingBot
+    from src.app.infrastructure.bot_runtime import TradingBot
     from src.app.infrastructure.config import config
 
     try:
