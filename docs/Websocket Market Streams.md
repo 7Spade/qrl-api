@@ -12,7 +12,8 @@ Please process the data according to the parameters returned in the documentatio
 - **輕量蠟燭圖／走勢圖**：`lightweight-charts`（TradingView 官方 npm 套件）能以極小體積呈現 K 線、交易量與即時游標提示，適合 streaming 的 kline、trade streams。
 - **通用統計圖表**：`chart.js` 搭配 `chartjs-chart-financial`（蠟燭／OHLC 插件）與 `chartjs-adapter-luxon`（時間軸解析）可快速繪製 K 線、成交量柱狀圖與 VWAP/MA 疊加。
 - **深度圖／熱力圖**：`apache-echarts` 內建豐富圖表類型，可用折線／面積圖呈現 order book depth，或使用 heatmap/treemap 呈現成交分佈。
-- **在瀏覽器解 protobuf**：若前端直接連到 `*.api.pb` channel，可在瀏覽器端安裝 `protobufjs` 讀取官方 proto schema（來源：https://github.com/mexcdevelop/websocket-proto）；若由後端轉 JSON，則確保 Python 端已安裝 `protobuf`（已在 `requirements.txt` 鎖定 `protobuf==4.25.1`）再推播給前端圖表。
+- **在瀏覽器解 protobuf**：若前端直接連到 `*.api.pb` channel，可在瀏覽器端安裝 `protobufjs`，並引入官方 proto schema（來源：https://github.com/mexcdevelop/websocket-proto）。
+- **後端轉 JSON 再推送**：若由後端解析再轉推前端，確保 Python 端已安裝 `protobuf`（已在 `requirements.txt` 鎖定 `protobuf==4.25.1`），再將解析後的 JSON 串流給圖表元件。
 
 Live Subscription/Unsubscription to Data Streams
 The following data can be sent via websocket to subscribe or unsubscribe from data streams. Examples are provided below.
