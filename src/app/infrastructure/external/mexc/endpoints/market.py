@@ -1,5 +1,5 @@
 """Market endpoints wrapper."""
-from infrastructure.external.mexc_client.market_endpoints import MarketEndpointsMixin
+from src.app.infrastructure.external.mexc.market_endpoints import MarketEndpointsMixin
 
 MarketEndpoints = MarketEndpointsMixin
 

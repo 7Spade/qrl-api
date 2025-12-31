@@ -7,8 +7,8 @@ import asyncio
 from contextlib import suppress
 from typing import Any, AsyncIterator, Iterable, Optional
 
-from infrastructure.external.mexc_client import MEXCClient
-from infrastructure.external.mexc_client.ws_channels import (
+from src.app.infrastructure.external.mexc import MEXCClient
+from src.app.infrastructure.external.mexc.ws_channels import (
     BinaryDecoder,
     book_ticker_batch_stream,
     book_ticker_stream,
@@ -19,7 +19,7 @@ from infrastructure.external.mexc_client.ws_channels import (
     partial_depth_stream,
     trade_stream,
 )
-from infrastructure.external.mexc_client.ws_core import MEXCWebSocketClient, WS_BASE
+from src.app.infrastructure.external.mexc.ws_core import MEXCWebSocketClient, WS_BASE
 
 
 async def _keepalive_listen_key(

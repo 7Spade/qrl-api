@@ -1,7 +1,7 @@
 """Account endpoints mixin."""
 from typing import Any, Dict, Optional
 
-from infrastructure.external.mexc_client.account import (
+from src.app.infrastructure.external.mexc.account import (
     build_balance_map,
     fetch_balance_snapshot,
 )

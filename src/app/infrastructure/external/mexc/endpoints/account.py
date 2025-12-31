@@ -1,5 +1,5 @@
 """Account endpoints wrapper."""
-from infrastructure.external.mexc_client.account_repo import AccountRepoMixin
+from src.app.infrastructure.external.mexc.account_repo import AccountRepoMixin
 
 AccountEndpoints = AccountRepoMixin
 

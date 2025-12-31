@@ -1,7 +1,7 @@
 """Backward compatible websocket core import."""
 import websockets
 
-from infrastructure.external.mexc_client.websocket.client import (
+from src.app.infrastructure.external.mexc.websocket.client import (
     MEXCWebSocketClient,
     WS_BASE,
 )
