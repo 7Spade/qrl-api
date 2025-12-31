@@ -60,3 +60,12 @@ gcloud scheduler jobs create http health-check-job \
   --oidc-service-account-email="qrl-api@appspot.gserviceaccount.com" \
   --oidc-token-audience="https://qrl-trading-api-545492969490.asia-southeast1.run.app" \
   --message-body='{"job":"HEALTH_CHECK"}'
+
+gcloud scheduler jobs create http rebalance-symmetric \
+  --schedule="0 */1 * * *" \
+  --time-zone="Asia/Taipei" \
+  --http-method=POST \
+  --uri="https://qrl-trading-api-545492969490.asia-southeast1.run.app/tasks/rebalance/symmetric" \
+  --oidc-service-account-email="qrl-api@appspot.gserviceaccount.com" \
+  --oidc-token-audience="https://qrl-trading-api-545492969490.asia-southeast1.run.app" \
+  --message-body='{"job":"REBALANCE_SYMMETRIC"}'

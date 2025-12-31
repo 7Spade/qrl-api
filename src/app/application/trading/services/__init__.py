@@ -13,6 +13,9 @@ from src.app.application.trading.services.trading.trading_workflow import Tradin
 from src.app.application.trading.services.trading.balance_resolver import BalanceResolver
 from src.app.application.trading.services.trading.price_resolver import PriceResolver
 from src.app.application.trading.services.trading.position_updater import PositionUpdater
+from src.app.application.trading.services.trading.rebalance_service import (
+    RebalanceService,
+)
 
 # Market services
 from src.app.application.trading.services.market.market_service import MarketService
@@ -35,6 +38,7 @@ __all__ = [
     "BalanceResolver",
     "PriceResolver",
     "PositionUpdater",
+    "RebalanceService",
     # Market
     "MarketService",
     "CacheService",
