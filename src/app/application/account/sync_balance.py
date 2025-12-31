@@ -10,8 +10,8 @@ from typing import Optional
 
 from fastapi import Header, HTTPException, params
 
-from infrastructure.config.config import config
-from infrastructure.external.mexc_client import mexc_client
+from src.app.infrastructure.config import config
+from src.app.infrastructure.external import mexc_client
 
 logger = logging.getLogger(__name__)
 

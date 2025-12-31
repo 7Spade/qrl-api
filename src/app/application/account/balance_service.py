@@ -2,8 +2,8 @@ from datetime import datetime
 import logging
 from typing import Any, Dict, Optional
 
-from infrastructure.external.mexc_client.account import QRL_USDT_SYMBOL
-from infrastructure.utils.type_safety import safe_float
+from src.app.infrastructure.external import QRL_USDT_SYMBOL
+from src.app.infrastructure.utils import safe_float
 
 logger = logging.getLogger(__name__)
 

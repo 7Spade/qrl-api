@@ -19,18 +19,18 @@ def test_domain_interfaces_exports():
 
 
 def test_domain_core_packages():
-    from domain.position_manager import PositionManager
-    from domain.risk_manager import RiskManager
-    from domain.trading_strategy import TradingStrategy
+    from src.app.domain.position.calculator import PositionManager
+    from src.app.domain.risk.limits import RiskManager
+    from src.app.domain.strategies.trading_strategy import TradingStrategy
 
-    assert PositionManager.__module__.endswith("position_manager.core")
-    assert RiskManager.__module__.endswith("risk_manager.core")
-    assert TradingStrategy.__module__.endswith("trading_strategy.core")
+    assert PositionManager.__module__.endswith("calculator")
+    assert RiskManager.__module__.endswith("limits")
+    assert TradingStrategy.__module__.endswith("trading_strategy")
 
 
 def test_infrastructure_wrappers():
-    from infrastructure.bot.bot_core import TradingBot
-    from infrastructure.config.config import Config, config
+    from src.app.infrastructure.bot_runtime import TradingBot
+    from src.app.infrastructure.config import Config, config
     from infrastructure.external import MEXCClient, mexc_client
     from infrastructure.external.redis_client import RedisClient, redis_client
 
@@ -50,18 +50,17 @@ def test_task_router_wrapper():
 
 
 def test_utils_wrappers():
-    from infrastructure.utils import redis_helpers, utils
+    from src.app.infrastructure import utils
 
-    assert isinstance(redis_helpers, types.ModuleType)
     assert isinstance(utils, types.ModuleType)
     assert hasattr(utils, "handle_redis_errors")
-    assert hasattr(redis_helpers, "RedisDataManager")
+    assert hasattr(utils, "RedisDataManager")
 
 
 def test_repository_and_service_wrappers():
-    from repositories.account import CostRepository, PositionRepository
-    from repositories.market import PriceRepository
-    from repositories.trade import TradeRepository
+    from src.app.infrastructure.persistence.repos.account import CostRepository, PositionRepository
+    from src.app.infrastructure.persistence.repos.market import PriceRepository
+    from src.app.infrastructure.persistence.repos.trade import TradeRepository
     from services.market import MarketService
     from services.trading import TradingService
 

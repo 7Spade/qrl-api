@@ -4,7 +4,7 @@ Order book fetch shim aligned with the target infrastructure layout.
 from datetime import datetime
 from typing import Dict
 
-from infrastructure.external import mexc_client
+from src.app.infrastructure.external import mexc_client
 
 
 async def get_orderbook(symbol: str, limit: int = 50) -> Dict[str, object]:

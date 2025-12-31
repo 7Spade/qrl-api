@@ -6,7 +6,7 @@ Uses the legacy shared mexc_client to preserve existing behavior.
 from datetime import datetime
 from typing import Dict
 
-from infrastructure.external import mexc_client
+from src.app.infrastructure.external import mexc_client
 
 
 async def get_price(symbol: str) -> Dict[str, str]:

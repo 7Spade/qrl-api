@@ -2,8 +2,8 @@
 Account balance fetch shim using the migrated BalanceService.
 """
 from src.app.application.account.balance_service import BalanceService
-from infrastructure.external.mexc_client import mexc_client
-from infrastructure.external.redis_client import redis_client
+from src.app.infrastructure.external.mexc import mexc_client
+from src.app.infrastructure.persistence.redis import redis_client
 
 
 async def get_balance() -> dict:

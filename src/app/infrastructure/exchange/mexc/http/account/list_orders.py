@@ -4,8 +4,8 @@ Open orders fetch shim for MEXC.
 from datetime import datetime
 from typing import Dict, Any
 
-from infrastructure.external.mexc_client import mexc_client
-from infrastructure.external.mexc_client.account import QRL_USDT_SYMBOL
+from src.app.infrastructure.external.mexc import mexc_client
+from src.app.infrastructure.external.mexc.account import QRL_USDT_SYMBOL
 
 
 async def list_orders(symbol: str = QRL_USDT_SYMBOL) -> Dict[str, Any]:

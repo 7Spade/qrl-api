@@ -14,8 +14,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from infrastructure.config.config import config
-from infrastructure.external.mexc_client import mexc_client
+from src.app.infrastructure.config import config
+from src.app.infrastructure.external import mexc_client
 
 # Configure logging
 logging.basicConfig(
@@ -38,19 +38,25 @@ async def lifespan(app: FastAPI):
     logger.info(f"Listening on port: {config.PORT}")
     logger.info(f"Host: {config.HOST}")
     
-    # Test MEXC API (non-blocking)
-    try:
-        logger.info("Testing MEXC API connection...")
-        import asyncio
-        await asyncio.wait_for(mexc_client.ping(), timeout=5.0)
-        logger.info("MEXC API connection successful")
-    except asyncio.TimeoutError:
-        logger.warning("MEXC API connection timeout - continuing anyway")
-    except Exception as e:
-        logger.warning(f"MEXC API connection test failed: {e} - continuing anyway")
-    
+    # CRITICAL: Minimal startup - don't block on external API checks
+    # Cloud Run requires fast startup to listen on PORT within timeout
     logger.info("QRL Trading API started successfully (Cloud Run - Direct API mode, No Redis)")
     logger.info(f"Server is ready to accept requests on port {config.PORT}")
+    
+    # Test MEXC API in background (non-blocking, fire-and-forget)
+    import asyncio
+    async def test_mexc_api():
+        try:
+            logger.info("Testing MEXC API connection...")
+            await asyncio.wait_for(mexc_client.ping(), timeout=3.0)
+            logger.info("MEXC API connection successful")
+        except asyncio.TimeoutError:
+            logger.warning("MEXC API connection timeout - continuing anyway")
+        except Exception as e:
+            logger.warning(f"MEXC API connection test failed: {e} - continuing anyway")
+    
+    # Schedule background task without awaiting
+    asyncio.create_task(test_mexc_api())
     
     yield
     
@@ -85,8 +91,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Serve static assets for the dashboard (templates/static -> /static)
-app.mount("/static", StaticFiles(directory="templates/static"), name="static")
+# Serve static assets for the dashboard (src/app/interfaces/templates/static -> /static)
+try:
+    app.mount("/static", StaticFiles(directory="src/app/interfaces/templates/static"), name="static")
+    logger.info("Static files mounted successfully")
+except Exception as e:
+    logger.warning(f"Failed to mount static files: {e} - continuing without static files")
 
 
 # ===== Include Routers =====

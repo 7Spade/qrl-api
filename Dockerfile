@@ -16,15 +16,9 @@ RUN apt-get update && \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code and templates
+# Copy application code and src directory (includes templates)
 COPY *.py ./
-COPY api/ ./api/
-COPY infrastructure/ ./infrastructure/
-COPY services/ ./services/
-COPY repositories/ ./repositories/
-COPY domain/ ./domain/
 COPY src/ ./src/
-COPY templates/ ./templates/
 
 # Create non-root user
 RUN adduser \
@@ -44,7 +38,8 @@ USER appuser
 EXPOSE 8080
 
 # Health check - use PORT environment variable
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+# Reduced start-period to 10s for faster Cloud Run startup detection
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:${PORT:-8080}/health || exit 1
 
 # Run with uvicorn - use PORT environment variable (Cloud Run compatible)

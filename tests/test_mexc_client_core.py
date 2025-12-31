@@ -7,8 +7,8 @@ ROOT_DIR = Path(__file__).resolve().parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from infrastructure.external.mexc_client.core import MEXCClient  # noqa: E402
-from infrastructure.external.mexc_client.signer import generate_signature  # noqa: E402
+from src.app.infrastructure.external.mexc.core import MEXCClient  # noqa: E402
+from src.app.infrastructure.external.mexc.signer import generate_signature  # noqa: E402
 
 
 def test_generate_signature_matches_helper():
