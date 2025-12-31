@@ -3,7 +3,7 @@ Account and balance helpers extracted from MEXC client core.
 """
 from typing import TYPE_CHECKING, Any, Dict
 
-from infrastructure.utils.type_safety import safe_float
+from src.app.infrastructure.utils import safe_float
 
 
 QRL_USDT_SYMBOL = "QRLUSDT"

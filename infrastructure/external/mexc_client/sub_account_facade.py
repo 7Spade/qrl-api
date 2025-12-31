@@ -2,7 +2,7 @@
 import logging
 from typing import Any, Dict, List
 
-from infrastructure.config.config import config
+from src.app.infrastructure.config import config
 
 logger = logging.getLogger(__name__)
 

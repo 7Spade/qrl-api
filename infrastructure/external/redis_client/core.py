@@ -11,7 +11,7 @@ try:
 except ImportError:  # hiredis 2.x removed parser, fall back to default
     HiredisParser = None
 
-from infrastructure.config.config import config
+from src.app.infrastructure.config import config
 from infrastructure.external.redis_client.balance_cache import BalanceCacheMixin
 from infrastructure.external.redis_client.market_cache import MarketCacheMixin
 from infrastructure.external.redis_client.bot_status_repo import BotStatusRepoMixin

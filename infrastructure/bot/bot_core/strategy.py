@@ -2,7 +2,7 @@
 from typing import Dict
 
 from infrastructure.bot.bot_utils import derive_ma_pair
-from infrastructure.config.config import config
+from src.app.infrastructure.config import config
 
 
 async def phase_strategy(bot, market_data: Dict[str, float]) -> str:

@@ -1,10 +1,9 @@
 """
-Configuration module - re-exports from legacy infrastructure.
+Configuration module - native implementation.
 
-This adapter allows src/app code to import config without depending on
-root-level infrastructure directly. As legacy code is migrated, this
-module will be replaced with native implementations.
+Migrated from legacy infrastructure/config to establish proper config management
+within the src/app structure.
 """
-from infrastructure.config.config import config
+from .settings import Config, config
 
-__all__ = ["config"]
+__all__ = ["Config", "config"]

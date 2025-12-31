@@ -2,7 +2,7 @@
 Trading strategy domain logic
 Pure business logic without infrastructure dependencies
 """
-from infrastructure.config.config import config
+from src.app.infrastructure.config import config
 
 
 class TradingStrategy:

@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from infrastructure.config.config import config
+from src.app.infrastructure.config import config
 
 
 class PriceRepoMixin:

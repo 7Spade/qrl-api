@@ -30,7 +30,7 @@ def test_domain_core_packages():
 
 def test_infrastructure_wrappers():
     from infrastructure.bot.bot_core import TradingBot
-    from infrastructure.config.config import Config, config
+    from src.app.infrastructure.config import Config, config
     from infrastructure.external import MEXCClient, mexc_client
     from infrastructure.external.redis_client import RedisClient, redis_client
 

@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from infrastructure.config.config import config
+from src.app.infrastructure.config import config
 
 
 @dataclass

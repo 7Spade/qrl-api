@@ -1,5 +1,5 @@
 """Execution phase."""
-from infrastructure.config.config import config
+from src.app.infrastructure.config import config
 
 
 async def phase_execution(bot, signal: str, market_data, risk_check):

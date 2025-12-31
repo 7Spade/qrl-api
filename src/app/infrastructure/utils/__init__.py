@@ -1,9 +1,9 @@
 """
-Utility functions - re-exports from legacy infrastructure.
+Utility functions - native implementations.
 
-This adapter allows src/app code to import utilities without
-depending on root-level infrastructure directly.
+Migrated from legacy infrastructure/utils to establish proper utilities
+within the src/app structure.
 """
-from infrastructure.utils.type_safety import safe_float
+from .type_safety import safe_float, safe_int
 
-__all__ = ["safe_float"]
+__all__ = ["safe_float", "safe_int"]

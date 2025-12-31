@@ -1,7 +1,7 @@
 """Cost repository mixin."""
 from typing import Optional, Dict
 
-from infrastructure.config.config import config
+from src.app.infrastructure.config import config
 
 
 class CostRepoMixin:

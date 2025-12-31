@@ -2,7 +2,7 @@
 from typing import Any, Dict, Optional
 
 from infrastructure.bot.bot_utils import compute_cost_metrics
-from infrastructure.config.config import config
+from src.app.infrastructure.config import config
 
 
 async def phase_data_collection(bot) -> Optional[Dict[str, Any]]:

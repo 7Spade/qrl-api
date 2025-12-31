@@ -1,7 +1,7 @@
 """Shared helpers for the QRL/USDT trading bot."""
 from typing import List, Optional, Tuple
 
-from infrastructure.utils.type_safety import safe_float
+from src.app.infrastructure.utils import safe_float
 
 __all__ = [
     "calculate_moving_average",
