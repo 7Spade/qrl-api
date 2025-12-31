@@ -16,7 +16,7 @@ RUN apt-get update && \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code, templates, and src directory
+# Copy application code and src directory (includes templates)
 COPY *.py ./
 COPY src/ ./src/
 

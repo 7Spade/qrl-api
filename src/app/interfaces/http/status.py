@@ -11,7 +11,14 @@ from pydantic import BaseModel
 
 router = APIRouter(tags=["Status"])
 logger = logging.getLogger(__name__)
-templates = Jinja2Templates(directory="src/app/interfaces/templates")
+
+# Initialize templates with error handling
+try:
+    templates = Jinja2Templates(directory="src/app/interfaces/templates")
+    logger.info("Templates initialized successfully")
+except Exception as e:
+    logger.warning(f"Failed to initialize templates: {e} - dashboard will not be available")
+    templates = None
 
 
 class HealthResponse(BaseModel):
@@ -32,12 +39,24 @@ class StatusResponse(BaseModel):
 @router.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     """Root endpoint - returns dashboard HTML."""
+    if templates is None:
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            content={"message": "Dashboard unavailable - templates not loaded", "status": "degraded"},
+            status_code=503
+        )
     return templates.TemplateResponse("dashboard.html", {"request": request})
 
 
 @router.get("/dashboard", response_class=HTMLResponse)
 async def dashboard(request: Request):
     """Dashboard endpoint - returns dashboard HTML."""
+    if templates is None:
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            content={"message": "Dashboard unavailable - templates not loaded", "status": "degraded"},
+            status_code=503
+        )
     return templates.TemplateResponse("dashboard.html", {"request": request})
 
 

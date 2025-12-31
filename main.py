@@ -92,7 +92,11 @@ app.add_middleware(
 )
 
 # Serve static assets for the dashboard (src/app/interfaces/templates/static -> /static)
-app.mount("/static", StaticFiles(directory="src/app/interfaces/templates/static"), name="static")
+try:
+    app.mount("/static", StaticFiles(directory="src/app/interfaces/templates/static"), name="static")
+    logger.info("Static files mounted successfully")
+except Exception as e:
+    logger.warning(f"Failed to mount static files: {e} - continuing without static files")
 
 
 # ===== Include Routers =====
