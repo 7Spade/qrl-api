@@ -28,11 +28,22 @@ async def get_orderbook(symbol: str, mexc_client, limit: int = 20) -> Dict[str, 
     async with mexc_client:
         depth_data = await mexc_client.get_orderbook(symbol, limit=limit)
         
+        # Parse bid/ask arrays into structured format
+        # MEXC returns: [[price, quantity], ...]
+        bids = [
+            {"price": float(bid[0]), "quantity": float(bid[1]), "total": float(bid[0]) * float(bid[1])}
+            for bid in depth_data.get("bids", [])
+        ]
+        asks = [
+            {"price": float(ask[0]), "quantity": float(ask[1]), "total": float(ask[0]) * float(ask[1])}
+            for ask in depth_data.get("asks", [])
+        ]
+        
         return {
             "success": True,
             "source": "api",
             "symbol": symbol,
-            "bids": depth_data.get("bids", []),
-            "asks": depth_data.get("asks", []),
+            "bids": bids,
+            "asks": asks,
             "timestamp": datetime.now().isoformat(),
         }

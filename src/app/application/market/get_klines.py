@@ -35,14 +35,34 @@ async def get_klines(
     """
     logger.info(f"Fetching klines for {symbol} from MEXC API (interval={interval}, limit={limit})")
     
+    # Validate symbol format
+    if not symbol or not symbol.isupper():
+        symbol = symbol.upper()
+    
     async with mexc_client:
-        klines = await mexc_client.get_klines(
+        klines_raw = await mexc_client.get_klines(
             symbol=symbol,
             interval=interval,
             limit=limit,
             start_time=start_time,
             end_time=end_time,
         )
+        
+        # Parse K-line arrays into structured format
+        # MEXC returns: [[openTime, open, high, low, close, volume, closeTime, quoteVolume, ...]]
+        klines = [
+            {
+                "open_time": int(k[0]),
+                "open": float(k[1]),
+                "high": float(k[2]),
+                "low": float(k[3]),
+                "close": float(k[4]),
+                "volume": float(k[5]),
+                "close_time": int(k[6]),
+                "quote_volume": float(k[7]) if len(k) > 7 else 0.0,
+            }
+            for k in klines_raw
+        ]
         
         return {
             "success": True,
