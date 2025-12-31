@@ -15,8 +15,8 @@ from src.app.infrastructure.external import mexc_client, redis_client
 router = APIRouter(prefix="/tasks", tags=["Cloud Tasks"])
 
 
-@router.post("/rebalance/50-50")
-async def task_rebalance_50_50(
+@router.post("/rebalance/symmetric")
+async def task_rebalance_symmetric(
     x_cloudscheduler: Optional[str] = Header(None, alias="X-CloudScheduler"),
     authorization: Optional[str] = Header(None),
 ):
@@ -32,7 +32,7 @@ async def task_rebalance_50_50(
 
         return {
             "status": "success",
-            "task": "rebalance-50-50",
+            "task": "rebalance-symmetric",
             "auth": auth_method,
             "plan": plan,
         }

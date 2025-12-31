@@ -1,9 +1,13 @@
 """
-50/50 rebalance planner.
+Symmetric (50/50) rebalance planner.
 
-Calculates how much QRL to buy or sell to reach a 50/50 split between
-QRL (valued in USDT) and USDT cash, without executing trades. Results
-are stored for observability and can be triggered by Cloud Scheduler.
+Rules:
+- Target portfolio value split: QRL value 50%, USDT 50% (symmetric).
+- HOLD when total value is zero/price missing, below min notional, or deviation
+  is below threshold_pct of total value.
+- SELL when QRL value is above target; clamp to current QRL balance.
+- BUY when QRL value is below target; clamp to available USDT.
+- The planner only computes and records intent; it does not place orders.
 """
 from __future__ import annotations
 
