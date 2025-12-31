@@ -8,6 +8,7 @@ if str(ROOT) not in sys.path:
 from src.app.infrastructure.supabase.client import SupabaseClient, supabase_client
 from src.app.infrastructure.supabase.config import SupabaseSettings
 from src.app.infrastructure.supabase.repositories.account_repo import AccountRepository
+from src.app.infrastructure.supabase.utils.event_logger import EventLogger
 
 
 def test_supabase_settings_not_configured_by_default(monkeypatch):
@@ -26,6 +27,13 @@ def test_supabase_settings_reads_env(monkeypatch):
     assert refreshed.api_key == "test-key"
 
 
+def test_supabase_schema_env_alias(monkeypatch):
+    monkeypatch.setenv("SUPABASE_SCHEMA", "analytics")
+    refreshed = SupabaseSettings()
+    assert refreshed.schema == "analytics"
+    assert refreshed.database_schema == "analytics"
+
+
 def test_account_repo_returns_empty_when_no_supabase(monkeypatch):
     # Ensure the shared client is not configured for this test
     monkeypatch.setattr(supabase_client, "settings", SupabaseSettings())
@@ -39,3 +47,10 @@ def test_supabase_client_handles_missing_config(monkeypatch):
     supabase_client._client = None
     client = SupabaseClient(supabase_client.settings)
     assert client.get_client() is None
+
+
+def test_event_logger_falls_back_when_supabase_disabled(monkeypatch):
+    monkeypatch.setattr(supabase_client, "settings", SupabaseSettings())
+    supabase_client._client = None
+    logger = EventLogger(table_name="event_logs")
+    assert logger.log("test_event", {"value": 1}) is False
