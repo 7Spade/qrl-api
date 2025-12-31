@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 
 import pytest
+from fastapi import HTTPException
 
 # Ensure project root is on sys.path for module imports
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -53,3 +54,29 @@ async def test_get_price_uses_shared_client(monkeypatch):
 
     assert result["price"] == "0.123456"
     assert dummy_client.price_called is True
+
+
+@pytest.mark.asyncio
+async def test_klines_rejects_non_qrlusdt(monkeypatch):
+    with pytest.raises(HTTPException) as exc:
+        await market_routes.klines_endpoint("BTCUSDT")
+
+    assert exc.value.status_code == 404
+    assert exc.value.detail == "Only QRLUSDT klines are supported"
+
+
+@pytest.mark.asyncio
+async def test_klines_normalizes_and_passes_symbol(monkeypatch):
+    captured = {}
+
+    async def fake_get_klines(symbol, mexc_client, **kwargs):
+        captured["symbol"] = symbol
+        return {"symbol": symbol, "data": []}
+
+    monkeypatch.setattr(market_routes, "get_klines", fake_get_klines)
+    monkeypatch.setattr(market_routes, "_get_mexc_client", lambda: None)
+
+    result = await market_routes.klines_endpoint("qrl/usdt", interval="1m", limit=2)
+
+    assert captured["symbol"] == "QRLUSDT"
+    assert result["symbol"] == "QRLUSDT"

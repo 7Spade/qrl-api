@@ -13,11 +13,18 @@ from src.app.application.market.get_klines import get_klines
 router = APIRouter(prefix="/market", tags=["Market Data"])
 logger = logging.getLogger(__name__)
 
+ALLOWED_KLINE_SYMBOL = "QRLUSDT"
+
 
 def _get_mexc_client():
     """Get MEXC client instance from infrastructure."""
     from src.app.infrastructure.external import mexc_client
     return mexc_client
+
+
+def _normalize_symbol(symbol: str) -> str:
+    """Normalize trading pair by stripping separators and uppercasing."""
+    return symbol.replace("/", "").upper()
 
 
 @router.get("/price/{symbol}")
@@ -54,9 +61,13 @@ async def klines_endpoint(
 ):
     """Get candlestick (kline) data."""
     try:
+        normalized_symbol = _normalize_symbol(symbol)
+        if normalized_symbol != ALLOWED_KLINE_SYMBOL:
+            raise HTTPException(status_code=404, detail="Only QRLUSDT klines are supported")
+
         mexc_client = _get_mexc_client()
         result = await get_klines(
-            symbol=symbol,
+            symbol=normalized_symbol,
             mexc_client=mexc_client,
             interval=interval,
             limit=limit,
@@ -64,6 +75,8 @@ async def klines_endpoint(
             end_time=end_time,
         )
         return result
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Failed to get klines for {symbol}: {e}")
         raise HTTPException(status_code=500, detail=str(e))

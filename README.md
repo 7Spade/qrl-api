@@ -109,7 +109,7 @@ make test
 | `/market/price/{symbol}` | GET | 獲取當前價格（支援 Redis 快取） |
 | `/market/orderbook/{symbol}` | GET | 獲取訂單簿深度（支援 Redis 快取） |
 | `/market/trades/{symbol}` | GET | 獲取最近交易記錄（支援 Redis 快取） |
-| `/market/klines/{symbol}` | GET | 獲取 K 線/蠟燭圖數據（支援 Redis 快取） |
+| `/market/klines/{symbol}` | GET | 獲取 K 線/蠟燭圖數據（僅支援 QRL/USDT，支援 Redis 快取） |
 
 ### 帳戶端點
 
