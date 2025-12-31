@@ -14,8 +14,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from infrastructure.config.config import config
-from infrastructure.external.mexc_client import mexc_client
+from src.app.infrastructure.config import config
+from src.app.infrastructure.external import mexc_client
 
 # Configure logging
 logging.basicConfig(

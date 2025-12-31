@@ -11,12 +11,12 @@ logger = logging.getLogger(__name__)
 
 
 def _get_mexc_client():
-    from infrastructure.external import mexc_client
+    from src.app.infrastructure.external import mexc_client
     return mexc_client
 
 
 def _get_config():
-    from infrastructure.config import config
+    from src.app.infrastructure.config import config
     return config
 
 

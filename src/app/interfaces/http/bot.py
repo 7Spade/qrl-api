@@ -62,7 +62,7 @@ async def control_bot(request: ControlRequest):
 async def execute_trading(request: ExecuteRequest, background_tasks: BackgroundTasks):
     """Execute trading operation manually."""
     from infrastructure.bot import TradingBot
-    from infrastructure.config import config
+    from src.app.infrastructure.config import config
 
     try:
         action = request.action.upper()

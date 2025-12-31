@@ -5,6 +5,6 @@ Re-exports the legacy TradingService so callers can resolve it from the new
 application layer without changing behavior.
 """
 
-from services.trading.trading_service_core import TradingService
+from src.app.application.trading.services import TradingService
 
 __all__ = ["TradingService"]

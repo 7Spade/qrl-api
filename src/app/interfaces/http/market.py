@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 def _get_mexc_client():
     """Get MEXC client instance from infrastructure."""
-    from infrastructure.external import mexc_client
+    from src.app.infrastructure.external import mexc_client
     return mexc_client
 
 

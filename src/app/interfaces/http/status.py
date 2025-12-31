@@ -44,7 +44,7 @@ async def dashboard(request: Request):
 @router.get("/health", response_model=HealthResponse)
 async def health_check():
     """Health check endpoint - returns system health status."""
-    from infrastructure.config import config
+    from src.app.infrastructure.config import config
 
     mexc_api_configured = bool(config.MEXC_API_KEY and config.MEXC_SECRET_KEY)
     status = "healthy" if mexc_api_configured else "degraded"

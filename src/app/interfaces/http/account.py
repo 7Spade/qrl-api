@@ -15,13 +15,13 @@ logger = logging.getLogger(__name__)
 
 
 def _build_balance_service() -> BalanceService:
-    from infrastructure.external.mexc_client import mexc_client
-    from infrastructure.external.redis_client import redis_client
+    from src.app.infrastructure.external import mexc_client
+    from src.app.infrastructure.external import redis_client
     return BalanceService(mexc_client, redis_client)
 
 
 def _get_mexc_client():
-    from infrastructure.external.mexc_client import mexc_client
+    from src.app.infrastructure.external import mexc_client
     return mexc_client
 
 
@@ -51,7 +51,7 @@ async def get_account_balance():
 @router.get("/balance/cache")
 async def get_cached_balance():
     """Retrieve cached balance without hitting the exchange."""
-    from infrastructure.external.redis_client import redis_client
+    from src.app.infrastructure.external import redis_client
 
     cached = await redis_client.get_cached_account_balance()
     if cached:
@@ -95,7 +95,7 @@ async def trades_endpoint(symbol: str = "QRLUSDT", limit: int = 50):
 async def get_configured_sub_account():
     """Get configured sub-account balance (alias for convenience)."""
     mexc_client = _get_mexc_client()
-    from infrastructure.config.config import config
+    from src.app.infrastructure.config import config
 
     try:
         if not config.MEXC_API_KEY or not config.MEXC_SECRET_KEY:
