@@ -1,5 +1,5 @@
 """Price resolver for market service."""
-from infrastructure.utils.type_safety import safe_float
+from src.app.infrastructure.utils import safe_float
 
 
 class PriceResolver:

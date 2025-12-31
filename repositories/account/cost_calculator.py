@@ -5,7 +5,7 @@ Extracted from CostRepository for clearer responsibilities.
 from typing import Dict
 import logging
 
-from infrastructure.utils.type_safety import safe_float
+from src.app.infrastructure.utils import safe_float
 
 logger = logging.getLogger(__name__)
 

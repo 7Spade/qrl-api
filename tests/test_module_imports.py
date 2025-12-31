@@ -50,12 +50,11 @@ def test_task_router_wrapper():
 
 
 def test_utils_wrappers():
-    from infrastructure.utils import redis_helpers, utils
+    from src.app.infrastructure import utils
 
-    assert isinstance(redis_helpers, types.ModuleType)
     assert isinstance(utils, types.ModuleType)
     assert hasattr(utils, "handle_redis_errors")
-    assert hasattr(redis_helpers, "RedisDataManager")
+    assert hasattr(utils, "RedisDataManager")
 
 
 def test_repository_and_service_wrappers():
