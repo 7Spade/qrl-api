@@ -1,7 +1,7 @@
 """Data collection phase."""
 from typing import Any, Dict, Optional
 
-from infrastructure.bot.bot_utils import compute_cost_metrics
+from src.app.infrastructure.bot_runtime.utils import compute_cost_metrics
 from src.app.infrastructure.config import config
 
 

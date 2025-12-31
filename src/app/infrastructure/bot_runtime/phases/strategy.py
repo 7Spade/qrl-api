@@ -1,7 +1,7 @@
 """Strategy phase."""
 from typing import Dict
 
-from infrastructure.bot.bot_utils import derive_ma_pair
+from src.app.infrastructure.bot_runtime.utils import derive_ma_pair
 from src.app.infrastructure.config import config
 
 

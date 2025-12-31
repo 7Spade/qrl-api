@@ -1,7 +1,7 @@
 """
 Compatibility shim for TradingBot.
-Delegates to infrastructure.bot.bot_core.TradingBot to match folder layout.
+Delegates to src.app.infrastructure.bot_runtime for new architecture.
 """
-from infrastructure.bot.bot_core import TradingBot
+from src.app.infrastructure.bot_runtime import TradingBot
 
 __all__ = ["TradingBot"]

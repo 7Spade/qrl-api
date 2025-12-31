@@ -2,6 +2,6 @@
 Risk adapter shim referencing the legacy TradingBot utilities.
 """
 
-from infrastructure.bot import TradingBot
+from src.app.infrastructure.bot_runtime import TradingBot
 
 __all__ = ["TradingBot"]

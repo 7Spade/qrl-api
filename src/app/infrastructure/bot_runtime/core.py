@@ -3,12 +3,12 @@ import logging
 import time
 from typing import Dict, Any, List
 
-from infrastructure.bot.bot_core.startup import phase_startup
-from infrastructure.bot.bot_core.data_collection import phase_data_collection
-from infrastructure.bot.bot_core.strategy import phase_strategy
-from infrastructure.bot.bot_core.risk import phase_risk_control
-from infrastructure.bot.bot_core.execution import phase_execution
-from infrastructure.bot.bot_core.cleanup import phase_cleanup
+from src.app.infrastructure.bot_runtime.phases.startup import phase_startup
+from src.app.infrastructure.bot_runtime.phases.data_collection import phase_data_collection
+from src.app.infrastructure.bot_runtime.phases.strategy import phase_strategy
+from src.app.infrastructure.bot_runtime.phases.risk import phase_risk_control
+from src.app.infrastructure.bot_runtime.phases.execution import phase_execution
+from src.app.infrastructure.bot_runtime.phases.cleanup import phase_cleanup
 
 logger = logging.getLogger(__name__)
 

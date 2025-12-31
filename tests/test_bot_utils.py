@@ -3,7 +3,7 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
-from infrastructure.bot.bot_utils import (
+from src.app.infrastructure.bot_runtime.utils import (
     calculate_moving_average,
     derive_ma_pair,
     compute_cost_metrics,
