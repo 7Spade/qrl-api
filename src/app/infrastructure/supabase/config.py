@@ -1,8 +1,10 @@
 """
 Supabase configuration sourced from environment variables.
 """
+import os
 from typing import Optional
 
+from dotenv import dotenv_values
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -26,7 +28,25 @@ class SupabaseSettings(BaseSettings):
         env_prefix="SUPABASE_",
         extra="ignore",
         protected_namespaces=(),
+        populate_by_name=True,
     )
+
+    def model_post_init(self, __context) -> None:
+        """
+        Allow legacy SUPABASE_SCHEMA to populate the schema when no explicit value is set.
+        """
+        if self.database_schema and self.database_schema != "public":
+            return
+
+        legacy_schema = os.getenv("SUPABASE_SCHEMA")
+        if legacy_schema:
+            object.__setattr__(self, "database_schema", legacy_schema)
+            return
+
+        env_values = dotenv_values(self.model_config.get("env_file", ".env"))
+        legacy_schema = env_values.get("SUPABASE_SCHEMA")
+        if legacy_schema:
+            object.__setattr__(self, "database_schema", legacy_schema)
 
     @property
     def api_key(self) -> Optional[str]:
