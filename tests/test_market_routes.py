@@ -73,9 +73,7 @@ async def test_klines_normalizes_and_passes_symbol(monkeypatch):
         captured["symbol"] = symbol
         return {"symbol": symbol, "data": []}
 
-    monkeypatch.setattr(
-        "src.app.application.market.get_klines.get_klines", fake_get_klines
-    )
+    # Patch the imported get_klines function used by the router
     monkeypatch.setattr(market_routes, "get_klines", fake_get_klines)
     monkeypatch.setattr(market_routes, "_get_mexc_client", lambda: None)
 
