@@ -1,7 +1,7 @@
 ## Websocket User Data Streams (V3, protobuf)
 
-- REST base: `https://api.mexc.com`. WS base: `wss://wbs-api.mexc.com/ws?listenKey=<key>`.
-- listenKey valid 60m; refresh with `PUT` every ≤30m; `DELETE` to close. Each key supports 5 WS links; up to 60 keys/UID. Connections max 24h.
+- REST base: `https://api.mexc.com`. WS base: `wss://wbs-api.mexc.com/ws?listenKey=<listenKey>`.
+- listenKey valid 60 min; send `PUT` keepalive every 30 min or less to extend; `DELETE` to close. Each key supports 5 WS links; up to 60 keys/UID. Connections max 24h.
 - Default private channels: `spot@private.account.v3.api.pb`, `spot@private.deals.v3.api.pb`, `spot@private.orders.v3.api.pb`.
 
 Subscribe example:
@@ -29,4 +29,4 @@ async for msg in connect_user_stream():
 ### Ops notes
 - Heartbeat: send `{"method":"PING"}`; reply `{"method":"PONG"}` when asked.
 - Retry listenKey keepalive on REST 429/5xx with backoff, but keep interval ≤30m.
-- Limit one set of subscriptions per WS; open a new key if you need >30 subs.
+- Per websocket connection you can subscribe to up to 30 channels; open another WS (and key if needed) beyond that limit.
