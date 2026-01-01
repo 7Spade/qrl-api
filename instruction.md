@@ -1,3 +1,8 @@
+gcloud scheduler jobs create http 15-min-job --location=asia-southeast1 --schedule="*/15 * * * *" --uri="https://qrl-trading-api-545492969490.asia-southeast1.run.app/tasks/15-min-job" --http-method=POST --oidc-service-account-email=qrl-api-asia-east1@qrl-api.iam.gserviceaccount.com --oidc-token-audience="https://qrl-trading-api-545492969490.asia-southeast1.run.app" --attempt-deadline=60s --time-zone="Asia/Taipei"
+
+
+
+
 gcloud scheduler jobs create http 01-min-job --schedule="*/1 * * * *" --uri="https://qrl-trading-api-545492969490.asia-southeast1.run.app/tasks/01-min-job" --http-method=POST --headers="X-CloudScheduler=true,Content-Type=application/json" --time-zone="Asia/Taipei" --description="01-min-job"
 
 gcloud scheduler jobs create http 01-min-job --schedule="*/1 * * * *" --uri="https://qrl-trading-api-545492969490.asia-southeast1.run.app/tasks/01-min-job" --http-method=POST --headers="X-CloudScheduler=true,Content-Type=application/json" --time-zone="Asia/Taipei" --description="01-min-job"
