@@ -1,3 +1,20 @@
+gh pr merge --squash
+
+gcloud builds submit --config cloudbuild.yaml \
+  --substitutions=BRANCH_NAME=copilot/discuss-cloud-scheduler-logic
+
+curl -X POST https://qrl-trading-api-545492969490.asia-southeast1.run.app/tasks/15-min-job \
+  -H "X-CloudScheduler: true"
+
+
+
+
+
+
+
+
+
+
 gcloud scheduler jobs create http 15-min-job --location=asia-southeast1 --schedule="*/15 * * * *" --uri="https://qrl-trading-api-545492969490.asia-southeast1.run.app/tasks/15-min-job" --http-method=POST --oidc-service-account-email=qrl-api-asia-east1@qrl-api.iam.gserviceaccount.com --oidc-token-audience="https://qrl-trading-api-545492969490.asia-southeast1.run.app" --attempt-deadline=60s --time-zone="Asia/Taipei"
 
 
