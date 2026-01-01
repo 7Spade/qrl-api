@@ -11,7 +11,7 @@ from typing import Optional
 
 from fastapi import Header, HTTPException
 
-from src.app.infrastructure.redis_client import RedisClient
+from src.app.infrastructure.external import RedisClient
 
 logger = logging.getLogger(__name__)
 
