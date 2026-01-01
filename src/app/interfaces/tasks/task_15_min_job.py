@@ -69,11 +69,24 @@ async def task_15_min_job(
         
         # Get balance snapshot for debugging
         snapshot = await balance_service.get_account_balance()
+        
+        qrl_total = snapshot.get('balances', {}).get('QRL', {}).get('total', 0)
+        usdt_total = snapshot.get('balances', {}).get('USDT', {}).get('total', 0)
+        price = snapshot.get('prices', {}).get('QRLUSDT', 0)
+        
+        # Calculate portfolio metrics for debugging
+        qrl_value = qrl_total * price
+        total_value = qrl_value + usdt_total
+        deviation_pct = abs((qrl_value / total_value * 100) - 50) if total_value > 0 else 0
+        
         logger.info(
             f"[15-min-job] Balance snapshot - "
-            f"QRL: {snapshot.get('balances', {}).get('QRL', {}).get('total', 0)}, "
-            f"USDT: {snapshot.get('balances', {}).get('USDT', {}).get('total', 0)}, "
-            f"Price: {snapshot.get('prices', {}).get('QRLUSDT', 'N/A')}, "
+            f"QRL: {qrl_total:.4f}, "
+            f"USDT: {usdt_total:.4f}, "
+            f"Price: {price:.6f}, "
+            f"QRL Value: {qrl_value:.2f} USDT, "
+            f"Total Value: {total_value:.2f} USDT, "
+            f"Deviation: {deviation_pct:.2f}% from 50/50, "
             f"Source: {snapshot.get('source', 'unknown')}"
         )
         

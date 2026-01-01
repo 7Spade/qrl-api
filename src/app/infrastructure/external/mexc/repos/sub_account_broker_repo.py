@@ -1,5 +1,4 @@
 """Broker sub-account endpoints."""
-import time
 from typing import Any, Dict, Optional
 
 
@@ -7,7 +6,7 @@ class SubAccountBrokerRepoMixin:
     async def get_broker_sub_accounts(
         self, sub_account: Optional[str] = None, page: int = 1, limit: int = 10
     ) -> Dict[str, Any]:
-        params = {"page": page, "limit": limit, "timestamp": int(time.time() * 1000)}
+        params = {"page": page, "limit": limit}
         if sub_account:
             params["subAccount"] = sub_account
         return await self._request(
@@ -15,7 +14,7 @@ class SubAccountBrokerRepoMixin:
         )
 
     async def get_broker_sub_account_assets(self, sub_account: str) -> Dict[str, Any]:
-        params = {"subAccount": sub_account, "timestamp": int(time.time() * 1000)}
+        params = {"subAccount": sub_account}
         return await self._request(
             "GET", "/api/v3/broker/sub-account/assets", params=params, signed=True
         )
@@ -28,7 +27,6 @@ class SubAccountBrokerRepoMixin:
             "toAccount": to_account,
             "asset": asset,
             "amount": amount,
-            "timestamp": int(time.time() * 1000),
         }
         return await self._request(
             "POST", "/api/v3/broker/sub-account/transfer", params=params, signed=True
@@ -40,7 +38,6 @@ class SubAccountBrokerRepoMixin:
         params = {
             "subAccount": sub_account,
             "permissions": permissions,
-            "timestamp": int(time.time() * 1000),
         }
         if note:
             params["note"] = note

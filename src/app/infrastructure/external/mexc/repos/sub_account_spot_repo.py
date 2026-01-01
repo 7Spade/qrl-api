@@ -1,5 +1,4 @@
 """Spot sub-account endpoints (regular users)."""
-import time
 from typing import Any, Dict, Optional
 
 
@@ -7,7 +6,7 @@ class SubAccountSpotRepoMixin:
     async def get_sub_accounts_spot(
         self, sub_account_id: Optional[str] = None, page: int = 1, limit: int = 10
     ) -> Dict[str, Any]:
-        params = {"page": page, "limit": limit, "timestamp": int(time.time() * 1000)}
+        params = {"page": page, "limit": limit}
         if sub_account_id:
             params["subAccountId"] = sub_account_id
         return await self._request(
@@ -25,7 +24,6 @@ class SubAccountSpotRepoMixin:
         params = {
             "asset": asset,
             "amount": amount,
-            "timestamp": int(time.time() * 1000),
         }
         if from_account:
             params["fromAccount"] = from_account
@@ -47,7 +45,6 @@ class SubAccountSpotRepoMixin:
         params = {
             "subAccountId": sub_account_id,
             "permissions": permissions,
-            "timestamp": int(time.time() * 1000),
         }
         if ip_restriction:
             params["ipRestriction"] = ip_restriction
@@ -63,7 +60,6 @@ class SubAccountSpotRepoMixin:
         params = {
             "subAccountId": sub_account_id,
             "apiKey": api_key,
-            "timestamp": int(time.time() * 1000),
         }
         return await self._request(
             "DELETE", "/api/v3/sub-account/apiKey", params=params, signed=True
