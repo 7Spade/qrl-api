@@ -13,7 +13,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Header
 
-from src.app.application.account.balance_service import BalanceService
+from src.app.application.trading.services.account.balance_service_core import BalanceService
 from src.app.application.trading.services.trading.rebalance_service import (
     RebalanceService,
 )

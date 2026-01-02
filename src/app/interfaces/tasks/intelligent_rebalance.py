@@ -87,7 +87,7 @@ async def task_rebalance_intelligent(
 
     try:
         # Step 3: Generate intelligent rebalance plan
-        balance_service = BalanceService(mexc_client, redis_client)
+        balance_service = BalanceService(mexc_client, redis_client, cache_ttl=45)
         intelligent_service = IntelligentRebalanceService(
             balance_service=balance_service,
             mexc_client=mexc_client,

@@ -73,7 +73,7 @@ async def task_rebalance_symmetric(
 
     try:
         # Step 3: Generate rebalance plan
-        balance_service = BalanceService(mexc_client, redis_client)
+        balance_service = BalanceService(mexc_client, redis_client, cache_ttl=45)
         rebalance_service = RebalanceService(balance_service, redis_client)
         plan = await rebalance_service.generate_plan()
 

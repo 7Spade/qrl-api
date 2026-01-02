@@ -19,9 +19,9 @@ def test_domain_interfaces_exports():
 
 
 def test_domain_core_packages():
-    from src.app.domain.position.calculator import PositionManager
-    from src.app.domain.risk.limits import RiskManager
-    from src.app.domain.strategies.trading_strategy import TradingStrategy
+    from src.app.domain.trading.services.position.calculator import PositionManager
+    from src.app.domain.trading.services.risk.limits import RiskManager
+    from src.app.domain.trading.strategies.trading_strategy import TradingStrategy
 
     assert PositionManager.__module__.endswith("calculator")
     assert RiskManager.__module__.endswith("limits")

@@ -22,7 +22,7 @@ def test_tasks_router_exposes_expected_paths():
 @pytest.mark.asyncio
 async def test_task_sync_balance_requires_auth():
     from fastapi import HTTPException
-    from src.app.application.account.sync_balance import task_sync_balance
+    from src.app.interfaces.background.task_sync_balance import task_sync_balance
 
     with pytest.raises(HTTPException) as excinfo:
         await task_sync_balance()
@@ -32,7 +32,7 @@ async def test_task_sync_balance_requires_auth():
 @pytest.mark.asyncio
 async def test_task_update_price_requires_auth():
     from fastapi import HTTPException
-    from src.app.application.market.sync_price import task_update_price
+    from src.app.interfaces.background.task_update_price import task_update_price
 
     with pytest.raises(HTTPException) as excinfo:
         await task_update_price()
@@ -42,7 +42,7 @@ async def test_task_update_price_requires_auth():
 @pytest.mark.asyncio
 async def test_task_update_cost_requires_auth():
     from fastapi import HTTPException
-    from src.app.application.market.sync_cost import task_update_cost
+    from src.app.interfaces.background.task_update_cost import task_update_cost
 
     with pytest.raises(HTTPException) as excinfo:
         await task_update_cost()

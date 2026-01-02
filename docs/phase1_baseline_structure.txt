@@ -1,0 +1,78 @@
+src/app/domain
+├── __init__.py
+├── __pycache__
+│   └── __init__.cpython-312.pyc
+├── events
+│   ├── __init__.py
+│   └── trading_events.py
+├── models
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-312.pyc
+│   │   ├── account.cpython-312.pyc
+│   │   ├── balance.cpython-312.pyc
+│   │   ├── order.cpython-312.pyc
+│   │   ├── position.cpython-312.pyc
+│   │   ├── price.cpython-312.pyc
+│   │   └── trade.cpython-312.pyc
+│   ├── account.py
+│   ├── balance.py
+│   ├── order.py
+│   ├── position.py
+│   ├── price.py
+│   └── trade.py
+├── ports
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-312.pyc
+│   │   ├── execution_port.cpython-312.pyc
+│   │   └── market_feed.cpython-312.pyc
+│   ├── account_port.py
+│   ├── cost_port.py
+│   ├── execution_port.py
+│   ├── market_feed.py
+│   ├── market_port.py
+│   ├── position_port.py
+│   ├── price_port.py
+│   └── trade_port.py
+├── position
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-312.pyc
+│   │   ├── calculator.cpython-312.pyc
+│   │   └── updater.cpython-312.pyc
+│   ├── calculator.py
+│   └── updater.py
+├── risk
+│   ├── __init__.py
+│   ├── __pycache__
+│   │   ├── __init__.cpython-312.pyc
+│   │   ├── limits.cpython-312.pyc
+│   │   └── stop_loss.cpython-312.pyc
+│   ├── limits.py
+│   ├── stop_loss.py
+│   └── validators
+│       ├── __init__.py
+│       ├── __pycache__
+│       ├── position_validator.py
+│       └── trade_frequency_validator.py
+└── strategies
+    ├── __init__.py
+    ├── __pycache__
+    │   ├── __init__.cpython-312.pyc
+    │   ├── base.cpython-312.pyc
+    │   ├── example_strategy.cpython-312.pyc
+    │   └── trading_strategy.cpython-312.pyc
+    ├── base.py
+    ├── example_strategy.py
+    ├── filters
+    │   ├── __init__.py
+    │   ├── __pycache__
+    │   └── cost_filter.py
+    ├── indicators
+    │   ├── __init__.py
+    │   ├── __pycache__
+    │   └── ma_signal_generator.py
+    └── trading_strategy.py
+
+19 directories, 57 files

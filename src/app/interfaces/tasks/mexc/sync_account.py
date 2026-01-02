@@ -7,7 +7,7 @@ interfaces/tasks layout.
 
 from fastapi import APIRouter
 
-from src.app.application.account.sync_balance import task_sync_balance
+from src.app.interfaces.background.task_sync_balance import task_sync_balance
 
 router = APIRouter(prefix="/tasks", tags=["Cloud Tasks"])
 router.add_api_route("/01-min-job", task_sync_balance, methods=["POST"])
