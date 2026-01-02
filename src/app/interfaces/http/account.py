@@ -6,7 +6,7 @@ import logging
 from datetime import datetime
 from fastapi import APIRouter, HTTPException
 
-from src.app.application.account.balance_service import BalanceService
+from src.app.application.trading.services.account.balance_service_core import BalanceService
 from src.app.application.trading.use_cases.get_orders_use_case import get_orders
 from src.app.application.trading.use_cases.get_trades_use_case import get_trades
 

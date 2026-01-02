@@ -12,7 +12,7 @@ from fastapi import Header, HTTPException, params
 
 from src.app.infrastructure.config import config
 from src.app.infrastructure.external import mexc_client, redis_client
-from src.app.application.account.balance_service import BalanceService
+from src.app.application.trading.services.account.balance_service_core import BalanceService
 
 logger = logging.getLogger(__name__)
 

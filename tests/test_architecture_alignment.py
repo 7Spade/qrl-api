@@ -7,7 +7,7 @@ import asyncio
 from datetime import datetime
 import pytest
 
-from src.app.application.market.timeframe_aggregator import (
+from src.app.application.trading.services.market.timeframe_aggregator import (
     MarketCandle,
     TimeframeAggregator,
 )
@@ -111,7 +111,7 @@ class TestPortAbstractions:
 
     def test_market_feed_is_abstract(self):
         """MarketFeed should be an abstract base class."""
-        from src.app.domain.ports.market_feed import MarketFeed
+        from src.app.application.trading.ports.market_feed import MarketFeed
         
         # Should not be able to instantiate directly
         with pytest.raises(TypeError):
@@ -119,7 +119,7 @@ class TestPortAbstractions:
 
     def test_execution_port_is_abstract(self):
         """ExecutionPort should be an abstract base class."""
-        from src.app.domain.ports.execution_port import ExecutionPort
+        from src.app.application.trading.ports.execution_port import ExecutionPort
         
         # Should not be able to instantiate directly
         with pytest.raises(TypeError):
@@ -131,7 +131,7 @@ class TestSupervisorPattern:
 
     def test_supervisor_initialization(self):
         """Supervisor should initialize with client and callback."""
-        from src.app.application.market.ws_supervisor import (
+        from src.app.application.trading.services.market.ws_supervisor import (
             MarketStreamSupervisor,
         )
         
