@@ -1,8 +1,8 @@
 """Helpers to update position state after trades."""
 from __future__ import annotations
 
-from src.app.domain.models.position import Position
-from src.app.domain.position.calculator import PositionManager
+from src.app.domain.trading.entities.position import Position
+from src.app.domain.trading.services.position.calculator import PositionManager
 
 
 class PositionUpdater:

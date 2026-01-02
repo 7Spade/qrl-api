@@ -1,7 +1,7 @@
 """Trading Strategy - Policy definition (Domain layer)"""
 from src.app.infrastructure.config import config
-from src.app.domain.strategies.indicators import MASignalGenerator
-from src.app.domain.strategies.filters import CostFilter
+from src.app.domain.trading.strategies.indicators import MASignalGenerator
+from src.app.domain.trading.strategies.filters import CostFilter
 
 
 class TradingStrategy:

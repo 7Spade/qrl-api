@@ -29,10 +29,10 @@ Reference: docs/STRATEGY_DESIGN_FORMULAS.md (Section 6: Risk Control)
 from typing import Any, Dict
 
 from src.app.infrastructure.config.env import config
-from src.app.domain.risk.validators.trade_frequency_validator import (
+from src.app.domain.trading.services.risk.validators.trade_frequency_validator import (
     TradeFrequencyValidator,
 )
-from src.app.domain.risk.validators.position_validator import PositionValidator
+from src.app.domain.trading.services.risk.validators.position_validator import PositionValidator
 
 
 class RiskManager:
