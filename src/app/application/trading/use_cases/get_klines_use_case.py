@@ -39,37 +39,60 @@ async def get_klines(
     if not symbol or not symbol.isupper():
         symbol = symbol.upper()
     
-    async with mexc_client:
-        klines_raw = await mexc_client.get_klines(
-            symbol=symbol,
-            interval=interval,
-            limit=limit,
-            start_time=start_time,
-            end_time=end_time,
-        )
-        
-        # Parse K-line arrays into structured format
-        # MEXC returns: [[openTime, open, high, low, close, volume, closeTime, quoteVolume, ...]]
-        klines = [
-            {
-                "open_time": int(k[0]),
-                "open": float(k[1]),
-                "high": float(k[2]),
-                "low": float(k[3]),
-                "close": float(k[4]),
-                "volume": float(k[5]),
-                "close_time": int(k[6]),
-                "quote_volume": float(k[7]) if len(k) > 7 else 0.0,
+    try:
+        async with mexc_client:
+            klines_raw = await mexc_client.get_klines(
+                symbol=symbol,
+                interval=interval,
+                limit=limit,
+                start_time=start_time,
+                end_time=end_time,
+            )
+            
+            # Validate response
+            if not klines_raw or not isinstance(klines_raw, list):
+                logger.warning(f"Invalid klines response for {symbol}: {type(klines_raw)}")
+                return {
+                    "success": True,
+                    "source": "api",
+                    "symbol": symbol,
+                    "interval": interval,
+                    "data": [],
+                    "count": 0,
+                    "timestamp": datetime.now().isoformat(),
+                }
+            
+            # Parse K-line arrays into structured format
+            # MEXC returns: [[openTime, open, high, low, close, volume, closeTime, quoteVolume, ...]]
+            klines = []
+            for k in klines_raw:
+                try:
+                    if not k or len(k) < 7:
+                        logger.warning(f"Skipping invalid kline data: {k}")
+                        continue
+                    klines.append({
+                        "open_time": int(k[0]),
+                        "open": float(k[1]),
+                        "high": float(k[2]),
+                        "low": float(k[3]),
+                        "close": float(k[4]),
+                        "volume": float(k[5]),
+                        "close_time": int(k[6]),
+                        "quote_volume": float(k[7]) if len(k) > 7 else 0.0,
+                    })
+                except (ValueError, TypeError, IndexError) as e:
+                    logger.warning(f"Failed to parse kline data {k}: {e}")
+                    continue
+            
+            return {
+                "success": True,
+                "source": "api",
+                "symbol": symbol,
+                "interval": interval,
+                "data": klines,
+                "count": len(klines),
+                "timestamp": datetime.now().isoformat(),
             }
-            for k in klines_raw
-        ]
-        
-        return {
-            "success": True,
-            "source": "api",
-            "symbol": symbol,
-            "interval": interval,
-            "data": klines,
-            "count": len(klines),
-            "timestamp": datetime.now().isoformat(),
-        }
+    except Exception as e:
+        logger.error(f"Failed to fetch klines for {symbol}: {e}", exc_info=True)
+        raise
