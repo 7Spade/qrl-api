@@ -1,37 +1,32 @@
-"""
-Application Trading Use Cases
+"""Application Use Cases
 
-This module contains use case implementations for the trading application.
-Use cases represent the application-specific business rules and orchestrate the flow
-of data to and from entities, coordinating the work of domain services.
+Use cases represent application-specific business rules and orchestrate domain logic.
+They are the entry points for features from the interface layer.
 
-Use Case Characteristics:
-- Orchestrate domain logic without containing business rules
-- Depend on ports (interfaces) not concrete implementations
-- Are the entry points for features from the interface layer
-- Handle cross-cutting concerns (transactions, logging, validation)
+Current use cases (organized by domain):
+- Trading workflow: execute_trade, manage_risk, validate_trade, update_position, trading_workflow
+- Account data: get_orders, get_trades  
+- Market data: get_klines, get_orderbook, get_price
 
-Use Cases in this module:
-- execute_trade_use_case: Execute trading operations
-- manage_risk_use_case: Manage risk and limits
-- update_position_use_case: Update position information  
-- validate_trade_use_case: Validate trade parameters
-- trading_workflow: Coordinate complex trading workflows
-
-Note: These are currently shims/re-exports for backward compatibility.
-They will be converted to proper use case implementations in future refactoring.
+Note: Many of these are currently shims for backward compatibility.
+Future refactoring will transform them into proper use case implementations with:
+- Constructor injection of ports
+- Clear single responsibility  
+- Orchestration without business logic
 """
 
-from src.app.application.trading.use_cases.execute_trade_use_case import *
-from src.app.application.trading.use_cases.manage_risk_use_case import *
-from src.app.application.trading.use_cases.update_position_use_case import *
-from src.app.application.trading.use_cases.validate_trade_use_case import *
-from src.app.application.trading.use_cases.trading_workflow import *
+# Trading workflow use cases
+from .execute_trade_use_case import *
+from .manage_risk_use_case import *
+from .update_position_use_case import *
+from .validate_trade_use_case import *
+from .trading_workflow import *
 
-__all__ = [
-    "TradingService",
-    "RiskManager",
-    "PositionUpdater",
-    "TradeValidator",
-    "TradingWorkflow",
-]
+# Account data use cases
+from .get_orders_use_case import *
+from .get_trades_use_case import *
+
+# Market data use cases
+from .get_klines_use_case import *
+from .get_orderbook_use_case import *
+from .get_price_use_case import *

@@ -1,11 +1,16 @@
-from .market_service import MarketService
-from .cache_service import CacheService
-from .price_repo_service import PriceRepoService
-from .mexc_client_service import MexcClientService
+"""Market Application Services
+
+Application services that coordinate market data infrastructure:
+- TimeframeAggregator: Aggregates market data across timeframes (✨.md Section 6.4)
+- MarketStreamSupervisor: Supervises WebSocket market data streams (✨.md Section 6.3)
+
+These are application-level coordinators, not domain services.
+"""
+
+from .timeframe_aggregator import TimeframeAggregator
+from .ws_supervisor import MarketStreamSupervisor
 
 __all__ = [
-    "MarketService",
-    "CacheService",
-    "PriceRepoService",
-    "MexcClientService",
+    "TimeframeAggregator",
+    "MarketStreamSupervisor",
 ]
