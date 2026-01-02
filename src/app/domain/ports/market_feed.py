@@ -11,7 +11,7 @@ Strategy/Bot/Position layer doesn't need to change.
 from abc import ABC, abstractmethod
 from typing import AsyncIterator
 
-from src.app.application.market.timeframe_aggregator import MarketCandle
+from src.app.application.trading.services.market.timeframe_aggregator import MarketCandle
 
 
 class MarketFeed(ABC):

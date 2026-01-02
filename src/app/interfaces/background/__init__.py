@@ -13,12 +13,12 @@ application use cases or services. They handle external trigger mechanisms
 (Cloud Scheduler auth, request parsing) and delegate to application layer.
 """
 
-from .task_sync_balance import sync_balance_task
-from .task_update_cost import update_cost_task
-from .task_update_price import update_price_task
+from .task_sync_balance import task_sync_balance
+from .task_update_cost import task_update_cost
+from .task_update_price import task_update_price
 
 __all__ = [
-    "sync_balance_task",
-    "update_cost_task",
-    "update_price_task",
+    "task_sync_balance",
+    "task_update_cost",
+    "task_update_price",
 ]

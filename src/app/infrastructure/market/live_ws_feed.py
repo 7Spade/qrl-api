@@ -7,7 +7,7 @@ from typing import AsyncIterator
 from datetime import datetime
 
 from src.app.domain.ports.market_feed import MarketFeed
-from src.app.application.market.timeframe_aggregator import MarketCandle
+from src.app.application.trading.services.market.timeframe_aggregator import MarketCandle
 from src.app.infrastructure.external.mexc.ws.ws_client import connect_public_trades
 
 

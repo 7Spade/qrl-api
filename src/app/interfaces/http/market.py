@@ -6,9 +6,9 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException
 from typing import Optional
 
-from src.app.application.market.get_price import get_price
-from src.app.application.market.get_orderbook import get_orderbook
-from src.app.application.market.get_klines import get_klines
+from src.app.application.trading.use_cases.get_price_use_case import get_price
+from src.app.application.trading.use_cases.get_orderbook_use_case import get_orderbook
+from src.app.application.trading.use_cases.get_klines_use_case import get_klines
 
 router = APIRouter(prefix="/market", tags=["Market Data"])
 logger = logging.getLogger(__name__)
