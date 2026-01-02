@@ -6,7 +6,7 @@ import logging
 from datetime import datetime
 from fastapi import APIRouter, HTTPException
 
-from src.app.application.trading.services.account.balance_service_core import BalanceService
+from src.app.application.account.balance_service import BalanceService
 from src.app.application.trading.use_cases.get_orders_use_case import get_orders
 from src.app.application.trading.use_cases.get_trades_use_case import get_trades
 
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 def _build_balance_service() -> BalanceService:
     from src.app.infrastructure.external import mexc_client
     from src.app.infrastructure.external import redis_client
-    return BalanceService(mexc_client, redis_client)
+    return BalanceService(mexc_client, redis_client, cache_ttl=45)
 
 
 def _get_mexc_client():
@@ -134,6 +134,83 @@ async def trades_endpoint(symbol: str = "QRLUSDT", limit: int = 50):
         return result
     except Exception as e:
         logger.error(f"Failed to get trades: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/orders")
+async def place_order_endpoint(
+    symbol: str = "QRLUSDT",
+    side: str = "BUY",
+    order_type: str = "MARKET",
+    quantity: float = None,
+    price: float = None,
+):
+    """
+    Place a new order on MEXC exchange.
+    
+    Args:
+        symbol: Trading pair (default: QRLUSDT)
+        side: BUY or SELL
+        order_type: MARKET or LIMIT
+        quantity: Order quantity (required for MARKET, optional for LIMIT)
+        price: Order price (required for LIMIT orders)
+    
+    Returns:
+        Order response from MEXC API with order details
+    """
+    try:
+        mexc_client = _get_mexc_client()
+        
+        if not _has_credentials(mexc_client):
+            raise HTTPException(
+                status_code=401,
+                detail="API credentials required for placing orders"
+            )
+        
+        # Validate required parameters
+        if order_type.upper() == "MARKET" and not quantity:
+            raise HTTPException(
+                status_code=400,
+                detail="Quantity is required for market orders"
+            )
+        
+        if order_type.upper() == "LIMIT" and (not quantity or not price):
+            raise HTTPException(
+                status_code=400,
+                detail="Both quantity and price are required for limit orders"
+            )
+        
+        logger.info(f"Placing {side} {order_type} order for {symbol}")
+        
+        async with mexc_client:
+            # Prepare order parameters
+            order_params = {
+                "symbol": symbol.upper(),
+                "side": side.upper(),
+                "type": order_type.upper(),
+            }
+            
+            if quantity:
+                order_params["quantity"] = quantity
+            
+            if price:
+                order_params["price"] = price
+            
+            # Place order via MEXC API
+            order_result = await mexc_client.create_order(**order_params)
+            
+            return {
+                "success": True,
+                "source": "api",
+                "symbol": symbol,
+                "order": order_result,
+                "timestamp": datetime.now().isoformat(),
+            }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to place order: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
