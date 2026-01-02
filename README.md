@@ -21,6 +21,27 @@ MEXC API 整合的 QRL/USDT 自動化交易機器人
 - ✅ 多層倉位管理
 - ✅ 風險控制機制
 - ✅ Docker 容器化支援
+- ✅ **Clean Architecture 設計** - 完整遵循 [✨.md](docs/✨.md) 架構模式
+- ✅ **WebSocket 自動重連** - 數據流心跳監測 + 斷線恢復
+- ✅ **多時間框架聚合** - 單一 WS 支援多策略
+- ✅ **回測/模擬/實盤** - 同一程式碼支援所有模式
+
+### 架構設計
+
+本專案遵循 Clean Architecture 原則，詳見 [架構對齊文檔](docs/ARCHITECTURE_ALIGNMENT.md)：
+
+**核心原則**:
+- **Strategy = Opinion** (策略是意見)
+- **Position = Law** (倉位是法律)
+- **Order = Execution** (訂單是執行)
+
+**關鍵模式**:
+- 數據流心跳監測 (非 ping/pong)
+- WebSocket 自動重連
+- 多時間框架聚合 (1m → 5m, 15m, 1h)
+- 統一介面支援回測/模擬/實盤
+
+詳細說明請參閱 [✨.md](docs/✨.md) 和 [架構對齊文檔](docs/ARCHITECTURE_ALIGNMENT.md)。
 
 ## 快速開始
 
