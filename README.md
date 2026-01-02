@@ -461,3 +461,71 @@ POST /account/sub-account/api-key
 - **SPOT API**: 無法從主帳戶直接查詢子帳戶餘額，需使用子帳戶的 API Key
 - **BROKER API**: 需要 MEXC Broker 帳戶權限
 - 詳細的 API 文檔請參考 MEXC v3 官方文檔
+
+---
+
+## 🏗️ 架構遷移指南
+
+### Phase 1: Domain Layer 重構完成 ✅
+
+專案已完成 Clean Architecture Phase 1 重構，domain 層現已完全符合 [✨.md](docs/✨.md) 規範。
+
+#### 新架構結構
+```
+src/app/domain/trading/
+├── entities/         # 實體：Order, Trade, Position, Account
+├── value_objects/    # 值對象：Price, Balance
+├── strategies/       # 策略模式
+│   ├── indicators/   # 技術指標
+│   └── filters/      # 過濾器
+├── events/           # 領域事件
+├── services/         # 領域服務
+│   ├── position/     # 倉位管理
+│   └── risk/         # 風險控制
+├── repositories.py   # 抽象儲存介面
+└── errors.py         # 領域異常
+```
+
+#### 向後兼容性 ✅
+
+**舊的導入路徑仍然可用**（向後兼容層）:
+```python
+# ⚠️ 已棄用但仍可用
+from src.app.domain.models import Account, Order
+from src.app.domain.position import PositionManager
+from src.app.domain.risk import RiskManager
+```
+
+**新代碼請使用 Clean Architecture 路徑**:
+```python
+# ✅ 推薦使用
+from src.app.domain.trading.entities import Account, Order, Position, Trade
+from src.app.domain.trading.value_objects import Price, Balance
+from src.app.domain.trading.services.position import PositionManager
+from src.app.domain.trading.services.risk import RiskManager
+from src.app.domain.trading.strategies import TradingStrategy
+from src.app.domain.trading.repositories import OrderRepository
+from src.app.domain.trading.errors import RiskLimitExceededError
+```
+
+#### 遷移策略
+
+1. **現有代碼**: 無需立即修改，向後兼容層確保功能正常
+2. **新代碼**: 使用新的 Clean Architecture 路徑
+3. **漸進遷移**: 在修改現有文件時更新導入路徑
+4. **完整文檔**: 參見 [Phase 1 完成報告](docs/PHASE1_STAGES_5_6_COMPLETION.md)
+
+#### 重構成果
+
+- ✅ **17 個文件遷移** 到 Clean Architecture 結構
+- ✅ **31 個 Python 文件** 創建（包含 __init__.py 和生成文件）
+- ✅ **5 個向後兼容層** 確保零破壞性變更
+- ✅ **64 個測試通過** (基準線維持，0 個新失敗)
+- ✅ **零破壞性變更** - 兩種導入路徑都可正常工作
+- ✅ **完整文檔** - 包含遷移指南和最佳實踐
+
+詳細信息請參閱:
+- [架構重構總覽](docs/ARCHITECTURE_RESTRUCTURE_SUMMARY.md)
+- [Phase 1 實施指南](docs/PHASE1_IMPLEMENTATION_GUIDE.md)
+- [Phase 1 完成報告](docs/PHASE1_STAGES_5_6_COMPLETION.md)
+- [✨.md 架構規範](docs/✨.md)
